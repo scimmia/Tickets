@@ -1,0 +1,107 @@
+from django.db import models
+
+# Create your models here.
+
+class Card(models.Model):
+    name = models.CharField(u'银行卡', max_length=50)
+    money = models.FloatField(u'金额', default=0)
+    beizhu = models.CharField(u'备注', max_length=100)
+    pub_date = models.DateField(u'添加日期', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '银行卡'
+        verbose_name_plural = '银行卡'
+
+    def __str__(self):
+        return self.name
+
+
+class Ticket(models.Model):
+    PAY_STATUS= (
+        (1,u'待付款'),
+        (2,u'已付款'),
+    )
+    SELL_STATUS= (
+        (3,u'待收款'),
+        (4,u'已收款'),
+    )
+    TICKET_STATUS= (
+        (1,u'在库'),
+        (3,u'卖出'),
+        (5,u'入池'),
+    )
+    t_status = models.IntegerField(
+        u'状态',
+        choices=TICKET_STATUS,
+        default=1,
+    )
+    goumairiqi = models.DateTimeField(u'购买日期', auto_now_add=True)
+    qianpaipiaohao = models.CharField(u'前排票号', max_length=100, blank=True,null=True)
+    piaohao = models.CharField(u'票号', max_length=100, blank=True,null=True)
+    chupiaohang = models.CharField(u'出票行', max_length=100)
+    chupiaoriqi = models.DateField(u'出票日期', )
+    daoqiriqi = models.DateField(u'到期日期', )
+    piaomianjiage = models.FloatField(u'票面价格', default=0)
+    gouruhuilv = models.FloatField(u'购入利率', default=0)
+    gourujiage = models.FloatField(u'购入价格', default=0)
+    gouruzijinchi = models.BooleanField(u'资金池购入', default=False)
+    gourucard = models.ForeignKey( Card, related_name='buy_card', verbose_name=u'购入卡' ,  blank=True,null=True)
+    gongyingshang = models.CharField(u'供应商', max_length=100)
+    pay_status = models.IntegerField(
+        u'状态',
+        choices=PAY_STATUS,
+        default=1,
+    )
+    paytime = models.DateTimeField(u'付款时间', blank=True,null=True)
+    maichuriqi = models.DateTimeField(u'卖出日期', blank=True,null=True)
+    maichulilv = models.FloatField(u'卖出利率', default=0)
+    maichujiage = models.FloatField(u'卖出价格', default=0)
+    maichucard = models.ForeignKey( Card, related_name='sold_card',  verbose_name=u'卖出卡' ,  blank=True,null=True)
+    maipiaoren = models.CharField(u'买票人', max_length=100, blank=True,null=True)
+    sell_status = models.IntegerField(
+        u'状态',
+        choices=SELL_STATUS,
+        default=1,
+    )
+    selltime = models.DateTimeField(u'收款时间', blank=True,null=True)
+    lirun = models.IntegerField(u'利润', default=0)
+    class Meta:
+        verbose_name = '票据'
+        verbose_name_plural = '票据'
+    def __str__(self):
+        return self.gongyingshang
+
+
+class Fee(models.Model):
+    ticket = models.ForeignKey( Ticket, related_name='fee_ticket', verbose_name=u'票据' ,  blank=True,null=True)
+    yinhangka = models.ForeignKey( Card, related_name='fee_card', verbose_name=u'银行卡' , blank=False,null=False)
+    name = models.CharField(u'费用内容', max_length=50)
+    money = models.FloatField(u'金额', default=0)
+    pub_date = models.DateField(u'添加日期', auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+    class Meta:
+        verbose_name = '费用'
+        verbose_name_plural = '费用'
+
+class TicketStatus(models.Model):
+    TICKET_STATUS= (
+        (1,u'在库'),
+        (3,u'卖出'),
+        (5,u'入池'),
+    )
+    ticket = models.ForeignKey( Ticket, related_name='status_ticket', verbose_name=u'票据')
+    t_status = models.IntegerField(
+        u'状态',
+        choices=TICKET_STATUS,
+        default=1,
+    )
+    pub_date = models.DateTimeField(u'登记时间', auto_now_add=True)
+    #登记人
+    status_signer = models.CharField(u'登记人',max_length=30,default='system')
+    def __str__(self):
+        return self.pub_date
+    class Meta:
+        verbose_name = '票据状态'
+        verbose_name_plural = '票据状态'

@@ -1,0 +1,281 @@
+{% extends "ticket/dashboard.html" %}
+{% load staticfiles %}
+
+{#{% block extrahead %}#}
+{#    {{ block.super }}#}
+{#        {% include 'material/includes/material_css.html' %}#}
+{#    {% include 'material/includes/material_js.html' %}#}
+{##}
+{#{% endblock %}#}
+
+
+{% load crispy_forms_tags %}
+{#{% load material_form %}#}
+
+{% block content %}
+        <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        票据
+        <small>新增</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
+        <li class="active">票据</li>
+      </ol>
+    </section>
+
+    <section class="content">
+    <div class="row">
+        <form method='POST' action=''>{% csrf_token %}
+            <!-- left column -->
+            <div class="col-md-4">
+                <!-- general form elements -->
+                <div class="box box-danger">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">基本信息</h3>
+                    </div>
+                    <div class="box-body">
+                        <div id="div_id_t_status" class="form-group"><label for="id_t_status"
+                                                                            class="control-label  requiredField">
+                            状态<span class="asteriskField">*</span> </label>
+                            <div class="controls "><select name="t_status" class="select form-control" id="id_t_status">
+                                <option value="1" selected="">在库</option>
+                                <option value="3">卖出</option>
+                                <option value="5">入池</option>
+
+                            </select></div>
+                        </div>
+                        <div id="div_id_qianpaipiaohao" class="form-group"><label for="id_qianpaipiaohao"
+                                                                                  class="control-label ">
+                            前排票号
+                        </label>
+                            <div class="controls "><input name="qianpaipiaohao" maxlength="100"
+                                                          class="textinput textInput form-control"
+                                                          id="id_qianpaipiaohao" type="text"></div>
+                        </div>
+                        <div id="div_id_piaohao" class="form-group"><label for="id_piaohao" class="control-label ">
+                            票号
+                        </label>
+                            <div class="controls "><input name="piaohao" maxlength="100"
+                                                          class="textinput textInput form-control" id="id_piaohao"
+                                                          type="text"></div>
+                        </div>
+                        <div id="div_id_chupiaohang" class="form-group"><label for="id_chupiaohang"
+                                                                               class="control-label  requiredField">
+                            出票行<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="chupiaohang" maxlength="100"
+                                                          class="textinput textInput form-control" required=""
+                                                          id="id_chupiaohang" type="text"></div>
+                        </div>
+                        <div id="div_id_chupiaoriqi" class="form-group"><label for="id_chupiaoriqi"
+                                                                               class="control-label  requiredField">
+                            出票日期<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="chupiaoriqi" class="dateinput form-control" required=""
+                                                          id="id_chupiaoriqi"  data-inputmask="'alias': 'yyyy/mm/dd'" data-mask="" type="text"></div>
+                        </div>
+                        <div id="div_id_daoqiriqi" class="form-group"><label for="id_daoqiriqi"
+                                                                             class="control-label  requiredField">
+                            到期日期<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="daoqiriqi" class="dateinput form-control" required=""
+                                                          id="id_daoqiriqi" data-inputmask="'alias': 'yyyy/mm/dd'" data-mask="" type="text"></div>
+                        </div>
+                        <div id="div_id_piaomianjiage" class="form-group"><label for="id_piaomianjiage"
+                                                                                 class="control-label  requiredField">
+                            票面价格<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="piaomianjiage"   step="any"
+                                                          class="numberinput form-control" required=""
+                                                          id="id_piaomianjiage" type="number"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-4">
+
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">买入信息</h3>
+                    </div>
+                    <div class="box-body">
+                        <div id="div_id_gongyingshang" class="form-group"><label for="id_gongyingshang"
+                                                                                 class="control-label  requiredField">
+                            供应商<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="gongyingshang" maxlength="100"
+                                                          class="textinput textInput form-control" required=""
+                                                          id="id_gongyingshang" type="text"></div>
+                        </div>
+                        <div id="div_id_gouruhuilv" class="form-group"><label for="id_gouruhuilv"
+                                                                              class="control-label  requiredField">
+                            购入利率<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="gouruhuilv"   step="any"
+                                                          class="numberinput form-control" required=""
+                                                          id="id_gouruhuilv" type="number"></div>
+                        </div>
+                        <div id="div_id_gourujiage" class="form-group"><label for="id_gourujiage"
+                                                                              class="control-label  requiredField">
+                            购入价格<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="gourujiage" step="any"
+                                                          class="numberinput form-control" required="" disabled=""
+                                                          id="id_gourujiage" type="number"></div>
+                        </div>
+                        <div class="form-group">
+                            <div id="div_id_gouruzijinchi" class="checkbox"><label for="id_gouruzijinchi" class="">
+                                <input name="gouruzijinchi" class="checkboxinput" id="id_gouruzijinchi" type="checkbox">
+                                资金池购入
+                            </label></div>
+                        </div>
+                        <div id="div_id_gourucard" class="form-group"><label for="id_gourucard" class="control-label ">
+                            购入卡
+                        </label>
+                            <div class="controls "><select name="gourucard" class="select form-control"
+                                                           id="id_gourucard">
+                                <option value="" selected="">---------</option>
+
+                            </select></div>
+                        </div>
+                        <div id="div_id_pay_status" class="form-group"><label for="id_pay_status"
+                                                                              class="control-label  requiredField">
+                            付款状态<span class="asteriskField">*</span> </label>
+                            <div class="controls "><select name="pay_status" class="select form-control"
+                                                           id="id_pay_status">
+                                <option value="1" selected="">待付款</option>
+                                <option value="2">已付款</option>
+
+                            </select></div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="box box-danger">
+                    <div class="box-body">
+                        <div id="div_id_fenshu" class="form-group"><label for="id_fenshu"
+                                                                                 class="control-label  requiredField">
+                            份数<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="fenshu" value="1" step="any"
+                                                          class="numberinput form-control" required=""
+                                                          id="id_fenshu" type="number"></div>
+                        </div>
+
+                    </div>
+                    <div class="box-footer">
+                        <input class="btn btn-primary" value="提交" type="submit">
+                        <a><input class="btn btn-default" value="取消" type="button"></a>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+
+            </div>
+            <!--/.col (left) -->
+            <!-- right column -->
+            <div class="col-md-4">
+                <!-- Horizontal Form -->
+                <div class="box box-info" id="sellinfo">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">卖出信息</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <!-- form start -->
+                        <div class="box-body">
+                        <div id="div_id_maichuriqi" class="form-group"><label for="id_maichuriqi"
+                                                                              class="control-label ">
+                            卖出日期
+                        </label>
+                            <div class="controls "><input name="maichuriqi" class="datetimeinput form-control"
+                                                          id="id_maichuriqi" type="text"></div>
+                        </div>
+                        <div id="div_id_maichulilv" class="form-group"><label for="id_maichulilv"
+                                                                              class="control-label  requiredField">
+                            卖出利率<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="maichulilv" value="0" step="any"
+                                                          class="numberinput form-control" required=""
+                                                          id="id_maichulilv" type="number"></div>
+                        </div>
+                        <div id="div_id_maichujiage" class="form-group"><label for="id_maichujiage"
+                                                                               class="control-label  requiredField">
+                            卖出价格<span class="asteriskField">*</span> </label>
+                            <div class="controls "><input name="maichujiage" value="0" step="any"
+                                                          class="numberinput form-control" required=""
+                                                          id="id_maichujiage" type="number"></div>
+                        </div>
+                        <div id="div_id_maichucard" class="form-group"><label for="id_maichucard"
+                                                                              class="control-label ">
+                            卖出卡
+                        </label>
+                            <div class="controls "><select name="maichucard" class="select form-control"
+                                                           id="id_maichucard">
+                                <option value="" selected="">---------</option>
+
+                            </select></div>
+                        </div>
+                        <div id="div_id_maipiaoren" class="form-group"><label for="id_maipiaoren"
+                                                                              class="control-label ">
+                            买票人
+                        </label>
+                            <div class="controls "><input name="maipiaoren" maxlength="100"
+                                                          class="textinput textInput form-control" id="id_maipiaoren"
+                                                          type="text"></div>
+                        </div>
+                        <div id="div_id_sell_status" class="form-group"><label for="id_sell_status"
+                                                                               class="control-label  requiredField">
+                            状态<span class="asteriskField">*</span> </label>
+                            <div class="controls "><select name="sell_status" class="select form-control"
+                                                           id="id_sell_status">
+                                <option value="3">待收款</option>
+                                <option value="4">已收款</option>
+
+                            </select></div>
+                        </div>
+                        </div>
+                        <!-- /.box-body -->
+                        <!-- /.box-footer -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!--/.col (right) -->
+        </form>
+    </div>
+    </section>
+
+{% endblock %}
+
+{% block script %}
+     <!-- Date Picker -->
+<script src="{% static 'plugins/input-mask/jquery.inputmask.js' %}"></script>
+<script src="{% static 'plugins/input-mask/jquery.inputmask.date.extensions.js' %}"></script>
+<script src="{% static 'plugins/input-mask/jquery.inputmask.extensions.js' %}"></script>
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+    <script type="text/javascript">
+        $(function () {
+            $("#sellinfo").hide();
+
+            //Datemask dd/mm/yyyy
+            $('#datemask').inputmask('yyyy/mm/dd', { 'placeholder': 'yyyy/mm/dd' })
+            //Datemask2 mm/dd/yyyy
+            $('#datemask2').inputmask('yyyy/mm/dd', { 'placeholder': 'yyyy/mm/dd' })
+            //Money Euro
+            $('[data-mask]').inputmask()
+            $("#id_t_status").bind("change", function () {
+                if (this.value == "1") {
+                    $("#sellinfo").hide();
+                } else if (this.value == "3") {
+                    $("#sellinfo").show();
+                } else if (this.value == "5") {
+                    $("#sellinfo").hide();
+                }
+            });
+            $("#id_gouruzijinchi").change(function() {
+                if($("#id_gouruzijinchi").is(":checked")){
+                    $("#div_id_gourucard").hide();
+
+			    }else {
+                    $("#div_id_gourucard").show();
+                }
+            });
+        });
+
+    </script>
+
+{% endblock %}
