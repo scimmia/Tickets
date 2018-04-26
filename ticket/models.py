@@ -6,7 +6,7 @@ class Card(models.Model):
     name = models.CharField(u'银行卡', max_length=50)
     money = models.FloatField(u'金额', default=0)
     beizhu = models.CharField(u'备注', max_length=100)
-    pub_date = models.DateField(u'添加日期', auto_now_add=True)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
     class Meta:
         verbose_name = '银行卡'
@@ -77,7 +77,7 @@ class Fee(models.Model):
     yinhangka = models.ForeignKey( Card, related_name='fee_card', verbose_name=u'银行卡' , blank=False,null=False)
     name = models.CharField(u'费用内容', max_length=50)
     money = models.FloatField(u'金额', default=0)
-    pub_date = models.DateField(u'添加日期', auto_now_add=True)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
     def __str__(self):
         return self.name

@@ -1,0 +1,17 @@
+{% extends "ticket/res_list.html" %}
+{% load staticfiles %}
+
+
+{% block table_tr %}
+    <th>银行卡</th>
+	<th>余额</th>
+	<th>备注</th>
+	<th>创建时间</th>
+
+{% endblock %}
+{% block table_td %}
+    <td>{{item.name}}</td>
+	<td>{{item.money}}</td>
+	<td>{{item.beizhu}}</td>
+	<td>{{item.pub_date}}</td>
+{% endblock %}

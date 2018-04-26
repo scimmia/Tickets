@@ -1,0 +1,44 @@
+{% extends "ticket/dashboard.html" %}
+{% load staticfiles %}
+
+{% load crispy_forms_tags %}
+{#{% load material_form %}#}
+
+{% block content %}
+        <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        银行卡
+        <small>新增</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
+        <li class="active">银行卡</li>
+      </ol>
+    </section>
+
+    <section class="content">
+    <div class="row">
+        <form method='POST' action=''>{% csrf_token %}
+            <!-- left column -->
+            <div class="col-md-4">
+
+                <div class="box box-danger">
+                    <div class="box-body">
+                        {{ form | crispy}}
+
+                    </div>
+                    <div class="box-footer">
+                        <input class="btn btn-primary" value="提交" type="submit">
+                        <a><input class="btn btn-default" value="取消" type="button"></a>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+
+            </div>
+        </form>
+    </div>
+    </section>
+
+{% endblock %}
+
