@@ -105,3 +105,25 @@ class TicketStatus(models.Model):
     class Meta:
         verbose_name = '票据状态'
         verbose_name_plural = '票据状态'
+
+class PoolFee(models.Model):
+    ticket = models.ForeignKey( Ticket, related_name='poolfee_ticket', verbose_name=u'票据' ,  blank=True,null=True)
+    money = models.FloatField(u'金额', default=0)
+    pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
+    create_date = models.DateField(u'添加日期', auto_now_add=True)
+
+    POOLFEE_STATUS= (
+        (1,u'入池'),
+        (2,u'出池'),
+        (5,u'保证金'),
+    )
+    poolfee_status = models.IntegerField(
+        u'费用内容',
+        choices=POOLFEE_STATUS,
+        default=1,
+    )
+    def __str__(self):
+        return self.poolfee_status
+    class Meta:
+        verbose_name = '资金池费用'
+        verbose_name_plural = '资金池费用'

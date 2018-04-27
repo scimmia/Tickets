@@ -37,17 +37,22 @@ def password_change(request):
 
 #增加
 def ticket_add(request):
-    #从TaskForm获取相关信息
     form = TicketForm(request.POST or None)
-    if form.is_valid():
-        pass
 
-    context = {
-        'form': form,
-        'page_title': '任务处理',
-        'sub_title': '新建任务',
-    }
-    return render(request, 'ticket/ticket_add.html',  context)
+    #从TaskForm获取相关信息
+    if form.is_valid():
+        if (not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard')):
+
+            return render(request, 'ticket/ticket_add.html', locals())
+
+        instance = form.save(commit=False)
+        #将登录用户作为登记人
+        instance.gourujiage = 12
+        #保存该实例
+        instance.save()
+        return render(request, 'ticket/ticket_add.html',locals())
+    else:
+        return render(request, 'ticket/ticket_add.html',locals())
 
 
 #显示各列表信息
@@ -115,7 +120,6 @@ def card_add(request):
         instance.save()
         return redirect('card_list',)
 
-        pass
 
     context = {
         'form': form,
