@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.template import loader
 # Create your views here.
 from ticket.forms import TicketForm, CardForm
-from ticket.models import Card
+from ticket.models import Card, Fee
 
 
 @login_required
@@ -128,28 +128,41 @@ def card_add(request):
 #修改数据,函数中的pk代表数据的id
 def card_edit(request,  pk):
     card_ins = get_object_or_404(Card, pk=pk)
-    # 通过instance来将Form的数据做填充
-    form = CardForm(request.POST or None, instance=card_ins)
+    fee_data = Fee.objects.filter(yinhangka=pk).order_by('-pub_date')
+    data_list, page_range, count, page_nums = pagination(request, fee_data)
+
     sub_title = '修改银行卡信息'
-    #判断form是否有效
-    if form.is_valid():
-        #创建实例，需要做些数据处理，暂不做保存
-        instance = form.save(commit=False)
-        #保存该实例
-        instance.save()
-        #跳转至列表页面,配合table参数，进行URL的反向解析
-        return redirect('card_list',)
+    if request.method == 'POST':
+        #任务联系人为可编辑选项，并填充原先的任务联系人
+        card_ins.name = request.POST['name']
+        card_ins.beizhu = request.POST['beizhu']
+
+        card = Card.objects.get(id = card_ins.id)
+        if request.POST['fee'].strip(' ') != '':
+            fee_ins = Fee()
+            fee_ins.yinhangka = card
+            fee_ins.money = float(request.POST['fee'])
+            fee_ins.name = request.POST['feebeizhu'].strip(' ')
+            fee_ins.save()
+            card_ins.money = card_ins.money + fee_ins.money
+        card_ins.save()
+
+        return redirect('card_edit', pk=card.id)
 
     context = {
-        'form': form,
+        'data': data_list,
+        'item': card_ins,
+        'page_range': page_range,
+        'count': count,
+        'page_nums': page_nums,
         'page_title': '基础资料',
         'sub_title': sub_title,
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
-    return render(request, 'ticket/card_add.html', context)
+    return render(request, 'ticket/card_edit.html', context)
 
 #分页函数
-def pagination(request, queryset, display_amount=2, after_range_num = 5,before_range_num = 4):
+def pagination(request, queryset, display_amount=10, after_range_num = 5,before_range_num = 4):
     #按参数分页
 
     try:

@@ -4,14 +4,20 @@
 
 {% block table_tr %}
     <th>银行卡</th>
-	<th>余额</th>
-	<th>备注</th>
-	<th>创建时间</th>
+    <th>余额</th>
+    <th>备注</th>
+    <th>创建时间</th>
 
 {% endblock %}
 {% block table_td %}
-    <td>{{item.name}}</td>
-	<td>{{item.money}}</td>
-	<td>{{item.beizhu}}</td>
-	<td>{{item.pub_date}}</td>
+    <td>{{ item.name }}</td>
+    <td>{{ item.money }}</td>
+    <td>{{ item.beizhu }}</td>
+    <td>{{ item.pub_date }}</td>
+    <td>
+        <div class="hidden-sm hidden-xs action-buttons">
+            <a class="green" href="{% url 'card_edit' item.id %}" title="编辑信息">
+                <i class="ace-icon fa fa-pencil bigger-130"></i>
+            </a></div>
+    </td>
 {% endblock %}

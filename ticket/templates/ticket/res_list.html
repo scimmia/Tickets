@@ -39,64 +39,6 @@
                             <!--通过for循环从data取出的具体表格内容-->
                             {% block table_td %}
                             {% endblock %}
-                            <td>
-                                <!--页面扩展时的按钮布局-->
-                                <div class="hidden-sm hidden-xs action-buttons">
-                                    <!--编辑信息按钮,同时获取item.id，传递给url-->
-{#                                    <a class="green" href="{% url {{ edit_url }} item.id %}" title="编辑信息">#}
-{#                                        <i class="ace-icon fa fa-pencil bigger-130"></i>#}
-{#                                    </a>#}
-                                    <!--删除信息按钮，为每个删除按钮设置一个id，并将content和title传递给modal-->
-{#                                    <a id="modal_button_{{ item.id }}" class="red" href="#modal_form"#}
-{#                                       data-toggle="modal" rel="{% url 'delete' table item.id %}" content="确认删除该条目么？"#}
-{#                                       title="删除信息">#}
-{#                                        <i class="ace-icon fa fa-trash-o bigger-130"></i>#}
-{#                                    </a>#}
-                                </div>
-                                <!--页面收缩时的按钮布局-->
-                                <div class="hidden-md hidden-lg">
-                                    <div class="inline position-relative">
-                                        <button class="btn btn-minier btn-yellow dropdown-toggle" data-toggle="dropdown"
-                                                data-position="auto">
-                                            <i class="ace-icon fa fa-caret-down icon-only bigger-120"></i>
-
-                                        </button>
-
-
-                                        <ul class="dropdown-menu dropdown-only-icon dropdown-yellow dropdown-menu-right dropdown-caret dropdown-close">
-                                            <li>
-                                                <a href="{% url 'card_add'%}" class="tooltip-info"
-                                                   data-rel="tooltip" title="添加数据">
-																				<span class="blue">
-																					<i class="ace-icon fa fa-search-plus bigger-120"></i>
-																				</span>
-                                                </a>
-                                            </li>
-
-                                            <li>
-                                                <!--编辑信息按钮，同时获取item.id，传递给url-->
-{#                                                <a class="green" href="{% url 'edit' table item.id %}" title="编辑信息">#}
-{##}
-{#																				<span class="green">#}
-{#																					<i class="ace-icon fa fa-pencil-square-o bigger-120"></i>#}
-{#																				</span>#}
-{#                                                </a>#}
-                                            </li>
-
-                                            <li>
-{#                                                <a id="modal_button_{{ item.id }}" class="red" href="#modal_form"#}
-{#                                                   data-toggle="modal" rel="{% url 'delete' table item.id %}"#}
-{#                                                   content="确认删除该条目么？"#}
-{#                                                   title="删除信息">#}
-{#																				<span class="red">#}
-{#																					<i class="ace-icon fa fa-trash-o bigger-120"></i>#}
-{#																				</span>#}
-{#                                                </a>#}
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </td>
                         </tr>
 
                     {% endfor %}
