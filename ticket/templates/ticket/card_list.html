@@ -2,6 +2,16 @@
 {% load staticfiles %}
 
 
+{% block content-header %}
+    <h1>
+        银行卡
+        <small>列表</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
+        <li class="active">银行卡</li>
+    </ol>
+{% endblock %}
 {% block table_tr %}
     <th>银行卡</th>
     <th>余额</th>

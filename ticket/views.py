@@ -41,9 +41,11 @@ def ticket_add(request):
 
     #从TaskForm获取相关信息
     if form.is_valid():
-        if (not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard')):
+        if ((not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard'))
+            or (form.cleaned_data.get('gouruzijinchi') and form.cleaned_data.get('gourucard'))):
 
-            return render(request, 'ticket/ticket_add.html', locals())
+            message = u'请选择“资金池购入”或“银行卡”中的一项'
+            return render(request, 'ticket/ticket_add.html',locals())
 
         instance = form.save(commit=False)
         #将登录用户作为登记人

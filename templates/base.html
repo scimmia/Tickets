@@ -174,17 +174,17 @@
                     <li class="treeview">
                 {% endif %}
                 <a href="#">
-                        <i class="fa fa-dashboard"></i> <span>银行卡</span>
-                        <span class="pull-right-container">
+                    <i class="fa fa-dashboard"></i> <span>银行卡</span>
+                    <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li><a href="#"><i class="fa fa-circle-o"></i>统计</a></li>
-                        <li><a href="{% url 'card_list' %}"><i class="fa fa-circle-o"></i>列表</a></li>
-                        <li><a href="{% url 'card_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> 可折叠侧边栏</a></li>
-                    </ul>
+                </a>
+                <ul class="treeview-menu">
+                    <li><a href="#"><i class="fa fa-circle-o"></i>统计</a></li>
+                    <li><a href="{% url 'card_list' %}"><i class="fa fa-circle-o"></i>列表</a></li>
+                    <li><a href="{% url 'card_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> 可折叠侧边栏</a></li>
+                </ul>
                 </li>
                 <li class="treeview">
                     <a href="#">
@@ -208,8 +208,16 @@
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
 
+        {% if message %}
+            <div class="callout callout-danger">
+
+                <p>{{ message }}</p>
+            </div>
+        {% endif %}
         {#        主体内容全放到这里！#}
-        {% block content %}{% endblock %}
+        {% block content %}
+
+        {% endblock %}
 
     </div>
     <!-- /.content-wrapper -->
