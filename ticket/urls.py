@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'password_change/', views.password_change, name='password_change'),
 
     # 任务列表
-    # url(r'^ticket_list/', views.ticket_list, name='ticket_list'),
+    url(r'^ticket/ticket_list/', views.ticket_list, name='ticket_list'),
     url(r'^ticket/ticket_add/', views.ticket_add, name='ticket_add'),
     # url(r'^ticket_edit/(?P<pk>\d+)/$', views.ticket_edit, name='ticket_edit'),
     # url(r'^ticket_delete/(?P<pk>\d+)/$', views.ticket_delete, name='ticket_delete'),

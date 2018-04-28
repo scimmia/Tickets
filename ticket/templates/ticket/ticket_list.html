@@ -1,0 +1,43 @@
+{% extends "ticket/res_list.html" %}
+{% load staticfiles %}
+
+
+{% block content-header %}
+    <h1>
+        票据
+        <small>列表</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
+        <li class="active">票据</li>
+    </ol>
+{% endblock %}
+{% block table_tr %}
+    <th>状态</th>
+    <th>付款状态</th>
+    <th>收款状态</th>
+    <th>购买日期</th>
+    <th>票号</th>
+    <th>出票行</th>
+    <th>票面价格</th>
+    <th>出票日期</th>
+    <th>到期日期</th>
+
+{% endblock %}
+{% block table_td %}
+    <td>{{ item.t_status }}</td>
+    <td>{{ item.pay_status }}</td>
+    <td>{{ item.sell_status }}</td>
+    <td>{{ item.goumairiqi }}</td>
+    <td>{{ item.piaohao }}</td>
+    <td>{{ item.chupiaohang }}</td>
+    <td>{{ item.piaomianjiage }}</td>
+    <td>{{ item.chupiaoriqi }}</td>
+    <td>{{ item.daoqiriqi }}</td>
+    <td>
+        <div class="hidden-sm hidden-xs action-buttons">
+            <a class="green" href="{% url 'card_edit' item.id %}" title="编辑信息">
+                <i class="ace-icon fa fa-pencil bigger-130"></i>
+            </a></div>
+    </td>
+{% endblock %}
