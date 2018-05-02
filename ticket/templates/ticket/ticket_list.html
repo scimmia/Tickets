@@ -25,9 +25,29 @@
 
 {% endblock %}
 {% block table_td %}
-    <td>{{ item.t_status }}</td>
-    <td>{{ item.pay_status }}</td>
-    <td>{{ item.sell_status }}</td>
+    <td>
+        {% if item.t_status == 1 %}
+            <span class="label label-success">在库
+        {% elif item.t_status == 3 %}
+            <span class="label label-danger">卖出
+        {% elif item.t_status == 5 %}
+            <span class="label label-info">入池
+        {% endif %}
+        </span></td>
+    <td>
+        {% if item.pay_status == 1 %}
+            <span class="label label-danger">待付款
+        {% elif item.pay_status == 2 %}
+            <span class="label label-success">已付款
+        {% endif %}
+        </span></td>
+    <td>
+        {% if item.sell_status == 3 %}
+            <span class="label label-danger">待收款
+        {% elif item.sell_status == 4 %}
+            <span class="label label-success">已收款
+        {% endif %}
+        </span></td>
     <td>{{ item.goumairiqi }}</td>
     <td>{{ item.piaohao }}</td>
     <td>{{ item.chupiaohang }}</td>
@@ -36,7 +56,7 @@
     <td>{{ item.daoqiriqi }}</td>
     <td>
         <div class="hidden-sm hidden-xs action-buttons">
-            <a class="green" href="{% url 'card_edit' item.id %}" title="编辑信息">
+            <a class="green" href="{% url 'ticket_edit' item.id %}" title="编辑信息">
                 <i class="ace-icon fa fa-pencil bigger-130"></i>
             </a></div>
     </td>

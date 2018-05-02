@@ -127,3 +127,24 @@ class PoolFee(models.Model):
     class Meta:
         verbose_name = '资金池费用'
         verbose_name_plural = '资金池费用'
+
+class StoreFee(models.Model):
+    ticket = models.ForeignKey( Ticket, related_name='storefee_ticket', verbose_name=u'票据' ,  blank=True,null=True)
+    money = models.FloatField(u'金额', default=0)
+    pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
+    create_date = models.DateField(u'添加日期', auto_now_add=True)
+
+    STROEFEE_STATUS= (
+        (1,u'入库'),
+        (2,u'离库'),
+    )
+    storefee_status = models.IntegerField(
+        u'费用内容',
+        choices=STROEFEE_STATUS,
+        default=1,
+    )
+    def __str__(self):
+        return self.storefee_status
+    class Meta:
+        verbose_name = '库存费用'
+        verbose_name_plural = '库存费用'

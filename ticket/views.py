@@ -7,8 +7,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 # Create your views here.
-from ticket.forms import TicketForm, CardForm
-from ticket.models import Card, Fee, Ticket
+from ticket.forms import TicketForm, CardForm, TicketEditForm
+from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee
 
 
 @login_required
@@ -35,26 +35,177 @@ def password_change(request):
     template_response = views.password_change(request,post_change_redirect='/index/')
     return template_response
 
+def ticket_instore(ticket_pk):
+    ticket = Ticket.objects.get(pk=ticket_pk)
+    storefee = StoreFee()
+    storefee.ticket = ticket
+    storefee.money = ticket.piaomianjiage
+    storefee.storefee_status = 1
+    storefee.save()
+    pass
+def ticket_outstore(ticket_pk):
+    ticket = Ticket.objects.get(pk=ticket_pk)
+    storefee = StoreFee()
+    storefee.ticket = ticket
+    storefee.money = 0- ticket.piaomianjiage
+    storefee.storefee_status = 2
+    storefee.save()
+    pass
+def ticket_inpool(ticket_pk):
+    ticket = Ticket.objects.get(pk=ticket_pk)
+    storefee = PoolFee()
+    storefee.ticket = ticket
+    storefee.money = ticket.piaomianjiage
+    storefee.poolfee_status = 1
+    storefee.save()
+    pass
+
+def ticket_outpool(ticket_pk):
+    ticket = Ticket.objects.get(pk=ticket_pk)
+    storefee = PoolFee()
+    storefee.ticket = ticket
+    storefee.money = 0 - ticket.piaomianjiage
+    storefee.poolfee_status = 2
+    storefee.save()
+    pass
+
+def ticket_pay(ticket_pk):
+    ticket = Ticket.objects.get(pk=ticket_pk)
+    card = Card.objects.get(pk=ticket.gourucard.pk)
+    fee_ins = Fee()
+    fee_ins.ticket = ticket
+    fee_ins.yinhangka = card
+    fee_ins.money = 0 - ticket.gourujiage
+    fee_ins.name = '购票付款'
+    fee_ins.save()
+    card.money = card.money + fee_ins.money
+    card.save()
+
+def ticket_poolpay(ticket_pk):
+    ticket = Ticket.objects.get(pk=ticket_pk)
+    fee_ins = PoolFee()
+    fee_ins.ticket = ticket
+    fee_ins.money = 0 - ticket.gourujiage
+    fee_ins.name = '购票付款'
+    fee_ins.save()
+
+def ticket_sold(ticket_pk):
+    ticket = Ticket.objects.get(pk=ticket_pk)
+    card = Card.objects.get(pk=ticket.maichucard.pk)
+    fee_ins = Fee()
+    fee_ins.ticket = ticket
+    fee_ins.yinhangka = card
+    fee_ins.money = ticket.gourujiage
+    fee_ins.name = '卖票收款'
+    fee_ins.save()
+    card.money = card.money + fee_ins.money
+    card.save()
+
 #增加
 def ticket_add(request):
     form = TicketForm(request.POST or None)
+    form.fields['gourujiage'].disabled = True  # text input
+    form.fields['maichujiage'].disabled = True  # text input
+    form.fields['lirun'].disabled = True  # text input
 
     #从TaskForm获取相关信息
     if form.is_valid():
         if ((not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard'))
                 or (form.cleaned_data.get('gouruzijinchi') and form.cleaned_data.get('gourucard'))):
-
             message = u'请选择“资金池购入”或“银行卡”中的一项'
             return render(request, 'ticket/ticket_add.html',locals())
+        else:
+            times = 1
+            if form.cleaned_data.get('fenshu')>1:
+                times = form.cleaned_data.get('fenshu')
+            instance = form.save(commit=False)
+            instance.gourujiage = instance.piaomianjiage * (1 - instance.gouruhuilv)
+            counter = 1
+            while counter <= times:
+                counter += 1
+                instance.pk = None
+                instance.save()
+                if instance.t_status == 1:
+                    ticket_instore(instance.pk)
+                elif instance.t_status == 5:
+                    ticket_inpool(instance.pk)
+                elif instance.t_status == 3:
+                    pass
 
-        instance = form.save(commit=False)
-        #将登录用户作为登记人
-        instance.gourujiage = 12
-        #保存该实例
-        instance.save()
+                if instance.gouruzijinchi:
+                    ticket_poolpay(instance.pk)
+                    pass
+                elif instance.pay_status == 2:
+                    ticket_pay(instance.pk)
+                    pass
+
+                if instance.sell_status == 4:
+                    ticket_sold(instance.pk)
+            return render(request, 'ticket/ticket_add.html',locals())
+            # return redirect('ticket_list')
+
+            pass
+
         return render(request, 'ticket/ticket_add.html',locals())
     else:
         return render(request, 'ticket/ticket_add.html',locals())
+#修改数据,函数中的pk代表数据的id
+def ticket_edit(request,  pk):
+    ticket_ins = get_object_or_404(Ticket, pk=pk)
+    form = TicketEditForm(request.POST or None, instance=ticket_ins)
+    form.fields['piaohao'].disabled = True  # text input
+
+    #从TaskForm获取相关信息
+    if form.is_valid():
+        if ((not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard'))
+                or (form.cleaned_data.get('gouruzijinchi') and form.cleaned_data.get('gourucard'))):
+            message = u'请选择“资金池购入”或“银行卡”中的一项'
+            return render(request, 'ticket/ticket_edit.html',locals())
+        else:
+            times = 1
+            if form.cleaned_data.get('fenshu')>1:
+                times = form.cleaned_data.get('fenshu')
+            instance = form.save(commit=False)
+            counter = 1
+            while counter <= times:
+                counter += 1
+                instance.pk = None
+                instance.gourujiage = 12
+                instance.save()
+                if form.cleaned_data.get('gouruzijinchi'):
+                    ticket_poolpay(instance.pk)
+                    pass
+                elif form.cleaned_data.get('pay_status')==2:
+                    ticket_pay(instance.pk)
+                    pass
+            return render(request, 'ticket/ticket_add.html',locals())
+            # return redirect('ticket_list')
+
+            pass
+
+        return render(request, 'ticket/ticket_edit.html',locals())
+    else:
+        return render(request, 'ticket/ticket_edit.html',locals())
+    # if request.method == 'POST':
+    #
+    #     card = Card.objects.get(id = card_ins.id)
+    #     if request.POST['fee'].strip(' ') != '':
+    #         fee_ins = Fee()
+    #         fee_ins.yinhangka = card
+    #         fee_ins.money = float(request.POST['fee'])
+    #         fee_ins.name = request.POST['feebeizhu'].strip(' ')
+    #         fee_ins.save()
+    #         card_ins.money = card_ins.money + fee_ins.money
+    #     card_ins.save()
+    #
+    #     return redirect('card_edit', pk=card.id)
+
+    context = {
+        'data': ticket_ins,
+    }
+    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
+    return render(request, 'ticket/ticket_edit.html', context)
+
 #显示各列表信息
 @login_required
 def ticket_list(request):
