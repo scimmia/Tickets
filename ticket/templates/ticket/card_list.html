@@ -17,7 +17,13 @@
     <th>余额</th>
     <th>备注</th>
     <th>创建时间</th>
-
+    <th>
+        <!--最后一列作为添加数据按钮-->
+        <a class="blue" href="{% url 'card_add' %}">
+            <i class="ace-icon fa fa-search-plus bigger-130"></i>
+            添加银行卡
+        </a>
+    </th>
 {% endblock %}
 {% block table_td %}
     <td>{{ item.name }}</td>

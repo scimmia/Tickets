@@ -22,7 +22,13 @@
     <th>票面价格</th>
     <th>出票日期</th>
     <th>到期日期</th>
-
+    <th>
+        <!--最后一列作为添加数据按钮-->
+        <a class="blue" href="{% url 'ticket_add' %}">
+            <i class="ace-icon fa fa-search-plus bigger-130"></i>
+            添加票据
+        </a>
+    </th>
 {% endblock %}
 {% block table_td %}
     <td>

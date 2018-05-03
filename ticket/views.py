@@ -143,10 +143,6 @@ def ticket_add(request):
                     ticket_sold(instance.pk)
             return render(request, 'ticket/ticket_add.html',locals())
             # return redirect('ticket_list')
-
-            pass
-
-        return render(request, 'ticket/ticket_add.html',locals())
     else:
         return render(request, 'ticket/ticket_add.html',locals())
 #修改数据,函数中的pk代表数据的id

@@ -162,8 +162,14 @@
                 </a>
                 <ul class="treeview-menu">
                     <li><a href="#"><i class="fa fa-circle-o"></i>统计</a></li>
-                    <li><a href="{% url 'ticket_list' %}"><i class="fa fa-circle-o"></i>列表</a></li>
-                    <li><a href="{% url 'ticket_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
+                    <li
+                            {% if '/ticket_list/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'ticket_list' %}"><i class="fa fa-circle-o"></i>列表</a></li>
+                    <li
+                            {% if '/ticket_add/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'ticket_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
                     <li><a href="#"><i class="fa fa-circle-o"></i>编辑</a></li>
                 </ul>
                 </li>
@@ -181,8 +187,15 @@
                 </a>
                 <ul class="treeview-menu">
                     <li><a href="#"><i class="fa fa-circle-o"></i>统计</a></li>
-                    <li><a href="{% url 'card_list' %}"><i class="fa fa-circle-o"></i>列表</a></li>
-                    <li><a href="{% url 'card_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
+                    <li
+                            {% if '/card_list/' in request.path %}
+                                class="active"
+                            {% endif %}>
+                        <a href="{% url 'card_list' %}"><i class="fa fa-circle-o"></i>列表</a></li>
+                    <li
+                            {% if '/card_add/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'card_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
                     <li><a href="#"><i class="fa fa-circle-o"></i> 可折叠侧边栏</a></li>
                 </ul>
                 </li>
