@@ -59,12 +59,12 @@
                             <h3 class="box-title">买入信息</h3>
                         </div>
                         <div class="box-body">
+                             {{ form.pay_status |as_crispy_field}}
                              {{ form.gongyingshang |as_crispy_field}}
                              {{ form.gouruhuilv |as_crispy_field}}
                              {{ form.gourujiage |as_crispy_field}}
                              {{ form.gouruzijinchi |as_crispy_field}}
                              {{ form.gourucard |as_crispy_field}}
-                             {{ form.pay_status |as_crispy_field}}
 
                         </div>
 
@@ -93,12 +93,12 @@
                         <!-- /.box-header -->
                         <!-- form start -->
                         <div class="box-body">
+                             {{ form.sell_status |as_crispy_field}}
+                             {{ form.maipiaoren |as_crispy_field}}
                              {{ form.maichulilv |as_crispy_field}}
                              {{ form.maichujiage |as_crispy_field}}
-                             {{ form.lirun |as_crispy_field}}
                              {{ form.maichucard |as_crispy_field}}
-                             {{ form.maipiaoren |as_crispy_field}}
-                             {{ form.sell_status |as_crispy_field}}
+                             {{ form.lirun |as_crispy_field}}
                         </div>
                         <!-- /.box-body -->
                         <!-- /.box-footer -->
@@ -135,17 +135,7 @@
                 format: 'yyyy/mm/dd',
                 language: 'cn',           //语言
             });
-            $("#id_t_status").bind("change", function () {
-                if (this.value == "1") {
-                    $("#sellinfo").hide();
-                } else if (this.value == "3") {
-                    $("#sellinfo").show();
-                } else if (this.value == "5") {
-                    $("#sellinfo").hide();
-                }
-            });
 
-            $("#sellinfo").hide();
         });
 
     </script>

@@ -112,14 +112,21 @@ def ticket_add(request):
     if form.is_valid():
         if ((not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard'))
                 or (form.cleaned_data.get('gouruzijinchi') and form.cleaned_data.get('gourucard'))):
-            message = u'请选择“资金池购入”或“银行卡”中的一项'
+            message = u'请选择“资金池购入”或“购入卡”中的一项'
+            return render(request, 'ticket/ticket_add.html',locals())
+        elif (form.cleaned_data.get('t_status') == 3):
+            if not form.cleaned_data.get('maichucard'):
+                message = u'请选择“卖出卡”'
+            elif not form.cleaned_data.get('maipiaoren'):
+                message = u'请填写“买票人”'
             return render(request, 'ticket/ticket_add.html',locals())
         else:
             times = 1
-            if form.cleaned_data.get('fenshu')>1:
+            if form.cleaned_data.get('fenshu') and form.cleaned_data.get('fenshu')>1:
                 times = form.cleaned_data.get('fenshu')
             instance = form.save(commit=False)
             instance.gourujiage = instance.piaomianjiage * (1 - instance.gouruhuilv)
+            instance.maichujiage = instance.piaomianjiage * (1 - instance.maichulilv)
             counter = 1
             while counter <= times:
                 counter += 1
@@ -148,59 +155,107 @@ def ticket_add(request):
 #修改数据,函数中的pk代表数据的id
 def ticket_edit(request,  pk):
     ticket_ins = get_object_or_404(Ticket, pk=pk)
-    form = TicketEditForm(request.POST or None, instance=ticket_ins)
-    form.fields['piaohao'].disabled = True  # text input
+    message = None
 
     #从TaskForm获取相关信息
-    if form.is_valid():
-        if ((not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard'))
-                or (form.cleaned_data.get('gouruzijinchi') and form.cleaned_data.get('gourucard'))):
-            message = u'请选择“资金池购入”或“银行卡”中的一项'
-            return render(request, 'ticket/ticket_edit.html',locals())
-        else:
-            times = 1
-            if form.cleaned_data.get('fenshu')>1:
-                times = form.cleaned_data.get('fenshu')
+    if request.method == 'POST':
+        POST = request.POST.copy()
+        if ticket_ins.t_status == 3:
+            POST['t_status'] = ticket_ins.t_status
+            POST['maichulilv'] = ticket_ins.maichulilv
+            POST['maichujiage'] = ticket_ins.maichujiage
+            POST['maichucard'] = ticket_ins.maichucard
+            POST['maipiaoren'] = ticket_ins.maipiaoren
+            POST['lirun'] = ticket_ins.lirun
+        POST['chupiaohang'] = ticket_ins.chupiaohang
+        POST['chupiaoriqi'] = ticket_ins.chupiaoriqi
+        POST['daoqiriqi'] = ticket_ins.daoqiriqi
+        POST['piaomianjiage'] = ticket_ins.piaomianjiage
+        POST['gongyingshang'] = ticket_ins.gongyingshang
+        POST['gouruhuilv'] = ticket_ins.gouruhuilv
+        POST['gourujiage'] = ticket_ins.gourujiage
+        POST['gouruzijinchi'] = ticket_ins.gouruzijinchi
+        POST['gourucard'] = ticket_ins.gourucard.pk
+        POST['lirun'] = ticket_ins.lirun
+        if ticket_ins.pay_status == 2:
+            POST['pay_status'] = ticket_ins.pay_status
+        if ticket_ins.sell_status == 4:
+            POST['sell_status'] = ticket_ins.sell_status
+        form = TicketEditForm(POST, instance=ticket_ins )
+
+        if ('t_status' in form.changed_data):
+            if form.cleaned_data.get('t_status') == 3:
+                if not form.cleaned_data.get('maichucard'):
+                    message = u'请选择“卖出卡”'
+                elif not form.cleaned_data.get('maipiaoren'):
+                    message = u'请填写“买票人”'
+        elif form.is_valid():
             instance = form.save(commit=False)
-            counter = 1
-            while counter <= times:
-                counter += 1
-                instance.pk = None
-                instance.gourujiage = 12
-                instance.save()
-                if form.cleaned_data.get('gouruzijinchi'):
-                    ticket_poolpay(instance.pk)
-                    pass
-                elif form.cleaned_data.get('pay_status')==2:
-                    ticket_pay(instance.pk)
-                    pass
-            return render(request, 'ticket/ticket_add.html',locals())
-            # return redirect('ticket_list')
+            instance.gourujiage = instance.piaomianjiage * (1 - instance.gouruhuilv)
+            instance.save()
+            if form.cleaned_data.get('gouruzijinchi'):
+                ticket_poolpay(instance.pk)
+                pass
+            elif form.cleaned_data.get('pay_status') == 2:
+                ticket_pay(instance.pk)
+                pass
+            # return render(request, 'ticket/ticket_edit.html', locals())
+            return redirect('ticket_edit', pk=pk)
 
             pass
-
-        return render(request, 'ticket/ticket_edit.html',locals())
     else:
-        return render(request, 'ticket/ticket_edit.html',locals())
-    # if request.method == 'POST':
-    #
-    #     card = Card.objects.get(id = card_ins.id)
-    #     if request.POST['fee'].strip(' ') != '':
-    #         fee_ins = Fee()
-    #         fee_ins.yinhangka = card
-    #         fee_ins.money = float(request.POST['fee'])
-    #         fee_ins.name = request.POST['feebeizhu'].strip(' ')
-    #         fee_ins.save()
-    #         card_ins.money = card_ins.money + fee_ins.money
-    #     card_ins.save()
-    #
-    #     return redirect('card_edit', pk=card.id)
+        form = TicketEditForm(request.POST or None, instance=ticket_ins)
 
-    context = {
-        'data': ticket_ins,
-    }
-    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
-    return render(request, 'ticket/ticket_edit.html', context)
+    form.fields['qianpaipiaohao'].disabled = True
+    form.fields['piaohao'].disabled = True
+    form.fields['chupiaohang'].disabled = True
+    form.fields['chupiaoriqi'].disabled = True
+    form.fields['daoqiriqi'].disabled = True
+    form.fields['gongyingshang'].disabled = True
+    form.fields['gouruhuilv'].disabled = True
+    form.fields['piaomianjiage'].disabled = True
+    form.fields['gourujiage'].disabled = True
+    form.fields['gouruzijinchi'].disabled = True
+    form.fields['gourucard'].disabled = True
+    if ticket_ins.pay_status == 2:
+        form.fields['pay_status'].disabled = True
+    if ticket_ins.sell_status == 4:
+        form.fields['sell_status'].disabled = True
+    if (not message) and ticket_ins.t_status == 3:
+        form.fields['t_status'].disabled = True
+        form.fields['maichulilv'].disabled = True
+        form.fields['maichujiage'].disabled = True
+        form.fields['maichucard'].disabled = True
+        form.fields['maipiaoren'].disabled = True
+    form.fields['lirun'].disabled = True
+    return render(request, 'ticket/ticket_edit.html', locals())
+def ticket_index(request,  pk):
+    ticket_ins = get_object_or_404(Ticket, pk=pk)
+    form = TicketEditForm(request.POST or None, instance=ticket_ins)
+
+    form.fields['qianpaipiaohao'].disabled = True
+    form.fields['piaohao'].disabled = True
+    form.fields['chupiaohang'].disabled = True
+    form.fields['chupiaoriqi'].disabled = True
+    form.fields['daoqiriqi'].disabled = True
+    form.fields['gongyingshang'].disabled = True
+    form.fields['gouruhuilv'].disabled = True
+    form.fields['piaomianjiage'].disabled = True
+    form.fields['gourujiage'].disabled = True
+    form.fields['gouruzijinchi'].disabled = True
+    form.fields['gourucard'].disabled = True
+    if ticket_ins.pay_status == 2:
+        form.fields['pay_status'].disabled = True
+    if ticket_ins.sell_status == 4:
+        form.fields['sell_status'].disabled = True
+    if ticket_ins.t_status == 3:
+        form.fields['t_status'].disabled = True
+        form.fields['maichulilv'].disabled = True
+        form.fields['maichujiage'].disabled = True
+        form.fields['maichucard'].disabled = True
+        form.fields['maipiaoren'].disabled = True
+        form.fields['lirun'].disabled = True
+    return render(request, 'ticket/ticket_index.html', locals())
 
 #显示各列表信息
 @login_required

@@ -2,16 +2,9 @@
 {% load staticfiles %}
 {% load crispy_forms_tags %}
 
-{#{% block extrahead %}#}
-{#    {{ block.super }}#}
-{#        {% include 'material/includes/material_css.html' %}#}
-{#    {% include 'material/includes/material_js.html' %}#}
-{##}
-{#{% endblock %}#}
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
 
-    <script src="https://cdn.bootcss.com/jquery-validate/1.17.0/jquery.validate.js"></script>
 {% endblock %}
 
 {% load crispy_forms_tags %}
@@ -22,7 +15,7 @@
     <section class="content-header">
         <h1>
             票据
-            <small>编辑</small>
+            <small>详情</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
@@ -142,16 +135,6 @@
                     $("#sellinfo").hide();
                 }
             });
-
-            {#$("#sellinfo").hide();#}
-            {#$("#id_t_status").disabled();#}
-            {#$("#id_qianpaipiaohao").attr("disabled",true);#}
-            {#$("#id_piaohao").attr("disabled",true);#}
-            {#$("#id_chupiaohang").attr("disabled",true);#}
-            {#$("#id_chupiaoriqi").attr("disabled",true);#}
-            {#$("#id_daoqiriqi").attr("disabled",true);#}
-            {#$("#id_piaomianjiage").attr("disabled",true);#}
-            {#$("#id_gourujiage").attr("disabled",true);#}
         });
 
     </script>

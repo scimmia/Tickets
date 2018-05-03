@@ -27,8 +27,8 @@ class Ticket(models.Model):
     )
     TICKET_STATUS= (
         (1,u'在库'),
-        (3,u'卖出'),
         (5,u'入池'),
+        (3, u'卖出'),
     )
     t_status = models.IntegerField(
         u'状态',
