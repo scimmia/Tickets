@@ -117,39 +117,44 @@ def ticket_add(request):
         elif (form.cleaned_data.get('t_status') == 3):
             if not form.cleaned_data.get('maichucard'):
                 message = u'请选择“卖出卡”'
+                return render(request, 'ticket/ticket_add.html', locals())
             elif not form.cleaned_data.get('maipiaoren'):
                 message = u'请填写“买票人”'
-            return render(request, 'ticket/ticket_add.html',locals())
-        else:
-            times = 1
-            if form.cleaned_data.get('fenshu') and form.cleaned_data.get('fenshu')>1:
-                times = form.cleaned_data.get('fenshu')
-            instance = form.save(commit=False)
-            instance.gourujiage = instance.piaomianjiage * (1 - instance.gouruhuilv)
-            instance.maichujiage = instance.piaomianjiage * (1 - instance.maichulilv)
-            counter = 1
-            while counter <= times:
-                counter += 1
-                instance.pk = None
+                return render(request, 'ticket/ticket_add.html',locals())
+        times = 1
+        if form.cleaned_data.get('fenshu') and form.cleaned_data.get('fenshu')>1:
+            times = form.cleaned_data.get('fenshu')
+        instance = form.save(commit=False)
+        instance.gourujiage = instance.piaomianjiage * (1 - instance.gouruhuilv)
+        instance.maichujiage = instance.piaomianjiage * (1 - instance.maichulilv)
+        counter = 1
+        while counter <= times:
+            counter += 1
+            instance.pk = None
+            instance.save()
+            if instance.t_status == 1:
+                ticket_instore(instance.pk)
+            elif instance.t_status == 5:
+                ticket_inpool(instance.pk)
+            elif instance.t_status == 3:
+                instance.lirun = instance.maichujiage - instance.gourujiage
                 instance.save()
-                if instance.t_status == 1:
-                    ticket_instore(instance.pk)
-                elif instance.t_status == 5:
-                    ticket_inpool(instance.pk)
-                elif instance.t_status == 3:
-                    pass
+                pass
 
-                if instance.gouruzijinchi:
-                    ticket_poolpay(instance.pk)
-                    pass
-                elif instance.pay_status == 2:
+            if instance.gouruzijinchi:
+                ticket_poolpay(instance.pk)
+                instance.pay_status = 2
+                instance.save()
+                pass
+            else:
+                if instance.pay_status == 2:
                     ticket_pay(instance.pk)
                     pass
 
-                if instance.sell_status == 4:
-                    ticket_sold(instance.pk)
-            return render(request, 'ticket/ticket_add.html',locals())
-            # return redirect('ticket_list')
+            if instance.sell_status == 4:
+                ticket_sold(instance.pk)
+        return render(request, 'ticket/ticket_add.html',locals())
+        # return redirect('ticket_list')
     else:
         return render(request, 'ticket/ticket_add.html',locals())
 #修改数据,函数中的pk代表数据的id
@@ -164,9 +169,11 @@ def ticket_edit(request,  pk):
             POST['t_status'] = ticket_ins.t_status
             POST['maichulilv'] = ticket_ins.maichulilv
             POST['maichujiage'] = ticket_ins.maichujiage
-            POST['maichucard'] = ticket_ins.maichucard
+            POST['maichucard'] = ticket_ins.maichucard.pk
             POST['maipiaoren'] = ticket_ins.maipiaoren
             POST['lirun'] = ticket_ins.lirun
+        POST['qianpaipiaohao'] = ticket_ins.qianpaipiaohao
+        POST['piaohao'] = ticket_ins.piaohao
         POST['chupiaohang'] = ticket_ins.chupiaohang
         POST['chupiaoriqi'] = ticket_ins.chupiaoriqi
         POST['daoqiriqi'] = ticket_ins.daoqiriqi
@@ -175,34 +182,55 @@ def ticket_edit(request,  pk):
         POST['gouruhuilv'] = ticket_ins.gouruhuilv
         POST['gourujiage'] = ticket_ins.gourujiage
         POST['gouruzijinchi'] = ticket_ins.gouruzijinchi
-        POST['gourucard'] = ticket_ins.gourucard.pk
+        if not ticket_ins.gouruzijinchi:
+            POST['gourucard'] = ticket_ins.gourucard.pk
         POST['lirun'] = ticket_ins.lirun
         if ticket_ins.pay_status == 2:
             POST['pay_status'] = ticket_ins.pay_status
         if ticket_ins.sell_status == 4:
             POST['sell_status'] = ticket_ins.sell_status
         form = TicketEditForm(POST, instance=ticket_ins )
-
-        if ('t_status' in form.changed_data):
-            if form.cleaned_data.get('t_status') == 3:
-                if not form.cleaned_data.get('maichucard'):
+        if form.is_valid():
+            if ('t_status' in form.changed_data) and (request.POST.get('t_status') == '3')\
+                    and (not request.POST.get('maichucard')):
                     message = u'请选择“卖出卡”'
-                elif not form.cleaned_data.get('maipiaoren'):
+            elif ('t_status' in form.changed_data) and (request.POST.get('t_status') == '3')\
+                    and (not request.POST.get('maipiaoren')):
                     message = u'请填写“买票人”'
-        elif form.is_valid():
-            instance = form.save(commit=False)
-            instance.gourujiage = instance.piaomianjiage * (1 - instance.gouruhuilv)
-            instance.save()
-            if form.cleaned_data.get('gouruzijinchi'):
-                ticket_poolpay(instance.pk)
-                pass
-            elif form.cleaned_data.get('pay_status') == 2:
-                ticket_pay(instance.pk)
-                pass
-            # return render(request, 'ticket/ticket_edit.html', locals())
-            return redirect('ticket_edit', pk=pk)
+            else:
+                instance = form.save(commit=False)
+                if 't_status' in form.changed_data:
+                    old_s = Ticket.objects.get(pk=pk).t_status
+                    new_s = form.cleaned_data.get('t_status')
+                    if old_s != new_s:
+                        if old_s == 1:#出库
+                            ticket_outstore(pk)
+                        elif old_s == 5:#出池
+                            ticket_outpool(pk)
+                        if new_s == 1:#入库
+                            ticket_instore(pk)
+                        elif new_s == 5:#入池
+                            ticket_inpool(pk)
+                        elif new_s == 5:#卖出
+                            # ticket_outpool(pk)
+                            instance.maichujiage = instance.piaomianjiage * (1 - instance.maichuhuilv)
+                            instance.lirun = instance.maichujiage - instance.gourujiage
+                            pass
 
-            pass
+                    pass
+                if 'pay_status' in form.changed_data:
+                    if form.cleaned_data.get('pay_status') == 2:
+                        ticket_pay(pk)
+                    pass
+                if 'sell_status' in form.changed_data:
+                    if form.cleaned_data.get('sell_status') == 2:
+                        ticket_sold(pk)
+                    pass
+                instance.save()
+                message = None
+                # return render(request, 'ticket/ticket_edit.html', locals())
+                return redirect('ticket_edit', pk=pk)
+
     else:
         form = TicketEditForm(request.POST or None, instance=ticket_ins)
 
@@ -217,9 +245,9 @@ def ticket_edit(request,  pk):
     form.fields['gourujiage'].disabled = True
     form.fields['gouruzijinchi'].disabled = True
     form.fields['gourucard'].disabled = True
-    if ticket_ins.pay_status == 2:
+    if (not message) and ticket_ins.pay_status == 2:
         form.fields['pay_status'].disabled = True
-    if ticket_ins.sell_status == 4:
+    if (not message) and ticket_ins.sell_status == 4:
         form.fields['sell_status'].disabled = True
     if (not message) and ticket_ins.t_status == 3:
         form.fields['t_status'].disabled = True
