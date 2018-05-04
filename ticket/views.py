@@ -1,4 +1,5 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 
 from django.contrib.auth import views
@@ -8,7 +9,7 @@ from django.http import HttpResponse
 from django.template import loader
 # Create your views here.
 from ticket.forms import TicketForm, CardForm, TicketEditForm
-from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee
+from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee, Pool
 
 
 @login_required
@@ -53,20 +54,34 @@ def ticket_outstore(ticket_pk):
     pass
 def ticket_inpool(ticket_pk):
     ticket = Ticket.objects.get(pk=ticket_pk)
-    storefee = PoolFee()
-    storefee.ticket = ticket
-    storefee.money = ticket.piaomianjiage
-    storefee.poolfee_status = 1
-    storefee.save()
+    p = Pool.objects.last()
+    if not p:
+        p = Pool()
+    pool = Pool()
+    pool.totalmoney = p.totalmoney + ticket.piaomianjiage
+    pool.promoney = p.promoney
+    pool.unusemoney = p.unusemoney + ticket.piaomianjiage
+    pool.usedmoney = p.usedmoney
+    pool.ticket = ticket
+    pool.money = ticket.piaomianjiage
+    pool.pool_status = 1
+    pool.save()
     pass
 
 def ticket_outpool(ticket_pk):
     ticket = Ticket.objects.get(pk=ticket_pk)
-    storefee = PoolFee()
-    storefee.ticket = ticket
-    storefee.money = 0 - ticket.piaomianjiage
-    storefee.poolfee_status = 2
-    storefee.save()
+    p = Pool.objects.last()
+    if not p:
+        p = Pool()
+    pool = Pool()
+    pool.totalmoney = p.totalmoney - ticket.piaomianjiage
+    pool.promoney = p.promoney
+    pool.unusemoney = p.unusemoney - ticket.piaomianjiage
+    pool.usedmoney = p.usedmoney
+    pool.ticket = ticket
+    pool.money = 0 - ticket.piaomianjiage
+    pool.pool_status = 2
+    pool.save()
     pass
 
 def ticket_pay(ticket_pk):
@@ -83,11 +98,18 @@ def ticket_pay(ticket_pk):
 
 def ticket_poolpay(ticket_pk):
     ticket = Ticket.objects.get(pk=ticket_pk)
-    fee_ins = PoolFee()
-    fee_ins.ticket = ticket
-    fee_ins.money = 0 - ticket.gourujiage
-    fee_ins.name = '购票付款'
-    fee_ins.save()
+    p = Pool.objects.last()
+    if not p:
+        p = Pool()
+    pool = Pool()
+    pool.totalmoney = p.totalmoney
+    pool.promoney = p.promoney
+    pool.unusemoney = p.unusemoney - ticket.piaomianjiage
+    pool.usedmoney = p.usedmoney + ticket.piaomianjiage
+    pool.ticket = ticket
+    pool.money = 0 - ticket.piaomianjiage
+    pool.pool_status = 5
+    pool.save()
 
 def ticket_sold(ticket_pk):
     ticket = Ticket.objects.get(pk=ticket_pk)
@@ -447,6 +469,41 @@ def card_edit(request,  pk):
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/card_edit.html', context)
 
+def pool_dash(request):
+    pool = Pool.objects.last()
+    pool_data = Fee.objects.all().order_by('-pub_date')
+    data_list, page_range, count, page_nums = pagination(request, pool_data)
+
+    sum_money = Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values( 'sum_money')
+
+    print(sum_money)
+    if request.method == 'POST':
+        # #任务联系人为可编辑选项，并填充原先的任务联系人
+        # card_ins.name = request.POST['name']
+        # card_ins.beizhu = request.POST['beizhu']
+        #
+        # card = Card.objects.get(id = card_ins.id)
+        # if request.POST['fee'].strip(' ') != '':
+        #     fee_ins = Fee()
+        #     fee_ins.yinhangka = card
+        #     fee_ins.money = float(request.POST['fee'])
+        #     fee_ins.name = request.POST['feebeizhu'].strip(' ')
+        #     fee_ins.save()
+        #     card_ins.money = card_ins.money + fee_ins.money
+        # card_ins.save()
+
+        # return redirect('card_edit', pk=card.id)
+        pass
+
+    context = {
+        'data': data_list,
+        'item': pool,
+        'page_range': page_range,
+        'count': count,
+        'page_nums': page_nums,
+    }
+    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
+    return render(request, 'ticket/pool_dash.html', context)
 #分页函数
 def pagination(request, queryset, display_amount=10, after_range_num = 5,before_range_num = 4):
     #按参数分页
