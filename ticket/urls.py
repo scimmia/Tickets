@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^card/card_index/(?P<pk>\d+)/$', views.card_edit, name='card_index'),
 
     url(r'^pool/pool_dash/', views.pool_dash, name='pool_dash'),
+    url(r'^pool/pool_pro/', views.pool_pro, name='pool_pro'),
     # url(r'^card/card_add/', views.card_add, name='card_add'),
     # url(r'^card/card_edit/(?P<pk>\d+)/$', views.card_edit, name='card_edit'),
     # url(r'^card/card_delete/(?P<pk>\d+)/$', views.ticket_delete, name='ticket_delete'),

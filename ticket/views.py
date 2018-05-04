@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.shortcuts import render, redirect, get_object_or_404
 
 from django.contrib.auth import views
@@ -468,15 +468,18 @@ def card_edit(request,  pk):
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/card_edit.html', context)
-
 def pool_dash(request):
     pool = Pool.objects.last()
-    pool_data = Fee.objects.all().order_by('-pub_date')
+    pool_data = Pool.objects.all().order_by('-pub_date')
     data_list, page_range, count, page_nums = pagination(request, pool_data)
 
-    sum_money = Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values( 'sum_money')
-
-    print(sum_money)
+    count_t = Ticket.objects.filter(t_status=5).count()
+    sum_money = 0
+    print(count_t)
+    if count_t > 0:
+        sum_money = Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values('sum_money')[0].get('sum_money')
+        print(str(Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values('sum_money').query))
+        print(sum_money)
     if request.method == 'POST':
         # #任务联系人为可编辑选项，并填充原先的任务联系人
         # card_ins.name = request.POST['name']
@@ -497,6 +500,50 @@ def pool_dash(request):
 
     context = {
         'data': data_list,
+        'sum_money': sum_money,
+        'count_t': count_t,
+        'item': pool,
+        'page_range': page_range,
+        'count': count,
+        'page_nums': page_nums,
+    }
+    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
+    return render(request, 'ticket/pool_dash.html', context)
+
+def pool_pro(request):
+    pool = Pool.objects.last()
+    pool_data = Pool.objects.all().order_by('-pub_date')
+    data_list, page_range, count, page_nums = pagination(request, pool_data)
+
+    count_t = Ticket.objects.filter(t_status=5).count()
+    sum_money = 0
+    print(count_t)
+    if count_t > 0:
+        sum_money = Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values('sum_money')[0].get('sum_money')
+        print(str(Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values('sum_money').query))
+        print(sum_money)
+    if request.method == 'POST':
+        # #任务联系人为可编辑选项，并填充原先的任务联系人
+        # card_ins.name = request.POST['name']
+        # card_ins.beizhu = request.POST['beizhu']
+        #
+        # card = Card.objects.get(id = card_ins.id)
+        # if request.POST['fee'].strip(' ') != '':
+        #     fee_ins = Fee()
+        #     fee_ins.yinhangka = card
+        #     fee_ins.money = float(request.POST['fee'])
+        #     fee_ins.name = request.POST['feebeizhu'].strip(' ')
+        #     fee_ins.save()
+        #     card_ins.money = card_ins.money + fee_ins.money
+        # card_ins.save()
+
+        # return redirect('card_edit', pk=card.id)
+        pass
+
+    context = {
+        'data': data_list,
+        'sum_money': sum_money,
+        'count_t': count_t,
         'item': pool,
         'page_range': page_range,
         'count': count,

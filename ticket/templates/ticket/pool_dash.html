@@ -29,7 +29,7 @@
 
                         </div>
                         <div class="icon">
-                            <i class="fa fa-shopping-cart"></i>
+                            <i class="fa ion-pie-graph"></i>
                         </div>
                         <a href="#" class="small-box-footer">
                             More info <i class="fa fa-arrow-circle-right"></i>
@@ -38,13 +38,13 @@
                     <div class="row">
                         <div class="col-lg-6 col-xs-6">
                             <!-- small box -->
-                            <div class="small-box bg-yellow">
+                            <div class="small-box bg-maroon">
                                 <div class="inner">
-                                    <p>入池票</p>
-                                    <h3>{{ item.promoney }}</h3>
+                                    <p>入池票:{{ count_t }}张</p>
+                                    <h3>{{ sum_money }}</h3>
                                 </div>
                                 <div class="icon">
-                                    <i class="ion ion-person-add"></i>
+                                    <i class="ion ion-clipboard"></i>
                                 </div>
                                 <a href="#" class="small-box-footer">
                                     More info <i class="fa fa-arrow-circle-right"></i>
@@ -60,7 +60,7 @@
                                     <h3>{{ item.promoney }}</h3>
                                 </div>
                                 <div class="icon">
-                                    <i class="ion ion-person-add"></i>
+                                    <i class="ion ion-card"></i>
                                 </div>
                                 <a href="#" class="small-box-footer">
                                     More info <i class="fa fa-arrow-circle-right"></i>
@@ -78,7 +78,7 @@
                                     <h3>{{ item.unusemoney }}</h3>
                                 </div>
                                 <div class="icon">
-                                    <i class="ion ion-stats-bars"></i>
+                                    <i class="ion ion-ios-unlocked"></i>
                                 </div>
                                 <a href="#" class="small-box-footer">
                                     More info <i class="fa fa-arrow-circle-right"></i>
@@ -94,7 +94,7 @@
                                     <h3>{{ item.usedmoney }}</h3>
                                 </div>
                                 <div class="icon">
-                                    <i class="ion ion-pie-graph"></i>
+                                    <i class="ion ion-ios-locked"></i>
                                 </div>
                                 <a href="#" class="small-box-footer">
                                     More info <i class="fa fa-arrow-circle-right"></i>
@@ -114,13 +114,24 @@
                                 <th>费用内容</th>
                                 <th>金额</th>
                                 <th>添加日期</th>
-                                <th>相关票据</th>
+                                <th>相关票据/<br/>银行卡</th>
                                 </thead>
                                 <!--表格内容-->
                                 <tbody>
                                 {% for i in data %}
                                     <tr>
-                                        <td>{{ i.name }}</td>
+                                        <td>
+                                            {% if i.pool_status == 1 %}
+                                                <span class="label label-success">入池</span>
+                                            {% elif i.pool_status == 2 %}
+                                                <span class="label label-danger">出池</span>
+                                            {% elif i.pool_status == 3 %}
+                                                <span class="label label-info">保证金收入</span>
+                                            {% elif i.pool_status == 4 %}
+                                                <span class="label label-warning">保证金支出</span>
+                                            {% elif i.pool_status == 5 %}
+                                                <span class="label label-primary">开票付款</span>
+                                            {% endif %}</td>
                                         <td>
                                             {% if i.money > 0 %}
                                                 <span class="label label-success">
@@ -132,8 +143,8 @@
                                         <td>
                                             {% if i.ticket %}
                                                 <span class="label label-success">{{ i.ticket }}
-                                            {% else %}
-                                                <span class="label label-danger">无
+                                            {% elif i.card %}
+                                                <span class="label label-danger">{{ i.card }}
                                             {% endif %}
                                             </span></td>
                                     </tr>
