@@ -449,6 +449,11 @@ def card_edit(request,  pk):
     fee_data = Fee.objects.filter(yinhangka=pk).order_by('-pub_date')
     data_list, page_range, count, page_nums = pagination(request, fee_data)
 
+    card_total = [card_ins.money,]
+    card_date = ['现在',]
+    for i in range(len(fee_data)):
+        list.insert(card_total, 0, card_total[0] - fee_data[i].money)
+        list.insert(card_date, 0, fee_data[i].pub_date)
     sub_title = '修改银行卡信息'
     if request.method == 'POST':
         #任务联系人为可编辑选项，并填充原先的任务联系人
@@ -470,6 +475,8 @@ def card_edit(request,  pk):
     context = {
         'data': data_list,
         'item': card_ins,
+        'card_total': card_total,
+        'card_date': card_date,
         'page_range': page_range,
         'count': count,
         'page_nums': page_nums,
