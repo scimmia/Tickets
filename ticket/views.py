@@ -123,6 +123,16 @@ def ticket_sold(ticket_pk):
     card.money = card.money + fee_ins.money
     card.save()
 
+def card_fee(card_pk,money,name):
+    card = Card.objects.get(pk=card_pk)
+    fee_ins = Fee()
+    fee_ins.yinhangka = card
+    fee_ins.money = money
+    fee_ins.name = name
+    fee_ins.save()
+    card.money = card.money + fee_ins.money
+    card.save()
+
 #增加
 def ticket_add(request):
     form = TicketForm(request.POST or None)
@@ -490,8 +500,14 @@ def pool_dash(request):
             if not p:
                 p = Pool()
             money = pool.money
-            if form.cleaned_data.get('pool_status') == 4:
+            if form.cleaned_data.get('p_status') == '4':
+                card_fee(pool.card.pk, money, '从保证金提取')
                 money = 0 - money
+                pool.pool_status = 4
+            else:
+                card_fee(pool.card.pk, 0-money,'充值到保证金')
+                pool.pool_status = 3
+
             pool.totalmoney = p.totalmoney + money
             pool.promoney = p.promoney + money
             pool.unusemoney = p.unusemoney + money

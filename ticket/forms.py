@@ -43,10 +43,10 @@ class CardForm(ModelForm):
 
 class PoolForm(ModelForm):
     #自定义ModelForm的内容
-    pool_status = forms.ChoiceField(label="类型",
+    p_status = forms.ChoiceField(label="类型",
         choices=(
-            (3, "充值"),
-            (4, "支出"),
+            (3, "存入"),
+            (4, "取出"),
         ),
         widget=forms.Select,
         initial='1',
@@ -61,4 +61,4 @@ class PoolForm(ModelForm):
         #该ModelForm参照Model: Node
         model = Pool
         #在Form中不显示node_signer这个字段
-        fields = ['pool_status','money','card',]
+        fields = ['p_status','money','card',]
