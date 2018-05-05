@@ -2,7 +2,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from ticket.models import Ticket, Card
+from ticket.models import Ticket, Card, Pool
 
 
 class TicketForm(ModelForm):
@@ -43,8 +43,22 @@ class CardForm(ModelForm):
 
 class PoolForm(ModelForm):
     #自定义ModelForm的内容
+    pool_status = forms.ChoiceField(label="类型",
+        choices=(
+            (3, "充值"),
+            (4, "支出"),
+        ),
+        widget=forms.Select,
+        initial='1',
+    )
+
+    # def __init__(self, *args, **kwargs):
+    #     # first call parent's constructor
+    #     super(PoolForm, self).__init__(*args, **kwargs)
+    #     # there's a `fields` property now
+    #     self.fields['card'].required = True
     class Meta:
         #该ModelForm参照Model: Node
-        model = Card
+        model = Pool
         #在Form中不显示node_signer这个字段
-        fields = []
+        fields = ['pool_status','money','card',]

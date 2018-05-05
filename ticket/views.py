@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 # Create your views here.
-from ticket.forms import TicketForm, CardForm, TicketEditForm
+from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm
 from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee, Pool
 
 
@@ -472,6 +472,8 @@ def pool_dash(request):
     pool = Pool.objects.last()
     pool_data = Pool.objects.all().order_by('-pub_date')
     data_list, page_range, count, page_nums = pagination(request, pool_data)
+    form = PoolForm(request.POST or None)
+    form.fields['card'].required = True
 
     count_t = Ticket.objects.filter(t_status=5).count()
     sum_money = 0
@@ -481,21 +483,22 @@ def pool_dash(request):
         print(str(Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values('sum_money').query))
         print(sum_money)
     if request.method == 'POST':
-        # #任务联系人为可编辑选项，并填充原先的任务联系人
-        # card_ins.name = request.POST['name']
-        # card_ins.beizhu = request.POST['beizhu']
-        #
-        # card = Card.objects.get(id = card_ins.id)
-        # if request.POST['fee'].strip(' ') != '':
-        #     fee_ins = Fee()
-        #     fee_ins.yinhangka = card
-        #     fee_ins.money = float(request.POST['fee'])
-        #     fee_ins.name = request.POST['feebeizhu'].strip(' ')
-        #     fee_ins.save()
-        #     card_ins.money = card_ins.money + fee_ins.money
-        # card_ins.save()
-
-        # return redirect('card_edit', pk=card.id)
+        if form.is_valid():
+            # 创建实例，需要做些数据处理，暂不做保存
+            pool = form.save(commit=False)
+            p = Pool.objects.last()
+            if not p:
+                p = Pool()
+            money = pool.money
+            if form.cleaned_data.get('pool_status') == 4:
+                money = 0 - money
+            pool.totalmoney = p.totalmoney + money
+            pool.promoney = p.promoney + money
+            pool.unusemoney = p.unusemoney + money
+            pool.usedmoney = p.usedmoney
+            pool.money = money
+            pool.save()
+            return redirect('pool_dash')
         pass
 
     context = {
@@ -506,6 +509,7 @@ def pool_dash(request):
         'page_range': page_range,
         'count': count,
         'page_nums': page_nums,
+        'form':form,
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/pool_dash.html', context)
