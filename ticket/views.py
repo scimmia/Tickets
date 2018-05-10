@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.template import loader
 # Create your views here.
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm
-from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee, Pool
+from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee, Pool, InpoolPercent
 
 
 @login_required
@@ -54,13 +54,18 @@ def ticket_outstore(ticket_pk):
     pass
 def ticket_inpool(ticket_pk):
     ticket = Ticket.objects.get(pk=ticket_pk)
+    item = InpoolPercent.objects.last()
+    if not item:
+        item = InpoolPercent()
+        item.inpoolPer = 100
+        item.save()
     p = Pool.objects.last()
     if not p:
         p = Pool()
     pool = Pool()
-    pool.totalmoney = p.totalmoney + ticket.piaomianjiage
+    pool.totalmoney = p.totalmoney + ticket.piaomianjiage * item.inpoolPer /100
     pool.promoney = p.promoney
-    pool.unusemoney = p.unusemoney + ticket.piaomianjiage
+    pool.unusemoney = p.unusemoney + ticket.piaomianjiage * item.inpoolPer /100
     pool.usedmoney = p.usedmoney
     pool.ticket = ticket
     pool.money = ticket.piaomianjiage
@@ -70,13 +75,18 @@ def ticket_inpool(ticket_pk):
 
 def ticket_outpool(ticket_pk):
     ticket = Ticket.objects.get(pk=ticket_pk)
+    item = InpoolPercent.objects.last()
+    if not item:
+        item = InpoolPercent()
+        item.inpoolPer = 100
+        item.save()
     p = Pool.objects.last()
     if not p:
         p = Pool()
     pool = Pool()
-    pool.totalmoney = p.totalmoney - ticket.piaomianjiage
+    pool.totalmoney = p.totalmoney - ticket.piaomianjiage * item.inpoolPer /100
     pool.promoney = p.promoney
-    pool.unusemoney = p.unusemoney - ticket.piaomianjiage
+    pool.unusemoney = p.unusemoney - ticket.piaomianjiage * item.inpoolPer /100
     pool.usedmoney = p.usedmoney
     pool.ticket = ticket
     pool.money = 0 - ticket.piaomianjiage
@@ -578,6 +588,42 @@ def pool_pro(request):
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/pool_dash.html', context)
+#配置
+def inpoolPercent(request):
+    item = InpoolPercent.objects.last()
+    if not item:
+        item = InpoolPercent()
+        item.inpoolPer = 100
+        item.save()
+    items_data = InpoolPercent.objects.all().order_by('-pub_date')
+    data_list, page_range, count, page_nums = pagination(request, items_data)
+    # form = PoolForm(request.POST or None)
+    # form.fields['card'].required = True
+    items_total = []
+    items_date = []
+    for i in range(len(items_data)):
+        list.insert(items_total, 0, items_data[i].inpoolPer)
+        list.insert(items_date, 0, items_data[i].pub_date)
+
+    if request.method == 'POST':
+        temp = InpoolPercent()
+        temp.inpoolPer = request.POST['inpoolPer']
+        temp.save()
+        return redirect('inpoolPercent')
+        pass
+
+    context = {
+        'data': data_list,
+        'item': item,
+        'items_total': items_total,
+        'items_date': items_date,
+        'page_range': page_range,
+        'count': count,
+        'page_nums': page_nums,
+    }
+    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
+    return render(request, 'ticket/inpoolPer.html',  context)
+
 #分页函数
 def pagination(request, queryset, display_amount=10, after_range_num = 5,before_range_num = 4):
     #按参数分页

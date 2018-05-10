@@ -143,8 +143,10 @@
                     <li class="header">
                 {% endif %}
                 导航栏</li>
-                <li class="">
-                    <a href="#">
+                <li {% if '/dashboard/' in request.path %}
+                    class="active"
+                {% endif %}>
+                    <a href="{% url 'dashboard' %}">
                         <i class="fa fa-th"></i> <span>总资产</span>
                     </a>
                 </li>
@@ -211,21 +213,42 @@
                         {% else %}
                     <li class="treeview">
                 {% endif %}
-                    <a href="#">
-                        <i class="fa fa-table"></i> <span>资金池</span>
-                        <span class="pull-right-container">
+                <a href="#">
+                    <i class="fa fa-table"></i> <span>资金池</span>
+                    <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li
-                                {% if '/pool_dash/' in request.path %}
-                                    class="active"
-                                {% endif %}><a href="{% url 'pool_dash' %}"><i class="fa fa-circle-o"></i>概览</a></li>
-                        <li><a href="layout/boxed.html"><i class="fa fa-circle-o"></i>保证金</a></li>
-                        <li><a href="layout/fixed.html"><i class="fa fa-circle-o"></i>定位</a></li>
-                        <li><a href="layout/collapsed-sidebar.html"><i class="fa fa-circle-o"></i> 可折叠侧边栏</a></li>
-                    </ul>
+                </a>
+                <ul class="treeview-menu">
+                    <li
+                            {% if '/pool_dash/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'pool_dash' %}"><i class="fa fa-circle-o"></i>概览</a></li>
+                    <li><a href="layout/boxed.html"><i class="fa fa-circle-o"></i>保证金</a></li>
+                    <li><a href="layout/fixed.html"><i class="fa fa-circle-o"></i>定位</a></li>
+                    <li><a href="layout/collapsed-sidebar.html"><i class="fa fa-circle-o"></i> 可折叠侧边栏</a></li>
+                </ul>
+                </li>
+                {% if '/sysconfig/' in request.path %}
+                    <li class="active treeview">
+                        {% else %}
+                    <li class="treeview">
+                {% endif %}
+                <a href="#">
+                    <i class="fa fa-save"></i> <span>配置</span>
+                    <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li
+                            {% if '/inpoolPercent' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'inpoolPercent' %}"><i class="fa fa-circle-o"></i>入池额度比例</a></li>
+                    <li><a href="layout/boxed.html"><i class="fa fa-circle-o"></i>保证金</a></li>
+                    <li><a href="layout/fixed.html"><i class="fa fa-circle-o"></i>定位</a></li>
+                    <li><a href="layout/collapsed-sidebar.html"><i class="fa fa-circle-o"></i> 可折叠侧边栏</a></li>
+                </ul>
                 </li>
             </ul>
         </section>

@@ -177,3 +177,14 @@ class Pool(models.Model):
     class Meta:
         verbose_name = '资金池'
         verbose_name_plural = '资金池'
+
+class InpoolPercent(models.Model):
+    inpoolPer = models.FloatField(u'入池额度比例', default=0)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '入池额度比例'
+        verbose_name_plural = '入池额度比例'
+
+    def __str__(self):
+        return self.inpoolPer

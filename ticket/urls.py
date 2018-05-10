@@ -7,6 +7,7 @@ urlpatterns = [
     # url(r'^up/', views.indexa, name='upfile'),
     # url(r'^ticket_add/', views.ticket_add, name='ticket_add'),
     url(r'^dashboard/', views.dashboard, name='dashboard'),
+    url(r'^sysconfig/inpoolPercent', views.inpoolPercent, name='inpoolPercent'),
 
     # 用户登陆列表
     # 用户登陆
