@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 # Create your views here.
-from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm
+from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm
 from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee, Pool, InpoolPercent
 
 
@@ -301,30 +301,23 @@ def ticket_edit(request,  pk):
     return render(request, 'ticket/ticket_edit.html', locals())
 def ticket_index(request,  pk):
     ticket_ins = get_object_or_404(Ticket, pk=pk)
-    form = TicketEditForm(request.POST or None, instance=ticket_ins)
+    fee_data = Fee.objects.filter(ticket=pk).order_by('-pub_date')
+    data_list, page_range, count, page_nums = pagination(request, fee_data)
 
-    form.fields['qianpaipiaohao'].disabled = True
-    form.fields['piaohao'].disabled = True
-    form.fields['chupiaohang'].disabled = True
-    form.fields['chupiaoriqi'].disabled = True
-    form.fields['daoqiriqi'].disabled = True
-    form.fields['gongyingshang'].disabled = True
-    form.fields['gouruhuilv'].disabled = True
-    form.fields['piaomianjiage'].disabled = True
-    form.fields['gourujiage'].disabled = True
-    form.fields['gouruzijinchi'].disabled = True
-    form.fields['gourucard'].disabled = True
-    if ticket_ins.pay_status == 2:
-        form.fields['pay_status'].disabled = True
-    if ticket_ins.sell_status == 4:
-        form.fields['sell_status'].disabled = True
-    if ticket_ins.t_status == 3:
-        form.fields['t_status'].disabled = True
-        form.fields['maichulilv'].disabled = True
-        form.fields['maichujiage'].disabled = True
-        form.fields['maichucard'].disabled = True
-        form.fields['maipiaoren'].disabled = True
-        form.fields['lirun'].disabled = True
+
+    form = TicketEditForm(request.POST or None, instance=ticket_ins)
+    feeform = TicketFeeForm(request.POST or None)
+    if request.method == 'POST':
+        if feeform.is_valid():
+            instance = feeform.save(commit=False)
+            instance.ticket = Ticket.objects.get(id = pk)
+            instance.save()
+            instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
+            # instance.yinhangka.save()
+            redirect('ticket_index',pk=pk)
+
+    for m in form.fields:
+        form.fields[m].disabled = True
     return render(request, 'ticket/ticket_index.html', locals())
 
 #显示各列表信息

@@ -2,7 +2,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from ticket.models import Ticket, Card, Pool
+from ticket.models import Ticket, Card, Pool, Fee
 
 
 class TicketForm(ModelForm):
@@ -30,7 +30,15 @@ class TicketEditForm(ModelForm):
 
         #在Form中不显示node_signer这个字段
         exclude = []
+class TicketFeeForm(ModelForm):
 
+    #自定义ModelForm的内容
+    class Meta:
+        #该ModelForm参照Model: Node
+        model = Fee
+
+        #在Form中不显示node_signer这个字段
+        exclude = ['ticket','pub_date',]
 
 class CardForm(ModelForm):
     #自定义ModelForm的内容
