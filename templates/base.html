@@ -176,6 +176,10 @@
                             {% if '/ticket_edit/' in request.path %}
                                 class="active"
                             {% endif %}><a href="#"><i class="fa fa-circle-o"></i>编辑</a></li>
+                    <li
+                            {% if '/ticket_import/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'ticket_import' %}"><i class="fa fa-circle-o"></i>导入</a></li>
                 </ul>
                 </li>
                 {% if '/card/' in request.path %}
@@ -224,9 +228,6 @@
                             {% if '/pool_dash/' in request.path %}
                                 class="active"
                             {% endif %}><a href="{% url 'pool_dash' %}"><i class="fa fa-circle-o"></i>概览</a></li>
-                    <li><a href="layout/boxed.html"><i class="fa fa-circle-o"></i>保证金</a></li>
-                    <li><a href="layout/fixed.html"><i class="fa fa-circle-o"></i>定位</a></li>
-                    <li><a href="layout/collapsed-sidebar.html"><i class="fa fa-circle-o"></i> 可折叠侧边栏</a></li>
                 </ul>
                 </li>
                 {% if '/sysconfig/' in request.path %}
@@ -245,9 +246,6 @@
                             {% if '/inpoolPercent' in request.path %}
                                 class="active"
                             {% endif %}><a href="{% url 'inpoolPercent' %}"><i class="fa fa-circle-o"></i>入池额度比例</a></li>
-                    <li><a href="layout/boxed.html"><i class="fa fa-circle-o"></i>保证金</a></li>
-                    <li><a href="layout/fixed.html"><i class="fa fa-circle-o"></i>定位</a></li>
-                    <li><a href="layout/collapsed-sidebar.html"><i class="fa fa-circle-o"></i> 可折叠侧边栏</a></li>
                 </ul>
                 </li>
             </ul>

@@ -1,3 +1,7 @@
+import csv
+import os
+import uuid
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Sum, Count
 from django.shortcuts import render, redirect, get_object_or_404
@@ -8,8 +12,10 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 # Create your views here.
+from django.urls import reverse
+
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm
-from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee, Pool, InpoolPercent
+from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport
 
 
 @login_required
@@ -326,7 +332,7 @@ def ticket_list(request):
     #从根据不同的请求，来获取相应的数据,并跳转至相应页面
 
     # 将原先的data更名为raw_data
-    raw_data = Ticket.objects.all()
+    raw_data = Ticket.objects.all().order_by('-goumairiqi')
     print(raw_data)
     list_template = 'ticket/ticket_list.html'
 
@@ -371,6 +377,100 @@ def ticket_list(request):
     print(context)
     #跳转到相应页面，并将值传递过去
     return render(request,list_template,context)
+
+def ticket_import(request):
+    context = {}
+    # 如果form通过POST方法发送数据
+    if request.method == 'GET':
+        stamp = request.GET.get('stamp')
+        items = TicketsImport.objects.filter(stamp=stamp)
+    if request.method == "POST":
+        if 'upfile' in request.POST.keys():
+            stamp = uuid.uuid1()
+            path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
+            if not os.path.exists(path):
+                os.makedirs(path)
+            with open(path + 'tmp.csv', 'wb+')as destination:
+                for chunk in request.FILES['file'].chunks():
+                    destination.write(chunk)
+            csv_reader = csv.reader(open(path + 'tmp.csv', 'r', newline=''))
+            for row in csv_reader:
+                a = len(row)
+                if len(row) == 14:
+                    if row[5].startswith('2'):
+                        m = TicketsImport()
+                        m.stamp = stamp
+                        m.piaohao = row[0]
+                        m.chupiaoren = row[1]
+                        m.shoukuanren = row[2]
+                        m.piaomianjiage = float(row[3].replace(',',''))
+                        m.piaomianlixi = row[4]
+                        m.chupiaoriqi = row[5].replace(' ','').replace('\t','')
+                        m.daoqiriqi = row[6].replace(' ','').replace('\t','')
+                        m.leixing = row[7]
+                        m.zhuangtai = row[8]
+                        m.chupiaohang = row[9]
+                        m.chupiaohangb = row[10]
+                        m.chengduiren = row[11]
+                        m.shoupiaoren = row[12]
+                        m.shoupiaohang = row[13]
+                        m.save()
+                        print(row)
+
+            return redirect('%s?stamp=%s' % (reverse('ticket_import'),stamp))
+        elif 'savefile' in request.POST.keys():
+            stamp = request.GET.get('stamp')
+            print(stamp)
+            TicketsImport.objects.filter(stamp=stamp).update(saved=True)
+            items = TicketsImport.objects.filter(stamp=stamp)
+            for item in items:
+                m = Ticket()
+                m.piaohao = item.piaohao
+                m.chupiaohang = item.chupiaohang
+                m.chupiaoriqi = item.chupiaoriqi
+                m.daoqiriqi = item.daoqiriqi
+                m.piaomianjiage = item.piaomianjiage
+                m.gongyingshang = item.chupiaoren
+                m.save()
+                pass
+
+            return redirect('ticket_list')
+            pass
+        # return redirect('ticket_import',)
+
+    # 如果是通过GET方法请求数据，返回一个空的表单
+    # else:
+        # form = NameForm()
+    # context['forma'] = form
+    return render(request, 'ticket/ticket_import.html',  locals())
+
+
+def handle_upload_file(file):
+    path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
+    if not os.path.exists(path):
+        os.makedirs(path)
+    with open(path + 'tmp.csv', 'wb+')as destination:
+        for chunk in file.chunks():
+            destination.write(chunk)
+    csv_reader = csv.reader(open(path + 'tmp.csv', 'r', newline=''))
+    res = []
+    for row in csv_reader:
+        a = len(row)
+        if len(row) == 14:
+            if row[5].startswith('2'):
+                m = Ticket()
+                m.qianpaipiaohao = row[0]
+                m.piaohao = row[0]
+                m.chupiaohang = row[9]
+                m.chupiaoriqi = row[5]
+                m.daoqiriqi = row[6]
+                m.piaomianjiage = row[3]
+                res.append(m)
+                print(row)
+
+            pass
+    return res
+
 
 #显示各列表信息
 @login_required
