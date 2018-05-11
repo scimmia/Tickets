@@ -26,7 +26,9 @@
     </th>
 {% endblock %}
 {% block table_td %}
-    <td>{{ item.name }}</td>
+    <td><a class="green" href="{% url 'card_edit' item.id %}" title="编辑信息">
+                {{ item.name }}
+            </a></td>
     <td>{{ item.money }}</td>
     <td>{{ item.beizhu }}</td>
     <td>{{ item.pub_date }}</td>

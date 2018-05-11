@@ -13,15 +13,15 @@
     </ol>
 {% endblock %}
 {% block table_tr %}
-    <th>状态</th>
-    <th>付款状态</th>
-    <th>收款状态</th>
     <th>购买日期</th>
     <th>票号</th>
     <th>出票行</th>
     <th>票面价格</th>
     <th>出票日期</th>
     <th>到期日期</th>
+    <th>状态</th>
+    <th>付款状态</th>
+    <th>收款状态</th>
     <th>
         <!--最后一列作为添加数据按钮-->
         <a class="blue" href="{% url 'ticket_add' %}">
@@ -31,6 +31,14 @@
     </th>
 {% endblock %}
 {% block table_td %}
+    <td><a class="green" href="{% url 'ticket_index' item.id %}" title="查看信息">
+                {{ item.goumairiqi }}
+            </a></td>
+    <td>{{ item.piaohao }}</td>
+    <td>{{ item.chupiaohang }}</td>
+    <td>{{ item.piaomianjiage }}</td>
+    <td>{{ item.chupiaoriqi }}</td>
+    <td>{{ item.daoqiriqi }}</td>
     <td>
         {% if item.t_status == 1 %}
             <span class="label label-success">在库
@@ -54,16 +62,10 @@
             <span class="label label-success">已收款
         {% endif %}
         </span></td>
-    <td>{{ item.goumairiqi }}</td>
-    <td>{{ item.piaohao }}</td>
-    <td>{{ item.chupiaohang }}</td>
-    <td>{{ item.piaomianjiage }}</td>
-    <td>{{ item.chupiaoriqi }}</td>
-    <td>{{ item.daoqiriqi }}</td>
     <td>
         <div class="hidden-sm hidden-xs action-buttons">
-            <a class="green" href="{% url 'ticket_index' item.id %}" title="编辑信息">
-                <i class="ace-icon fa fa-pencil bigger-130"></i>
+            <a class="green" href="{% url 'ticket_edit' item.id %}" title="编辑信息">
+                <i class="ace-icon fa fa-pencil bigger-130">编辑信息</i>
             </a></div>
     </td>
 {% endblock %}
