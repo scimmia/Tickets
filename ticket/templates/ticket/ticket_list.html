@@ -13,6 +13,10 @@
     </ol>
 {% endblock %}
 {% block table_tr %}
+ <form action="" method="get">
+        {{ filter.form.as_p }}
+        <input type="submit" />
+    </form>
     <th>购买日期</th>
     <th>票号</th>
     <th>出票行</th>

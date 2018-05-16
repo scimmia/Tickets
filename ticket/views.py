@@ -14,6 +14,7 @@ from django.template import loader
 # Create your views here.
 from django.urls import reverse
 
+from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm
 from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport
 
@@ -336,43 +337,45 @@ def ticket_list(request):
     print(raw_data)
     list_template = 'ticket/ticket_list.html'
 
-    #通过GET方法从提交的URL来获取相应参数
-    if request.method == 'GET':
-        #建立一个空的参数的字典
-        kwargs = {}
-        #建立一个空的查询语句
-        query = ''
-        #提交过来的GET值是一个迭代的键值对
-        for key in request.GET.keys():
-            value = request.GET.getlist(key)
-            #刨去其中的token和page选项
-            if key != 'csrfmiddlewaretoken' and key != 'page':
-                #由于线路和设备的外键均与node表格有关，当查询线路中的用户名称或设备信息中的使用部门时，可以直接通过以下方式跨表进行查找
-                if key == 'node':
-                    kwargs['node__node_name__contains'] = value
-                    #该query用于页面分页跳转时，能附带现有的搜索条件
-                    query += '&' + key + '=' + value
-                #其余的选项均通过key来辨别
-                else:
-                    kwargs[key + '__contains'] = value
-                    #该query用于页面分页跳转时，能附带现有的搜索条件
-                    query += '&' + key + '=' + value
-        #通过元始数据进行过滤，过滤条件为健对值的字典
-        data = raw_data.filter(**kwargs)
-    #如果没有从GET提交中获取信息，那么data则为元始数据
-    else:
-        data = raw_data
-    print(data)
+    # #通过GET方法从提交的URL来获取相应参数
+    # if request.method == 'GET':
+    #     #建立一个空的参数的字典
+    #     kwargs = {}
+    #     #建立一个空的查询语句
+    #     query = ''
+    #     #提交过来的GET值是一个迭代的键值对
+    #     for key in request.GET.keys():
+    #         value = request.GET.getlist(key)
+    #         #刨去其中的token和page选项
+    #         if key != 'csrfmiddlewaretoken' and key != 'page':
+    #             #由于线路和设备的外键均与node表格有关，当查询线路中的用户名称或设备信息中的使用部门时，可以直接通过以下方式跨表进行查找
+    #             if key == 'node':
+    #                 kwargs['node__node_name__contains'] = value
+    #                 #该query用于页面分页跳转时，能附带现有的搜索条件
+    #                 query += '&' + key + '=' + value
+    #             #其余的选项均通过key来辨别
+    #             else:
+    #                 kwargs[key + '__contains'] = value
+    #                 #该query用于页面分页跳转时，能附带现有的搜索条件
+    #                 query += '&' + key + '=' + value
+    #     #通过元始数据进行过滤，过滤条件为健对值的字典
+    #     data = raw_data.filter(**kwargs)
+    # #如果没有从GET提交中获取信息，那么data则为元始数据
+    # else:
+    #     data = raw_data
+    # print(data)
 
     #将分页的信息传递到展示页面中去
-    data_list, page_range, count, page_nums = pagination(request, data)
+    filter = TicketFilter(request.GET, queryset=Ticket.objects.all().order_by('-goumairiqi'))
+    data_list, page_range, count, page_nums = pagination(request, filter.qs)
     #建立context字典，将值传递到相应页面
     context = {
         'data': data_list,
-        'query': query,
+        # 'query': query,
         'page_range': page_range,
         'count': count,
         'page_nums': page_nums,
+        'filter': filter,
     }
     print(context)
     #跳转到相应页面，并将值传递过去
