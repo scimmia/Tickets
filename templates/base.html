@@ -173,9 +173,9 @@
                                 class="active"
                             {% endif %}><a href="{% url 'ticket_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
                     <li
-                            {% if '/ticket_edit/' in request.path %}
+                            {% if '/ticket_topay/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="#"><i class="fa fa-circle-o"></i>编辑</a></li>
+                            {% endif %}><a href="{% url 'ticket_topay' %}"><i class="fa fa-circle-o"></i>待付款</a></li>
                     <li
                             {% if '/ticket_import/' in request.path %}
                                 class="active"
