@@ -424,6 +424,7 @@ def ticket_topay(request):
     context = {}
     list_template = 'ticket/ticket_topay.html'
     if request.method == 'POST':
+        feeform = TicketFeeForm()
         index = request.POST['index']
         ids = request.POST['ids']
         selected_num = request.POST['selected_num']
@@ -438,6 +439,7 @@ def ticket_topay(request):
             'data': raw_data,
             'index': index,
             'title': title,
+            'feeform': feeform,
             'selected_num': selected_num,
             'selected_piaomian': selected_piaomian,
         }
