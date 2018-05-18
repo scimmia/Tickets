@@ -40,7 +40,7 @@
                     </thead>
                     <!--表格内容-->
                     <tbody>
-                    {% for item in data %}
+                    {% for item in ticket_data %}
                         <tr>
                             <!--通过for循环从data取出的具体表格内容-->
                             <td></td>
@@ -94,11 +94,29 @@
                         <th>费用内容</th>
                         <th>金额</th>
                         <th>相关银行卡</th>
-                        <th></th>
                         </thead>
                         <!--表格内容-->
-                        <tbody id="thebody">
+                        <tbody >
+                        {% for i in fee_data %}
+                            <tr>
+                                        <td>{{ i.name }}</td>
+                                        <td>
+                                            {% if i.money > 0 %}
+                                                <span class="label label-success">
+                                            {% else %}
+                                                <span class="label label-danger">
+                                            {% endif %}
+                                            {{ i.money }}</span></td>
+                                        <td>
+                                            {% if i.yinhangka %}
+                                                <span class="label label-success">{{ i.yinhangka }}
+                                            {% else %}
+                                                <span class="label label-danger">无
+                                            {% endif %}
+                                            </span></td>
+                                    </tr>
 
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -109,7 +127,8 @@
             <div class="col-xs-3 pull-right">
                 <h3><b>已选择</b> <a id="selected_num">{{ selected_num }}</a><b>张</b></h3>
                 <h3><b>合计票面价格</b> <a id="selected_piaomian">{{ selected_piaomian }}</a><b>元</b></h3>
-                <form  method='POST' action="{% url 'ticket_createorder' %}" id="signupForm"  onsubmit="return check();">{% csrf_token %}
+                <form method='POST' action="{% url 'ticket_createorder' %}" id="signupForm"
+                      onsubmit="return check();">{% csrf_token %}
                     <input name="fees" value=""
                            class="textinput textInput form-control"
                            id="id_fees" type="text">
@@ -140,10 +159,11 @@
             $(that).parent().parent().remove();
             sumFees();
         }
+
         function sumFees(that) {
-            var fees =new Array();
-            $("#thebody").find('tr').each(function(i, val) {
-                var fee =new Object();
+            var fees = new Array();
+            $("#thebody").find('tr').each(function (i, val) {
+                var fee = new Object();
                 fee.money = $(this).attr('data-money');
                 fee.name = $(this).attr('data-name');
                 fee.cardid = $(this).attr('data-cardid');
@@ -151,9 +171,10 @@
                 console.log(fee);
             });
             console.log(fees);
-                            $("#id_fees").val(JSON.stringify(fees));
+            $("#id_fees").val(JSON.stringify(fees));
 
         }
+
         $(document).ready(function () {
             var t = $('#table_id').DataTable({
                 'paging': false,
@@ -232,7 +253,7 @@
 
                     $('#thebody').append(trr);
                     sumFees();
-               }
+                }
             });
         });
     </script>

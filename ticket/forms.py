@@ -38,7 +38,7 @@ class TicketFeeForm(ModelForm):
         model = Fee
 
         #在Form中不显示node_signer这个字段
-        exclude = ['ticket','pub_date',]
+        exclude = ['ticket','order','pub_date',]
 
 class CardForm(ModelForm):
     #自定义ModelForm的内容

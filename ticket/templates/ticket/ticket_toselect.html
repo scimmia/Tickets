@@ -189,7 +189,7 @@
                 <h3><b>合计票面价格</b> <a id="selected_piaomian">0</a><b>元</b></h3>
             </div>
             <div class="col-xs-2 pull-right">
-                <form method='POST' action="{% url 'ticket_topay' %}" id="signupForm" action=''
+                <form method='POST' action="{% url 'ticket_topay' %}" id="signupForm"
                       onsubmit="return check();">{% csrf_token %}
                     <input name="index" value="{{ index }}"
                            class="textinput textInput form-control"

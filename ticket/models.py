@@ -15,6 +15,26 @@ class Card(models.Model):
     def __str__(self):
         return self.name
 
+class Order(models.Model):
+    ORDER_TYPE= (
+        (1,u'付款订单'),
+        (2,u'付款订单'),
+    )
+    order_type = models.IntegerField(
+        u'订单类型',
+        choices=ORDER_TYPE,
+        default=1,
+    )
+    money = models.FloatField(u'金额', default=0)
+    moneyleft = models.FloatField(u'剩余金额', default=0)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '订单'
+        verbose_name_plural = '订单'
+
+    def __str__(self):
+        return self.order_type
 
 class Ticket(models.Model):
     PAY_STATUS= (
@@ -52,6 +72,7 @@ class Ticket(models.Model):
         choices=PAY_STATUS,
         default=1,
     )
+    payorder = models.ForeignKey( Order, related_name='pay_order', verbose_name=u'付款订单' ,  blank=True,null=True)
     paytime = models.DateTimeField(u'付款时间', blank=True,null=True)
     maichuriqi = models.DateTimeField(u'卖出日期', blank=True,null=True)
     maichulilv = models.FloatField(u'卖出利率', default=0)
@@ -63,6 +84,7 @@ class Ticket(models.Model):
         choices=SELL_STATUS,
         default=3,
     )
+    sellorder = models.ForeignKey( Order, related_name='sell_order', verbose_name=u'收款订单' ,  blank=True,null=True)
     selltime = models.DateTimeField(u'收款时间', blank=True,null=True)
     lirun = models.IntegerField(u'利润', default=0)
     class Meta:
@@ -97,6 +119,7 @@ class TicketsImport(models.Model):
 
 class Fee(models.Model):
     ticket = models.ForeignKey( Ticket, related_name='fee_ticket', verbose_name=u'票据' ,  blank=True,null=True)
+    order = models.ForeignKey( Order, related_name='order_fee', verbose_name=u'订单费用' ,  blank=True,null=True)
     yinhangka = models.ForeignKey( Card, related_name='fee_card', verbose_name=u'银行卡' , blank=False,null=False)
     name = models.CharField(u'费用内容', max_length=50)
     money = models.FloatField(u'金额', default=0)

@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 import uuid
 
@@ -16,7 +17,7 @@ from django.urls import reverse
 
 from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm
-from ticket.models import Card, Fee, Ticket, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport
+from ticket.models import Card, Fee, Ticket,Order, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport
 
 
 @login_required
@@ -438,6 +439,7 @@ def ticket_topay(request):
         context = {
             'data': raw_data,
             'index': index,
+            'ids': ids,
             'title': title,
             'feeform': feeform,
             'selected_num': selected_num,
@@ -446,6 +448,36 @@ def ticket_topay(request):
     print(context)
     #跳转到相应页面，并将值传递过去
     return render(request,list_template,context)
+
+def ticket_createorder(request):
+    if request.method == 'POST':
+        order = Order()
+        order.order_type = 1
+        order.save()
+        fees = json.loads(request.POST['fees'])
+        for fee in fees:
+            f = Fee()
+            f.order = order
+            f.name = fee['name']
+            f.money = fee['money']
+            f.yinhangka = Card.objects.get(pk=(fee['cardid']))
+            f.save()
+        ids = request.POST['ids']
+        Ticket.objects.filter(id__in=ids.split(',')).update(payorder=order)
+        #建立context字典，将值传递到相应页面
+    return redirect('ticket_payorder', pk=order.id)
+
+
+def ticket_payorder(request,  pk):
+    order_ins = get_object_or_404(Order, pk=pk)
+    ticket_data = Ticket.objects.filter(payorder=pk).order_by('-goumairiqi')
+    fee_data = Fee.objects.filter(order=pk).order_by('-pub_date')
+    list_template = 'ticket/ticket_payorder.html'
+    if request.method == 'POST':
+        fees = json.loads(request.POST['fees'])
+        ids = request.POST['ids']
+        raw_data = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
+    return render(request,list_template,locals())
 
 def ticket_import(request):
     context = {}
