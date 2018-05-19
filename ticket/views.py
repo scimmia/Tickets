@@ -385,10 +385,10 @@ def ticket_needselect(request,index):
 
     if index == 1:
         title = '付款'
-        raw_data = Ticket.objects.filter(pay_status=1).order_by('-goumairiqi')
+        raw_data = Ticket.objects.filter(pay_status=1,payorder=None).order_by('-goumairiqi')
     else:
         title = '收款'
-        raw_data = Ticket.objects.filter(sell_status=3).order_by('-goumairiqi')
+        raw_data = Ticket.objects.filter(sell_status=3,sellorder=None).order_by('-goumairiqi')
     list_template = 'ticket/ticket_toselect.html'
 
     #通过GET方法从提交的URL来获取相应参数

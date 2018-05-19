@@ -110,10 +110,10 @@
                 <h3><b>已选择</b> <a id="selected_num">{{ selected_num }}</a><b>张</b></h3>
                 <h3><b>合计票面价格</b> <a id="selected_piaomian">{{ selected_piaomian }}</a><b>元</b></h3>
                 <form  method='POST' action="{% url 'ticket_createorder' %}" id="signupForm"  onsubmit="return check();">{% csrf_token %}
-                    <input name="fees" value=""
+                    <input name="fees" value="" style="display: none"
                            class="textinput textInput form-control"
                            id="id_fees" type="text">
-                    <input name="ids" value="{{ ids }}"
+                    <input name="ids" value="{{ ids }}" style="display: none"
                            class="textinput textInput form-control"
                            id="id_ids" type="text">
                     <button type="submit" class="btn btn-warning center-block" id="all_checked">
