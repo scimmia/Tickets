@@ -26,7 +26,14 @@ class Order(models.Model):
         default=1,
     )
     money = models.FloatField(u'金额', default=0)
-    moneyleft = models.FloatField(u'剩余金额', default=0)
+    ticket_sum = models.FloatField(u'合计票面价格', default=0)
+    ticket_count = models.IntegerField(u'票据数目', default=0)
+    fee_sum = models.FloatField(u'合计费用金额', default=0)
+    fee_count = models.IntegerField(u'费用数目', default=0)
+    payfee_sum = models.FloatField(u'已支付金额', default=0)
+    payfee_count = models.IntegerField(u'已支付数目', default=0)
+    total_sum = models.FloatField(u'总金额', default=0)
+    needpay_sum = models.FloatField(u'剩余金额', default=0)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
     class Meta:
@@ -125,6 +132,17 @@ class Fee(models.Model):
     money = models.FloatField(u'金额', default=0)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
+    FEE_TYPE= (
+        (1,u'付款订单'),
+        (2,u'付款订单'),
+        (3,u'付款支付'),
+        (4,u'收款收取'),
+    )
+    fee_type = models.IntegerField(
+        u'费用类型',
+        choices=FEE_TYPE,
+        default=1,
+    )
     def __str__(self):
         return self.name
     class Meta:

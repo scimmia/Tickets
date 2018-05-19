@@ -459,24 +459,49 @@ def ticket_createorder(request):
             f = Fee()
             f.order = order
             f.name = fee['name']
-            f.money = fee['money']
+            f.money = float(fee['money'])
             f.yinhangka = Card.objects.get(pk=(fee['cardid']))
             f.save()
+            order.fee_sum = order.fee_sum+f.money
+            order.fee_count = order.fee_count + 1
+
         ids = request.POST['ids']
         Ticket.objects.filter(id__in=ids.split(',')).update(payorder=order)
+        tickets = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
+        for t in tickets:
+            order.ticket_count = order.ticket_count + 1
+            order.ticket_sum = order.ticket_sum + t.piaomianjiage
+        order.total_sum = order.ticket_sum + order.fee_sum
+        order.payfee_sum = 0
+        order.needpay_sum = order.total_sum - order.payfee_sum
+        order.save()
+
         #建立context字典，将值传递到相应页面
     return redirect('ticket_payorder', pk=order.id)
 
 
 def ticket_payorder(request,  pk):
     order_ins = get_object_or_404(Order, pk=pk)
+    order = Order.objects.get(pk=pk)
     ticket_data = Ticket.objects.filter(payorder=pk).order_by('-goumairiqi')
-    fee_data = Fee.objects.filter(order=pk).order_by('-pub_date')
+    fee_data = Fee.objects.filter(order=pk,fee_type=1).order_by('-pub_date')
+    payfee_data = Fee.objects.filter(order=pk,fee_type=3).order_by('-pub_date')
     list_template = 'ticket/ticket_payorder.html'
+    feeform = TicketFeeForm(request.POST or None)
+    # feeform.fields['money'].max_value = needpay_sum
     if request.method == 'POST':
-        fees = json.loads(request.POST['fees'])
-        ids = request.POST['ids']
-        raw_data = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
+        if feeform.is_valid():
+            instance = feeform.save(commit=False)
+            instance.order = order
+            instance.fee_type = 3
+            instance.save()
+            instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
+            order.payfee_count = order.payfee_count + 1
+            order.payfee_sum = order.payfee_sum + instance.money
+            order.needpay_sum = order.total_sum - order.payfee_sum
+            order.save()
+
+            redirect('ticket_index',pk=pk)
     return render(request,list_template,locals())
 
 def ticket_import(request):
