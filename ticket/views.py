@@ -506,7 +506,6 @@ def ticket_createorder(request):
 
         tickets = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
         for t in tickets:
-
             if order.order_type == 2:
                 t.maichulilv = request.POST['maichulilv'+str(t.piaomianjiage)]
                 t.maichujiage = request.POST['maichujiage'+str(t.piaomianjiage)]
