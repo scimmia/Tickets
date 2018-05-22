@@ -448,16 +448,49 @@ def ticket_topay(request):
     print(context)
     #跳转到相应页面，并将值传递过去
     return render(request,list_template,context)
+def ticket_tocollect(request):
+    context = {}
+    list_template = 'ticket/ticket_tocollect.html'
+    if request.method == 'POST':
+        feeform = TicketFeeForm()
+        index = request.POST['index']
+        ids = request.POST['ids']
+        selected_num = request.POST['selected_num']
+        selected_piaomian = request.POST['selected_piaomian']
+        title = '收款'
+        raw_data = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
+        prices = set([])
+        for t in raw_data:
+            prices.add(str(t.piaomianjiage))
+            # if str(t.piaomianjiage) in items:
+            #     items[str(t.piaomianjiage)].append(t.pk)
+            # else:
+            #     items[str(t.piaomianjiage)] = [t.pk]
+        #建立context字典，将值传递到相应页面
+        context = {
+            'data': raw_data,
+            'prices': prices,
+            'index': index,
+            'ids': ids,
+            'title': title,
+            'feeform': feeform,
+            'selected_num': selected_num,
+            'selected_piaomian': selected_piaomian,
+        }
+    print(context)
+    #跳转到相应页面，并将值传递过去
+    return render(request,list_template,context)
 
 def ticket_createorder(request):
     if request.method == 'POST':
         order = Order()
-        order.order_type = 1
+        order.order_type = int(request.POST['ordertype'])
         order.save()
         fees = json.loads(request.POST['fees'])
         for fee in fees:
             f = Fee()
             f.order = order
+            f.fee_type = order.order_type
             f.name = fee['name']
             f.money = float(fee['money'])
             f.yinhangka = Card.objects.get(pk=(fee['cardid']))
@@ -466,15 +499,28 @@ def ticket_createorder(request):
             order.fee_count = order.fee_count + 1
 
         ids = request.POST['ids']
-        Ticket.objects.filter(id__in=ids.split(',')).update(payorder=order)
+        if order.order_type == 1:
+            Ticket.objects.filter(id__in=ids.split(',')).update(pay_status =2,payorder=order,paytime=order.pub_date)
+        elif order.order_type == 2:
+            Ticket.objects.filter(id__in=ids.split(',')).update(sell_status = 4,sellorder=order,selltime=order.pub_date,maipiaoren = request.POST['maipiaoren'])
+
         tickets = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
         for t in tickets:
+
+            if order.order_type == 2:
+                t.maichulilv = request.POST['maichulilv'+str(t.piaomianjiage)]
+                t.maichujiage = request.POST['maichujiage'+str(t.piaomianjiage)]
+                t.save()
             order.ticket_count = order.ticket_count + 1
             order.ticket_sum = order.ticket_sum + t.piaomianjiage
         order.total_sum = order.ticket_sum + order.fee_sum
         order.payfee_sum = 0
         order.needpay_sum = order.total_sum - order.payfee_sum
         order.save()
+        if order.order_type == 1:
+            return redirect('ticket_payorder', pk=order.id)
+        elif order.order_type == 2:
+            return redirect('ticket_sellorder', pk=order.id)
 
         #建立context字典，将值传递到相应页面
     return redirect('ticket_payorder', pk=order.id)
@@ -503,7 +549,28 @@ def ticket_payorder(request,  pk):
 
             redirect('ticket_index',pk=pk)
     return render(request,list_template,locals())
+def ticket_sellorder(request,  pk):
+    order_ins = get_object_or_404(Order, pk=pk)
+    order = Order.objects.get(pk=pk)
+    ticket_data = Ticket.objects.filter(sellorder=pk).order_by('-goumairiqi')
+    fee_data = Fee.objects.filter(order=pk,fee_type=2).order_by('-pub_date')
+    payfee_data = Fee.objects.filter(order=pk,fee_type=4).order_by('-pub_date')
+    list_template = 'ticket/ticket_sellorder.html'
+    feeform = TicketFeeForm(request.POST or None)
+    if request.method == 'POST':
+        if feeform.is_valid():
+            instance = feeform.save(commit=False)
+            instance.order = order
+            instance.fee_type = 4
+            instance.save()
+            instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
+            order.payfee_count = order.payfee_count + 1
+            order.payfee_sum = order.payfee_sum + instance.money
+            order.needpay_sum = order.total_sum - order.payfee_sum
+            order.save()
 
+            redirect('ticket_index',pk=pk)
+    return render(request,list_template,locals())
 def ticket_import(request):
     context = {}
     # 如果form通过POST方法发送数据

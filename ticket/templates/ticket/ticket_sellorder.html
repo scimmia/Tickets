@@ -79,25 +79,25 @@
                         <th>相关银行卡</th>
                         </thead>
                         <!--表格内容-->
-                        <tbody>
+                        <tbody >
                         {% for i in fee_data %}
                             <tr>
-                                <td>{{ i.name }}</td>
-                                <td>
-                                    {% if i.money > 0 %}
-                                        <span class="label label-success">
-                                    {% else %}
-                                        <span class="label label-danger">
-                                    {% endif %}
-                                    {{ i.money }}</span></td>
-                                <td>
-                                    {% if i.yinhangka %}
-                                        <span class="label label-success">{{ i.yinhangka }}
-                                    {% else %}
-                                        <span class="label label-danger">无
-                                    {% endif %}
-                                    </span></td>
-                            </tr>
+                                        <td>{{ i.name }}</td>
+                                        <td>
+                                            {% if i.money > 0 %}
+                                                <span class="label label-success">
+                                            {% else %}
+                                                <span class="label label-danger">
+                                            {% endif %}
+                                            {{ i.money }}</span></td>
+                                        <td>
+                                            {% if i.yinhangka %}
+                                                <span class="label label-success">{{ i.yinhangka }}
+                                            {% else %}
+                                                <span class="label label-danger">无
+                                            {% endif %}
+                                            </span></td>
+                                    </tr>
 
                         {% endfor %}
                         </tbody>
@@ -107,43 +107,33 @@
             </div>
 
             <div class="col-xs-6 pull-right">
-                <h3><b>票据</b> <a>{{ order.ticket_count }}</a><b>张</b><b>合计票面价格</b> <a>{{ order.ticket_sum }}</a><b>元</b>
-                </h3>
+                <h3><b>票据</b> <a>{{ order.ticket_count }}</a><b>张</b><b>合计票面价格</b> <a>{{ order.ticket_sum }}</a><b>元</b></h3>
                 <h3><b>费用</b> <a>{{ order.fee_count }}</a><b>项</b><b>合计费用</b> <a>{{ order.fee_sum }}</a><b>元</b></h3>
                 <h3><b>总计</b> <a>{{ order.total_sum }}</a><b>元</b></h3>
-                <h3><b>已{% if order.order_type == 1 %}支付
-                {% elif order.order_type == 2 %}收取
-                {% endif %}</b> <a>{{ order.payfee_count }}</a><b>项</b><b>合计</b> <a>{{ order.payfee_sum }}</a><b>元</b>
-                </h3>
-                <h3><b>待{% if order.order_type == 1 %}支付
-                {% elif order.order_type == 2 %}收取
-                {% endif %}</b> <a>{{ order.needpay_sum }}</a><b>元</b></h3>
+                <h3><b>已支付</b> <a>{{ order.payfee_count }}</a><b>项</b><b>合计</b> <a>{{ order.payfee_sum }}</a><b>元</b></h3>
+                <h3><b>待支付</b> <a>{{ order.needpay_sum }}</a><b>元</b></h3>
             </div>
 
         </div>
         <div class="row">
-            <form method='POST' id="signupForm" action="" onsubmit="return check();">{% csrf_token %}
-                <div class="col-md-4">
+            <form method='POST' id="signupForm" action='' onsubmit="return check();">{% csrf_token %}
+            <div class="col-md-4">
 
-                    <div class="box box-danger">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">新增{% if order.order_type == 1 %}
-                                付款
-                            {% elif order.order_type == 2 %}
-                                收款
-                            {% endif %}：</h3>
-                        </div>
-                        <div class="box-body">
-                            {{ feeform | crispy }}
-                        </div>
-
-                        <button type="submit" class="btn btn-danger center-block" id="add_fee">
-                            添加
-                            <i class="ace-icon fa fa-cart-plus icon-on-right bigger-110"></i>
-                        </button>
+                <div class="box box-danger">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">新增付款：</h3>
+                    </div>
+                    <div class="box-body">
+                        {{ feeform | crispy }}
                     </div>
 
+                    <button type="submit" class="btn btn-danger center-block" id="add_fee">
+                        添加
+                        <i class="ace-icon fa fa-cart-plus icon-on-right bigger-110"></i>
+                    </button>
                 </div>
+
+            </div>
             </form>
             <div class="col-md-6">
                 <div>
@@ -155,25 +145,25 @@
                         <th>相关银行卡</th>
                         </thead>
                         <!--表格内容-->
-                        <tbody>
+                        <tbody >
                         {% for i in payfee_data %}
                             <tr>
-                                <td>{{ i.name }}</td>
-                                <td>
-                                    {% if i.money > 0 %}
-                                        <span class="label label-success">
-                                    {% else %}
-                                        <span class="label label-danger">
-                                    {% endif %}
-                                    {{ i.money }}</span></td>
-                                <td>
-                                    {% if i.yinhangka %}
-                                        <span class="label label-success">{{ i.yinhangka }}
-                                    {% else %}
-                                        <span class="label label-danger">无
-                                    {% endif %}
-                                    </span></td>
-                            </tr>
+                                        <td>{{ i.name }}</td>
+                                        <td>
+                                            {% if i.money > 0 %}
+                                                <span class="label label-success">
+                                            {% else %}
+                                                <span class="label label-danger">
+                                            {% endif %}
+                                            {{ i.money }}</span></td>
+                                        <td>
+                                            {% if i.yinhangka %}
+                                                <span class="label label-success">{{ i.yinhangka }}
+                                            {% else %}
+                                                <span class="label label-danger">无
+                                            {% endif %}
+                                            </span></td>
+                                    </tr>
 
                         {% endfor %}
                         </tbody>
@@ -255,8 +245,8 @@
                         cell.innerHTML = i + 1;
                     });
                 }).draw();
-            $('#id_money').attr("max", "{{ order.needpay_sum }}")
-            $('#id_money').attr("min", "0")
+        $('#id_money').attr("max","{{ order.needpay_sum }}")
+        $('#id_money').attr("min","0")
 
         });
     </script>
