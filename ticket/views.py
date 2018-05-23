@@ -328,6 +328,14 @@ def ticket_index(request,  pk):
         form.fields[m].disabled = True
     return render(request, 'ticket/ticket_index.html', locals())
 
+def get_ticketlists(col):
+    gys = Ticket.objects.values(col).annotate(Count('id'))
+    t = []
+    for g in gys:
+        list.insert(t,0,g[col])
+    return t
+
+
 #显示各列表信息
 @login_required
 def ticket_list(request):
@@ -371,6 +379,8 @@ def ticket_list(request):
     #建立context字典，将值传递到相应页面
     context = {
         'data': data_list,
+        'gongyingshang': get_ticketlists('gongyingshang'),
+        'maipiaoren': get_ticketlists('maipiaoren'),
         'query': query,
         'page_range': page_range,
         'count': count,
