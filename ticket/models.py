@@ -137,6 +137,8 @@ class Fee(models.Model):
         (2,u'付款订单'),
         (3,u'付款支付'),
         (4,u'收款收取'),
+        (5,u'付款费用'),
+        (6,u'收款费用'),
     )
     fee_type = models.IntegerField(
         u'费用类型',

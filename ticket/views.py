@@ -4,7 +4,7 @@ import os
 import uuid
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from django.shortcuts import render, redirect, get_object_or_404
 
 from django.contrib.auth import views
@@ -16,7 +16,7 @@ from django.template import loader
 from django.urls import reverse
 
 from ticket.filters import TicketFilter
-from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm
+from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm
 from ticket.models import Card, Fee, Ticket,Order, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport
 
 
@@ -540,45 +540,53 @@ def ticket_payorder(request,  pk):
     order = Order.objects.get(pk=pk)
     ticket_data = Ticket.objects.filter(payorder=pk).order_by('-goumairiqi')
     fee_data = Fee.objects.filter(order=pk,fee_type=1).order_by('-pub_date')
-    payfee_data = Fee.objects.filter(order=pk,fee_type=3).order_by('-pub_date')
+    payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=3)|Q(fee_type=5))).order_by('-pub_date')
     list_template = 'ticket/ticket_payorder.html'
-    feeform = TicketFeeForm(request.POST or None)
+    feeform = TicketOrderFeeForm(request.POST or None)
     # feeform.fields['money'].max_value = needpay_sum
     if request.method == 'POST':
         if feeform.is_valid():
             instance = feeform.save(commit=False)
             instance.order = order
-            instance.fee_type = 3
-            instance.save()
-            instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
-            order.payfee_count = order.payfee_count + 1
-            order.payfee_sum = order.payfee_sum + instance.money
-            order.needpay_sum = order.total_sum - order.payfee_sum
-            order.save()
+            if feeform.cleaned_data.get('isOrderFee'):
+                instance.fee_type = 5
+            else:
+                instance.fee_type = 3
+                instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
+                order.payfee_count = order.payfee_count + 1
+                order.payfee_sum = order.payfee_sum + instance.money
+                order.needpay_sum = order.total_sum - order.payfee_sum
+                order.save()
 
-            redirect('ticket_index',pk=pk)
+            instance.save()
+
+            redirect('ticket_payorder',pk=pk)
     return render(request,list_template,locals())
 def ticket_sellorder(request,  pk):
     order_ins = get_object_or_404(Order, pk=pk)
     order = Order.objects.get(pk=pk)
     ticket_data = Ticket.objects.filter(sellorder=pk).order_by('-goumairiqi')
     fee_data = Fee.objects.filter(order=pk,fee_type=2).order_by('-pub_date')
-    payfee_data = Fee.objects.filter(order=pk,fee_type=4).order_by('-pub_date')
+    payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=4)|Q(fee_type=6))).order_by('-pub_date')
     list_template = 'ticket/ticket_sellorder.html'
-    feeform = TicketFeeForm(request.POST or None)
+    feeform = TicketOrderFeeForm(request.POST or None)
     if request.method == 'POST':
         if feeform.is_valid():
             instance = feeform.save(commit=False)
             instance.order = order
+            if feeform.cleaned_data.get('isOrderFee'):
+                instance.fee_type = 6
+            else:
+                instance.fee_type = 4
+                instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
+                order.payfee_count = order.payfee_count + 1
+                order.payfee_sum = order.payfee_sum + instance.money
+                order.needpay_sum = order.total_sum - order.payfee_sum
+                order.save()
             instance.fee_type = 4
             instance.save()
-            instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
-            order.payfee_count = order.payfee_count + 1
-            order.payfee_sum = order.payfee_sum + instance.money
-            order.needpay_sum = order.total_sum - order.payfee_sum
-            order.save()
 
-            redirect('ticket_index',pk=pk)
+            redirect('ticket_sellorder',pk=pk)
     return render(request,list_template,locals())
 def ticket_import(request):
     context = {}

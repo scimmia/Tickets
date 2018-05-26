@@ -13,7 +13,7 @@
     <section class="content-header">
         <h1>
             票据
-            <small>{{ title }}订单</small>
+            <small>收款订单</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
@@ -110,8 +110,8 @@
                 <h3><b>票据</b> <a>{{ order.ticket_count }}</a><b>张</b><b>合计票面价格</b> <a>{{ order.ticket_sum }}</a><b>元</b></h3>
                 <h3><b>费用</b> <a>{{ order.fee_count }}</a><b>项</b><b>合计费用</b> <a>{{ order.fee_sum }}</a><b>元</b></h3>
                 <h3><b>总计</b> <a>{{ order.total_sum }}</a><b>元</b></h3>
-                <h3><b>已支付</b> <a>{{ order.payfee_count }}</a><b>项</b><b>合计</b> <a>{{ order.payfee_sum }}</a><b>元</b></h3>
-                <h3><b>待支付</b> <a>{{ order.needpay_sum }}</a><b>元</b></h3>
+                <h3><b>已收款</b> <a>{{ order.payfee_count }}</a><b>项</b><b>合计</b> <a>{{ order.payfee_sum }}</a><b>元</b></h3>
+                <h3><b>待收款</b> <a>{{ order.needpay_sum }}</a><b>元</b></h3>
             </div>
 
         </div>
@@ -121,7 +121,7 @@
 
                 <div class="box box-danger">
                     <div class="box-header with-border">
-                        <h3 class="box-title">新增付款：</h3>
+                        <h3 class="box-title">新增收款：</h3>
                     </div>
                     <div class="box-body">
                         {{ feeform | crispy }}
