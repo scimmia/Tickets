@@ -431,6 +431,22 @@ def ticket_needpay(request):
 def ticket_needcollect(request):
     return ticket_needselect(request,3)
 
+def ticket_orderlist(request,index):
+    #从根据不同的请求，来获取相应的数据,并跳转至相应页面
+    if index == 1:
+        list_template = 'ticket/ticket_payorders.html'
+    else:
+        list_template = 'ticket/ticket_sellorders.html'
+    raw_data = Order.objects.filter(order_type=index).order_by('-pub_date')
+    context = {
+        'data': raw_data,
+    }
+    return render(request,list_template,context)
+def ticket_payorders(request):
+    return ticket_orderlist(request,1)
+def ticket_sellorders(request):
+    return ticket_orderlist(request,2)
+
 def ticket_topay(request):
     context = {}
     list_template = 'ticket/ticket_topay.html'
