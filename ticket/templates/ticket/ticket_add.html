@@ -41,13 +41,13 @@
                             <h3 class="box-title">基本信息</h3>
                         </div>
                         <div class="box-body">
-                            {{ form.t_status |as_crispy_field}}
-                            {{ form.qianpaipiaohao |as_crispy_field}}
-                            {{ form.piaohao |as_crispy_field}}
-                            {{ form.chupiaohang |as_crispy_field}}
-                            {{ form.chupiaoriqi |as_crispy_field}}
-                            {{ form.daoqiriqi |as_crispy_field}}
-                            {{ form.piaomianjiage |as_crispy_field}}
+                            {{ form.t_status |as_crispy_field }}
+                            {{ form.qianpaipiaohao |as_crispy_field }}
+                            {{ form.piaohao |as_crispy_field }}
+                            {{ form.chupiaohang |as_crispy_field }}
+                            {{ form.chupiaoriqi |as_crispy_field }}
+                            {{ form.daoqiriqi |as_crispy_field }}
+                            {{ form.piaomianjiage |as_crispy_field }}
                         </div>
                     </div>
 
@@ -59,19 +59,28 @@
                             <h3 class="box-title">买入信息</h3>
                         </div>
                         <div class="box-body">
-                             {{ form.pay_status |as_crispy_field}}
-                             {{ form.gongyingshang |as_crispy_field}}
-                             {{ form.gouruhuilv |as_crispy_field}}
-                             {{ form.gourujiage |as_crispy_field}}
-                             {{ form.gouruzijinchi |as_crispy_field}}
-                             {{ form.gourucard |as_crispy_field}}
+                            {{ form.gongyingshang |as_crispy_field }}
+                            {{ form.gouruhuilv |as_crispy_field }}
+                            <div id="div_id_gourujiage" class="form-group">
+                                <label for="id_gourujiage" class="control-label  requiredField">
+                                    购入价格<span class="asteriskField">*</span>
+                                </label>
+                                <div class="controls ">
+                                    <input type="number" name="gourujiageb" value="0" step="any"
+                                           class="numberinput form-control" required="" disabled="" id="id_gourujiageb">
+                                    <input type="number" name="gourujiage" value="0" step="any" style="display: none;"
+                                           class="numberinput form-control" required="" id="id_gourujiage">
+                                </div>
+                            </div>
+                            {{ form.gouruzijinchi |as_crispy_field }}
+                            {{ form.gourucard |as_crispy_field }}
 
                         </div>
 
                     </div>
                     <div class="box box-danger">
                         <div class="box-body">
-                             {{ form.fenshu |as_crispy_field}}
+                            {{ form.fenshu |as_crispy_field }}
 
                         </div>
                         <div class="box-footer">
@@ -84,29 +93,89 @@
                 </div>
                 <!--/.col (left) -->
                 <!-- right column -->
-                <div class="col-md-4">
-                    <!-- Horizontal Form -->
-                    <div class="box box-info" id="sellinfo">
-                        <div class="box-header with-border">
-                            <h3 class="box-title">卖出信息</h3>
-                        </div>
-                        <!-- /.box-header -->
-                        <!-- form start -->
-                        <div class="box-body">
-                             {{ form.sell_status |as_crispy_field}}
-                             {{ form.maipiaoren |as_crispy_field}}
-                             {{ form.maichulilv |as_crispy_field}}
-                             {{ form.maichujiage |as_crispy_field}}
-                             {{ form.maichucard |as_crispy_field}}
-                             {{ form.lirun |as_crispy_field}}
-                        </div>
-                        <!-- /.box-body -->
-                        <!-- /.box-footer -->
-                    </div>
-                    <!-- /.box -->
-                </div>
                 <!--/.col (right) -->
             </form>
+            <div class="col-md-4">
+                <div class="box box-danger">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">贴现计算器</h3>
+                    </div>
+                    <div class="box-body">
+
+                        <div class="col-md-12">
+                            <span class="destit">票面金额 (万元)</span>
+                            <div class="inp-box">
+                                <input name="je" class="textinput textInput form-control" value=""
+                                       type="number">
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="display: block;">
+                            <div class="li-inpbox">
+                                <span class="destit">月利率 (‰)</span>
+                                <div class="inp-box">
+                                    <input id="txlvi" name="txlv" onblur="getVal(this.value,'m')"
+                                           class="textinput textInput form-control"
+                                           value="" type="number">
+                                </div>
+                            </div>
+                            <div class="li-inpbox li-lastbox">
+                                <span class="destit">年利率 (%)</span>
+                                <div class="inp-box">
+                                    <input id="yxlvi" name="yxlv" onblur="getVal(this.value,'y')"
+                                           class="textinput textInput form-control"
+                                           value="" type="number">
+                                </div>
+                            </div>
+                            <div class="li-inpbox">
+                                <span class="destit">贴现日期</span>
+                                <div class="inp-box">
+                                    <input id="datepicker" name="outpjdate"
+                                           class="textinput textInput form-control dateinput"
+                                           value="" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <span class="destit">到期日期</span>
+                                <div class="inp-box">
+                                    <input id="pjendpicker" name="pjenddate"
+                                           class="textinput textInput form-control dateinput"
+                                           value="" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <span class="destit">调整天数 (天)</span>
+                                <div class="inp-box">
+                                    <input name="tzts" class="textinput textInput form-control" value=""
+                                           type="number">
+                                </div>
+                            </div>
+                            <input id="lilvbtn" class="btn btn-primary" value="按利率计算" onclick="calctxlxone()"
+                                   type="button">
+
+                        </div>
+                        <div class="col-md-6" style="display: block;">
+                            <div class="form-group">
+                                <span class="destit">每10万扣费(元)</span>
+                                <div class="controls">
+                                    <input name="everyten" class="textinput textInput form-control" value=""
+                                           type="number">
+                                </div>
+                            </div>
+                            <input id="tiexianbtn" class="btn btn-success" value="按贴现计算" onclick="calctxlxoneb()"
+                                   type="button">
+
+                        </div>
+                    </div>
+                    <div class="box-footer ">
+                        <h5>计息天数:<a id="jxtsd"></a>天</h5>
+                        <h5>贴现利息: <a id="txlxd"></a>元</h5>
+                        <h5>贴现金额: <a id="jined"></a>元</h5>
+                        <input id="exportbtn" class="btn btn-success" value="填入" onclick="exportbtn()" type="button">
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+
+            </div>
         </div>
     </section>
 
@@ -135,9 +204,113 @@
                 format: 'yyyy/mm/dd',
                 language: 'cn',           //语言
             });
-
+            $("#id_t_status option[value='3']").remove();
+            $("#id_gourucard").attr("required", "true");
+            $("#id_gouruzijinchi").change(function () {
+                if ($("#id_gouruzijinchi").is(':checked')) {
+                    $("#div_id_gourucard").hide()
+                    $("#id_gourucard").val("")
+                    $("#id_gourucard").removeAttr('required');
+                } else {
+                    $("#div_id_gourucard").show()
+                    $("#id_gourucard").prop("required", "true");
+                }
+            });
         });
 
+        function exportbtn() {
+            $("#id_piaomianjiage").val($("input[name='je']").val() * 10000);
+            $("#id_gourujiage").val($("#jined").text());
+            $("#id_gourujiageb").val($("#jined").text());
+        }
+
+        function calctxlxoneb() {
+            var je = $("input[name='je']").val();
+            var everyten = $("input[name='everyten']").val();
+            var ts = 0;
+            var txlx = Math.round(everyten * je) / 10;
+            var jine = Math.round(je * 10000 - txlx);
+            if (isNaN(txlx))
+                txlx = 0;
+            if (isNaN(jine))
+                jine = 0;
+            $("#jxtsd").text(ts);
+            $("#txlxd").text(txlx);
+            $("#jined").text(jine);
+            $("#id_gourujiage").val(jine);
+        }
+
+        function calctxlxone() {
+            var je = $("input[name='je']").val();
+            var txlv = $("input[name='txlv']").val();
+            var pjenddate = $("input[name='pjenddate']").val();
+            var outpjdate = $("input[name='outpjdate']").val();
+            var dqr = new Date((pjenddate.replace(/-/g, '/')));
+            var txr = new Date((outpjdate.replace(/-/g, '/')));
+            var tzts = parseInt($("input[name='tzts']").val());
+            if (isNaN(tzts))
+                tzts = 0;
+            //alert(tzts);
+            var ts = Math.floor(dqr.getTime() / (24 * 60 * 60 * 1000)) - Math.floor(txr.getTime() / (24 * 60 * 60 * 1000)) + tzts;
+            var txlx = Math.round(je * txlv * ts / 3 * 100) / 100;
+            var jine = Math.round(je * 1000000 - je * txlv * ts / 3 * 100) / 100;
+            if (isNaN(ts))
+                ts = 0;
+            if (isNaN(txlx))
+                txlx = 0;
+            if (isNaN(jine))
+                jine = 0;
+            $("#jxtsd").text(ts);
+            $("#txlxd").text(txlx);
+            $("#jined").text(jine);
+            $("#id_gourujiage").val(jine);
+        }
+
+        function numDiv(num1, num2) {
+            var baseNum1 = 0, baseNum2 = 0;
+            var baseNum3, baseNum4;
+            try {
+                baseNum1 = num1.toString().split(".")[1].length;
+            } catch (e) {
+                baseNum1 = 0;
+            }
+            try {
+                baseNum2 = num2.toString().split(".")[1].length;
+            } catch (e) {
+                baseNum2 = 0;
+            }
+            with (Math) {
+                baseNum3 = Number(num1.toString().replace(".", ""));
+                baseNum4 = Number(num2.toString().replace(".", ""));
+                return (baseNum3 / baseNum4) * pow(10, baseNum2 - baseNum1);
+            }
+        }
+
+        function numMulti(num1, num2) {
+            var baseNum = 0;
+            try {
+                baseNum += num1.toString().split(".")[1].length;
+            } catch (e) {
+            }
+            try {
+                baseNum += num2.toString().split(".")[1].length;
+            } catch (e) {
+            }
+            return Number(num1.toString().replace(".", "")) * Number(num2.toString().replace(".", "")) / Math.pow(10, baseNum);
+        }
+
+        function getVal(val, type) {
+            var vals = parseFloat(val);
+            if (type == 'm' && !isNaN(vals)) {
+                var mlv = numMulti(val, 1.2);
+                $("#yxlvi").val(mlv.toFixed(5));
+            }
+            if (type == 'y' && !isNaN(vals)) {
+                var ylv = numDiv(val, 1.2);
+                $("#txlvi").val(ylv.toFixed(4));
+            }
+            return true;
+        }
     </script>
 
 {% endblock %}

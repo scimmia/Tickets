@@ -154,29 +154,26 @@ def card_fee(card_pk,money,name):
 #增加
 def ticket_add(request):
     form = TicketForm(request.POST or None)
-    form.fields['gourujiage'].disabled = True  # text input
-    form.fields['maichujiage'].disabled = True  # text input
-    form.fields['lirun'].disabled = True  # text input
+    # if request.method == 'GET':
+    #     form.fields['gourujiage'].disabled = True  # text input
 
     #从TaskForm获取相关信息
     if form.is_valid():
-        if ((not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard'))
-                or (form.cleaned_data.get('gouruzijinchi') and form.cleaned_data.get('gourucard'))):
-            message = u'请选择“资金池购入”或“购入卡”中的一项'
-            return render(request, 'ticket/ticket_add.html',locals())
-        elif (form.cleaned_data.get('t_status') == 3):
-            if not form.cleaned_data.get('maichucard'):
-                message = u'请选择“卖出卡”'
-                return render(request, 'ticket/ticket_add.html', locals())
-            elif not form.cleaned_data.get('maipiaoren'):
-                message = u'请填写“买票人”'
-                return render(request, 'ticket/ticket_add.html',locals())
+        # if ((not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard'))
+        #         or (form.cleaned_data.get('gouruzijinchi') and form.cleaned_data.get('gourucard'))):
+        #     message = u'请选择“资金池购入”或“购入卡”中的一项'
+        #     return render(request, 'ticket/ticket_add.html',locals())
+        # elif (form.cleaned_data.get('t_status') == 3):
+        #     if not form.cleaned_data.get('maichucard'):
+        #         message = u'请选择“卖出卡”'
+        #         return render(request, 'ticket/ticket_add.html', locals())
+        #     elif not form.cleaned_data.get('maipiaoren'):
+        #         message = u'请填写“买票人”'
+        #         return render(request, 'ticket/ticket_add.html',locals())
         times = 1
         if form.cleaned_data.get('fenshu') and form.cleaned_data.get('fenshu')>1:
             times = form.cleaned_data.get('fenshu')
         instance = form.save(commit=False)
-        instance.gourujiage = instance.piaomianjiage * (1 - instance.gouruhuilv)
-        instance.maichujiage = instance.piaomianjiage * (1 - instance.maichulilv)
         counter = 1
         while counter <= times:
             counter += 1
