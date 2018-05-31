@@ -601,13 +601,14 @@ def ticket_payorder(request,  pk):
                 instance.fee_type = 5
             else:
                 instance.fee_type = 3
-                instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
                 order.payfee_count = order.payfee_count + 1
                 order.payfee_sum = order.payfee_sum + instance.money
                 order.needpay_sum = order.total_sum - order.payfee_sum
                 order.save()
 
             instance.save()
+            instance.yinhangka.money = instance.yinhangka.money - instance.money
+            instance.yinhangka.save()
 
             redirect('ticket_payorder',pk=pk)
     return render(request,list_template,locals())
@@ -625,15 +626,16 @@ def ticket_sellorder(request,  pk):
             instance.order = order
             if feeform.cleaned_data.get('isOrderFee'):
                 instance.fee_type = 6
+                instance.yinhangka.money = instance.yinhangka.money - instance.money
             else:
                 instance.fee_type = 4
-                instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
+                instance.yinhangka.money = instance.yinhangka.money + instance.money
                 order.payfee_count = order.payfee_count + 1
                 order.payfee_sum = order.payfee_sum + instance.money
                 order.needpay_sum = order.total_sum - order.payfee_sum
                 order.save()
-            instance.fee_type = 4
             instance.save()
+            instance.yinhangka.save()
 
             redirect('ticket_sellorder',pk=pk)
     return render(request,list_template,locals())

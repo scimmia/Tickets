@@ -149,11 +149,11 @@
                         {% for i in payfee_data %}
                             <tr>
                                         <td>{{ i.name }}</td>
-                                        <td>
-                                            {% if i.money > 0 %}
-                                                <span class="label label-success">
+                                        <td><span>
+                                            {% if i.fee_type == 4 %}
+                                                +
                                             {% else %}
-                                                <span class="label label-danger">
+                                                -
                                             {% endif %}
                                             {{ i.money }}</span></td>
                                         <td>

@@ -159,13 +159,7 @@
                         {% for i in payfee_data %}
                             <tr>
                                 <td>{{ i.name }}</td>
-                                <td>
-                                    {% if i.money > 0 %}
-                                        <span class="label label-success">
-                                    {% else %}
-                                        <span class="label label-danger">
-                                    {% endif %}
-                                    {{ i.money }}</span></td>
+                                <td><span>-{{ i.money }}</span></td>
                                 <td>
                                     {% if i.yinhangka %}
                                         <span class="label label-success">{{ i.yinhangka }}
