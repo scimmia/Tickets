@@ -12,89 +12,109 @@
 {% block content %}
     <!-- Content Header (Page header) -->
     <section class="content-header">
-      <h1>
-        仪表盘
-        <small>dashboard</small>
-      </h1>
-      <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
-        <li class="active">仪表盘</li>
-      </ol>
+        <h1>
+            概览
+            <small></small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
+            <li class="active">仪表盘</li>
+        </ol>
     </section>
 
     <!-- Main content -->
     <section class="content">
-    <div class="row">
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-aqua">
-            <div class="inner">
-              <h3>150</h3>
-
-              <p>New Orders</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">来票</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <table class="table table-bordered table-striped">
+                            <tbody>
+                            <tr>
+                                <th colspan="2">库存</th>
+                                <th colspan="2">在池</th>
+                            </tr>
+                            <tr>
+                                <th>电票</th>
+                                <th>纸票</th>
+                                <th>电票</th>
+                                <th>纸票</th>
+                            </tr>
+                            <tr>
+                                <td>{{ kudianc }}张，{{ kudians }}元</td>
+                                <td>{{ kuzhic }}张，{{ kuzhis }}元</td>
+                                <td>{{ chidianc }}张，{{ chidians }}元</td>
+                                <td>{{ chizhic }}张，{{ chizhis }}元</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="center">{{ kuc }}张，{{ kus }}元</td>
+                                <td colspan="2" align="center">{{ chic }}张，{{ chis }}元</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" align="center">{{ allc }}张，{{ alls }}元</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="icon">
-              <i class="fa fa-shopping-cart"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
         </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-green">
-            <div class="inner">
-              <h3>53<sup style="font-size: 20px">%</sup></h3>
-
-              <p>Bounce Rate</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">增幅</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <table class="table table-bordered table-striped">
+                            <tbody>
+                            <tr>
+                                <th></th>
+                                <th>今日</th>
+                                <th>前日</th>
+                                <th>增幅</th>
+                            </tr>
+                            <tr>
+                                <th>资产</th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th>现金</th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th>存票</th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th>应收款</th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th>应付款</th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="icon">
-              <i class="ion ion-stats-bars"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
         </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-yellow">
-            <div class="inner">
-              <h3>44</h3>
-
-              <p>User Registrations</p>
-            </div>
-            <div class="icon">
-              <i class="ion ion-person-add"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-        </div>
-        <!-- ./col -->
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-red">
-            <div class="inner">
-              <h3>65</h3>
-
-              <p>Unique Visitors</p>
-            </div>
-            <div class="icon">
-              <i class="ion ion-pie-graph"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-        </div>
-        <!-- ./col -->
-      </div>
-
     </section>
     <!-- /.content -->
 
@@ -106,146 +126,144 @@
 
     <script type="text/javascript">
 
-    // 顶部服务器状态百分率圆图
-    $(function () {
-        /* jQueryKnob */
+        // 顶部服务器状态百分率圆图
+        $(function () {
+            /* jQueryKnob */
 
-        $(".knob").knob({
-             /*change : function (value) {
-       //console.log("change : " + value);
-       },
-       release : function (value) {
-       console.log("release : " + value);
-       },
-       cancel : function () {
-       console.log("cancel : " + this.value);
-       },*/
-      draw: function () {
-             // "tron" case
-        if (this.$.data(
+            $(".knob").knob({
+                /*change : function (value) {
+          //console.log("change : " + value);
+          },
+          release : function (value) {
+          console.log("release : " + value);
+          },
+          cancel : function () {
+          console.log("cancel : " + this.value);
+          },*/
+                draw: function () {
+                    // "tron" case
+                    if (this.$.data(
+                        'skin') == 'tron'
+                    ) {
 
-                'skin') == 'tron'
-                ) {
+                        var a = this.angle(this.cv)  // Angle
+                            , sa = this.startAngle          // Previous start angle
+                            , sat = this.startAngle         // Start angle
+                            , ea                            // Previous end angle
+                            , eat = sat + a                 // End angle
+                            , r = true;
 
-          var a = this.angle(this.
+                        this.g.lineWidth = this.lineWidth;
 
-                    cv)  // Angle
-              , sa = this.
-                            startAngle          // Previous start angle
-              , sat = this.startAngle         // Start angle
-              , ea                            // Previous end angle
-              , eat = sat + a                 // End angle
-              , r = true;
+                        this.o.cursor
+                        && (sat = eat - 0.3)
+                        && (eat = eat + 0.3);
 
-          this.g.lineWidth = this.lineWidth;
-
-          this.o.cursor
-          && (sat = eat - 0.3)
-          && (eat = eat + 0.3);
-
-          if (this.o.displayPrevious) {
-            ea = this.startAngle + this.angle(this.value);
-            this.o.cursor
-            && (sa = ea - 0.3)
-            && (ea = ea + 0.3);
-            this.g.beginPath();
-            this.g.strokeStyle = this.previousColor;
-            this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sa, ea, false);
-            this.g.stroke();
-          }
-
-          this.g.beginPath();
-          this.g.strokeStyle = r ? this.o.fgColor : this.fgColor;
-          this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false);
-          this.g.stroke();
-
-          this.g.lineWidth = 2;
-          this.g.beginPath();
-          this.g.strokeStyle = this.o.fgColor;
-          this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
-          this.g.stroke();
-
-          return false;
-        }
-      }
-    });
-    /* END JQUERY KNOB */
-    });
-
-    //不同状态资产数量统计 柱状图
-    $(function () {
-        // 基于准备好的dom，初始化echarts实例
-        var myChart = echarts.init(document.getElementById('barChart'));
-
-        // 指定图表的配置项和数据
-        var option = {
-            color: ['#3398DB'],
-            title: {
-                text: '数量'
-            },
-            tooltip: {},
-            legend: { data:['']
-            },
-            xAxis: {
-                data: ["在线", "下线","故障","备用","未知"] },
-            yAxis: {},
-            series:
-                [{
-                name: '数量',
-                type: 'bar',
-                barWidth: '50%',
-                data: [{{ upline }}, {{ offline }}, {{ breakdown }}, {{ backup }}, {{ unknown }}]
-            }]
-        };
-            // 使用刚指定的配置项和数据显示图表。
-            myChart.setOption(option);
-    });
-
-    //资产类型数量统计 饼图
-    $(function () {
-        // 基于准备好的dom，初始化echarts实例
-        var myChart = echarts.init(document.getElementById('donutChart'));
-
-        // 指定图表的配置项和数据
-        option = {
-            title : {
-                x:'center'
-            },
-            tooltip : {
-                trigger: 'item',
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
-            },
-            legend: {
-                orient: 'vertical',
-                left: 'left',
-                data: ['服务器','网络设备','存储设备','安全设备','软件资产']
-            },
-            series : [
-                {
-                    name: '资产类型',
-                    type: 'pie',
-                    radius : '55%',
-                    center: ['50%', '60%'],
-                    data:[
-                        {value:{{ server_number }}, name:'服务器'},
-                        {value:{{ networkdevice_number }}, name:'网络设备'},
-                        {value:{{ storagedevice_number }}, name:'存储设备'},
-                        {value:{{ securitydevice_number }}, name:'安全设备'},
-                        {value:{{ software_number }}, name:'软件资产'}
-                    ],
-                    itemStyle: {
-                        emphasis: {
-                            shadowBlur: 10,
-                            shadowOffsetX: 0,
-                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        if (this.o.displayPrevious) {
+                            ea = this.startAngle + this.angle(this.value);
+                            this.o.cursor
+                            && (sa = ea - 0.3)
+                            && (ea = ea + 0.3);
+                            this.g.beginPath();
+                            this.g.strokeStyle = this.previousColor;
+                            this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sa, ea, false);
+                            this.g.stroke();
                         }
+
+                        this.g.beginPath();
+                        this.g.strokeStyle = r ? this.o.fgColor : this.fgColor;
+                        this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false);
+                        this.g.stroke();
+
+                        this.g.lineWidth = 2;
+                        this.g.beginPath();
+                        this.g.strokeStyle = this.o.fgColor;
+                        this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
+                        this.g.stroke();
+
+                        return false;
                     }
                 }
-            ]
-        };
+            });
+            /* END JQUERY KNOB */
+        });
+
+        //不同状态资产数量统计 柱状图
+        $(function () {
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('barChart'));
+
+            // 指定图表的配置项和数据
+            var option = {
+                color: ['#3398DB'],
+                title: {
+                    text: '数量'
+                },
+                tooltip: {},
+                legend: {
+                    data: ['']
+                },
+                xAxis: {
+                    data: ["在线", "下线", "故障", "备用", "未知"]
+                },
+                yAxis: {},
+                series:
+                    [{
+                        name: '数量',
+                        type: 'bar',
+                        barWidth: '50%',
+                        data: [{{ upline }}, {{ offline }}, {{ breakdown }}, {{ backup }}, {{ unknown }}]
+                    }]
+            };
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
-    });
+        });
+
+        //资产类型数量统计 饼图
+        $(function () {
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('donutChart'));
+
+            // 指定图表的配置项和数据
+            option = {
+                title: {
+                    x: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    data: ['服务器', '网络设备', '存储设备', '安全设备', '软件资产']
+                },
+                series: [
+                    {
+                        name: '资产类型',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['50%', '60%'],
+                        data: [
+                            {value:{{ server_number }}, name: '服务器'},
+                            {value:{{ networkdevice_number }}, name: '网络设备'},
+                            {value:{{ storagedevice_number }}, name: '存储设备'},
+                            {value:{{ securitydevice_number }}, name: '安全设备'},
+                            {value:{{ software_number }}, name: '软件资产'}
+                        ],
+                        itemStyle: {
+                            emphasis: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        });
 
     </script>
 

@@ -22,6 +22,42 @@ from ticket.models import Card, Fee, Ticket,Order, StoreFee, PoolFee, Pool, Inpo
 
 @login_required
 def dashboard(request):
+    ts = Ticket.objects.values('t_status','t_type').annotate(t_count = Count('id'),sum_money=Sum('piaomianjiage'))
+    kudianc = 0
+    kudians = 0
+    kuzhic = 0
+    kuzhis = 0
+    chidianc = 0
+    chidians = 0
+    chizhic = 0
+    chizhis = 0
+    for t in ts:
+        if t['t_status'] == 1:
+            if t['t_type'] == 1:
+                kuzhic = t['t_count']
+                kuzhis = t['sum_money']
+                pass
+            elif t['t_type'] == 2:
+                kudianc = t['t_count']
+                kudians = t['sum_money']
+                pass
+        elif t['t_status'] == 5:
+            if t['t_type'] == 1:
+                chizhic = t['t_count']
+                chizhis = t['sum_money']
+                pass
+            elif t['t_type'] == 2:
+                chidianc = t['t_count']
+                chidians = t['sum_money']
+                pass
+        pass
+    kuc = kudianc + kuzhic
+    kus = kudians + kuzhis
+    chic = chidianc + chizhic
+    chis = chidians + chizhis
+    allc = kuc + chic
+    alls = kus + chis
+    print(ts)
     return render(request, 'ticket\dashboard.html', locals())
 
 #用户登陆选项，所有的函数将会返回一个template_response的实例，用来描绘页面，同时你也可以在return之前增加一些特定的功能

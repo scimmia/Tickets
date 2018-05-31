@@ -57,9 +57,18 @@ class Ticket(models.Model):
         (5,u'入池'),
         (3, u'卖出'),
     )
+    TICKET_TYPES= (
+        (1,u'纸票'),
+        (2,u'电票'),
+    )
     t_status = models.IntegerField(
         u'状态',
         choices=TICKET_STATUS,
+        default=1,
+    )
+    t_type = models.IntegerField(
+        u'类型',
+        choices=TICKET_TYPES,
         default=1,
     )
     goumairiqi = models.DateTimeField(u'购买日期', auto_now_add=True)
@@ -68,7 +77,7 @@ class Ticket(models.Model):
     chupiaohang = models.CharField(u'出票行', max_length=100)
     chupiaoriqi = models.DateField(u'出票日期', )
     daoqiriqi = models.DateField(u'到期日期', )
-    piaomianjiage = models.FloatField(u'票面价格', default=0)
+    piaomianjiage = models.FloatField(u'票面价格(元)', default=0)
     gouruhuilv = models.FloatField(u'购入利率', default=0)
     gourujiage = models.FloatField(u'购入价格', default=0)
     gouruzijinchi = models.BooleanField(u'资金池购入', default=False)
