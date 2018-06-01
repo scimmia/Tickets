@@ -42,6 +42,7 @@
                         </div>
                         <div class="box-body">
                             {{ form.t_status |as_crispy_field }}
+                            {{ form.t_type |as_crispy_field }}
                             {{ form.qianpaipiaohao |as_crispy_field }}
                             {{ form.piaohao |as_crispy_field }}
                             {{ form.chupiaohang |as_crispy_field }}
@@ -60,7 +61,6 @@
                         </div>
                         <div class="box-body">
                             {{ form.gongyingshang |as_crispy_field }}
-                            {{ form.gouruhuilv |as_crispy_field }}
                             <div id="div_id_gourujiage" class="form-group">
                                 <label for="id_gourujiage" class="control-label  requiredField">
                                     购入价格<span class="asteriskField">*</span>

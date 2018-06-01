@@ -25,7 +25,7 @@ class Order(models.Model):
         choices=ORDER_TYPE,
         default=1,
     )
-    money = models.FloatField(u'金额', default=0)
+    money = models.FloatField(u'合计应收付金额', default=0)
     ticket_sum = models.FloatField(u'合计票面价格', default=0)
     ticket_count = models.IntegerField(u'票据数目', default=0)
     fee_sum = models.FloatField(u'合计费用金额', default=0)
