@@ -149,6 +149,13 @@
                                            type="number">
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <span class="destit">每十万元手续费`(元)</span>
+                                <div class="inp-box">
+                                    <input name="sxf" class="textinput textInput form-control" value="0"
+                                           type="number">
+                                </div>
+                            </div>
                             <input id="lilvbtn" class="btn btn-primary" value="按利率计算" onclick="calctxlxone()"
                                    type="button">
 
@@ -248,12 +255,13 @@
             var dqr = new Date((pjenddate.replace(/-/g, '/')));
             var txr = new Date((outpjdate.replace(/-/g, '/')));
             var tzts = parseInt($("input[name='tzts']").val());
+            var sxf = parseInt($("input[name='sxf']").val());
             if (isNaN(tzts))
                 tzts = 0;
             //alert(tzts);
             var ts = Math.floor(dqr.getTime() / (24 * 60 * 60 * 1000)) - Math.floor(txr.getTime() / (24 * 60 * 60 * 1000)) + tzts;
-            var txlx = Math.round(je * txlv * ts / 3 * 100) / 100;
-            var jine = Math.round(je * 1000000 - je * txlv * ts / 3 * 100) / 100;
+            var txlx = Math.round(je * txlv * ts / 3 * 100) / 100 + je*sxf/10;
+            var jine = Math.round(je * 1000000 - je * txlv * ts / 3 * 100) / 100 - je*sxf/10;
             if (isNaN(ts))
                 ts = 0;
             if (isNaN(txlx))
