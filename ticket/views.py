@@ -489,6 +489,7 @@ def ticket_topay(request):
         ids = request.POST['ids']
         selected_num = request.POST['selected_num']
         selected_piaomian = request.POST['selected_piaomian']
+        selected_real = request.POST['selected_real']
         if index == '1':
             title = '付款'
         else:
@@ -503,6 +504,7 @@ def ticket_topay(request):
             'feeform': feeform,
             'selected_num': selected_num,
             'selected_piaomian': selected_piaomian,
+            'selected_real': selected_real,
         }
     print(context)
     #跳转到相应页面，并将值传递过去
@@ -516,6 +518,7 @@ def ticket_tocollect(request):
         ids = request.POST['ids']
         selected_num = request.POST['selected_num']
         selected_piaomian = request.POST['selected_piaomian']
+        selected_real = request.POST['selected_real']
         title = '收款'
         raw_data = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
         prices = set([])
@@ -535,6 +538,7 @@ def ticket_tocollect(request):
             'feeform': feeform,
             'selected_num': selected_num,
             'selected_piaomian': selected_piaomian,
+            'selected_real': selected_real,
         }
     print(context)
     #跳转到相应页面，并将值传递过去
@@ -565,13 +569,15 @@ def ticket_createorder(request):
 
         tickets = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
         for t in tickets:
-            if order.order_type == 2:
-                t.maichulilv = request.POST['maichulilv'+str(t.piaomianjiage)]
-                t.maichujiage = request.POST['maichujiage'+str(t.piaomianjiage)]
-                t.save()
             order.ticket_count = order.ticket_count + 1
             order.ticket_sum = order.ticket_sum + t.piaomianjiage
-        order.total_sum = order.ticket_sum + order.fee_sum
+            if order.order_type == 1:
+                order.money = order.money + t.gourujiage
+            elif order.order_type == 2:
+                t.maichujiage = request.POST['maichujiage'+str(t.piaomianjiage)]
+                t.save()
+                order.money = order.money + int(request.POST['maichujiage'+str(t.piaomianjiage)])
+        order.total_sum = order.money + order.fee_sum
         order.payfee_sum = 0
         order.needpay_sum = order.total_sum - order.payfee_sum
         order.save()

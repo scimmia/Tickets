@@ -15,11 +15,12 @@
             <small>收款列表</small>
         </h1>
         <ol class="breadcrumb">
-            <li>        <!--最后一列作为添加数据按钮-->
-                <a class="blue" href="{% url 'ticket_needcollect' %}">
-                    <i class="ace-icon fa fa-search-plus bigger-130"></i>
+             <a class="blue" href="{% url 'ticket_needcollect' %}">
+                <button type="submit" class="btn btn-warning center-block" id="all_checked">
                     新建收款
-                </a></li>
+                    <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+                </button>
+            </a>
         </ol>
     </section>
 
@@ -33,9 +34,9 @@
                     <!--表格头部-->
                     <th>添加日期</th>
                     <th>合计票面价格</th>
-                    <th>合计费用金额</th>
-                    <th>总金额</th>
-                    <th>已支付金额</th>
+                    <th>合计应收款金额</th>
+{#                    <th>总金额</th>#}
+                    <th>已收取金额</th>
                     <th>剩余金额</th>
                     <th>完成状态</th>
                     </thead>
@@ -47,8 +48,8 @@
                                 {{ item.pub_date }}
                             </a></td>
                             <td>{{ item.ticket_sum }}</td>
-                            <td>{{ item.fee_sum }}</td>
-                            <td>{{ item.total_sum }}</td>
+                            <td>{{ item.money }}</td>
+{#                            <td>{{ item.total_sum }}</td>#}
                             <td>{{ item.payfee_sum }}</td>
                             <td>{{ item.needpay_sum }}</td>
                             <td>
