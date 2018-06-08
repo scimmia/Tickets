@@ -357,24 +357,26 @@ def ticket_list(request):
         if 'all_tostore' in request.POST.keys():
             print('all_tostore')
             ids = request.POST['ids']
-            tickets = Ticket.objects.filter(id__in=ids.split(','))
-            for t in tickets:
-                if t.t_status == 5:
-                    t.t_status = 1
-                    t.save()
-                    ticket_outstore(t.pk)
-                    ticket_inpool(t.pk)
+            if len(ids) > 0:
+                tickets = Ticket.objects.filter(id__in=ids.split(','))
+                for t in tickets:
+                    if t.t_status == 5:
+                        t.t_status = 1
+                        t.save()
+                        ticket_outstore(t.pk)
+                        ticket_inpool(t.pk)
             pass
         elif 'all_topool' in request.POST.keys():
             print('all_topool')
             ids = request.POST['ids']
-            tickets = Ticket.objects.filter(id__in=ids.split(','))
-            for t in tickets:
-                if t.t_status == 1:
-                    t.t_status = 5
-                    t.save()
-                    ticket_outpool(t.pk)
-                    ticket_instore(t.pk)
+            if len(ids) > 0:
+                tickets = Ticket.objects.filter(id__in=ids.split(','))
+                for t in tickets:
+                    if t.t_status == 1:
+                        t.t_status = 5
+                        t.save()
+                        ticket_outpool(t.pk)
+                        ticket_instore(t.pk)
             pass
     # 将原先的data更名为raw_data
     raw_data = Ticket.objects.all().order_by('-goumairiqi')

@@ -251,17 +251,17 @@
                 <!-- /.row -->
             </div>
         </div>
-        <form method='POST' action="" id="signupForm" class="form-inline"
+        <form method='POST' action="" id="signupForm" class="form-inline  pull-right"
               onsubmit="return check();">{% csrf_token %}
 
             <input name="ids" value="" style="display: none"
                    class="textinput textInput form-control "
                    id="id_ids" type="text">
-            <button type="submit" class="btn btn-warning breadcrumb" name="all_tostore">
+            <button type="submit" class="btn btn-facebook breadcrumb" name="all_tostore">
                 入库
                 <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
             </button>
-            <button type="submit" class="btn btn-warning breadcrumb" name="all_topool">
+            <button type="submit" class="btn btn-yahoo breadcrumb" name="all_topool">
                 入池
                 <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
             </button>
