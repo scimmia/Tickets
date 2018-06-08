@@ -190,22 +190,13 @@ def card_fee(card_pk,money,name):
 #增加
 def ticket_add(request):
     form = TicketForm(request.POST or None)
-    # if request.method == 'GET':
-    #     form.fields['gourujiage'].disabled = True  # text input
-
     #从TaskForm获取相关信息
+    context = {
+        'form': form,
+        'gongyingshang': get_ticketlists('gongyingshang'),
+        'chupiaohang': get_ticketlists('chupiaohang'),
+    }
     if form.is_valid():
-        # if ((not form.cleaned_data.get('gouruzijinchi')) and (not form.cleaned_data.get('gourucard'))
-        #         or (form.cleaned_data.get('gouruzijinchi') and form.cleaned_data.get('gourucard'))):
-        #     message = u'请选择“资金池购入”或“购入卡”中的一项'
-        #     return render(request, 'ticket/ticket_add.html',locals())
-        # elif (form.cleaned_data.get('t_status') == 3):
-        #     if not form.cleaned_data.get('maichucard'):
-        #         message = u'请选择“卖出卡”'
-        #         return render(request, 'ticket/ticket_add.html', locals())
-        #     elif not form.cleaned_data.get('maipiaoren'):
-        #         message = u'请填写“买票人”'
-        #         return render(request, 'ticket/ticket_add.html',locals())
         times = 1
         if form.cleaned_data.get('fenshu') and form.cleaned_data.get('fenshu')>1:
             times = form.cleaned_data.get('fenshu')
@@ -219,27 +210,16 @@ def ticket_add(request):
                 ticket_instore(instance.pk)
             elif instance.t_status == 5:
                 ticket_inpool(instance.pk)
-            elif instance.t_status == 3:
-                instance.lirun = instance.maichujiage - instance.gourujiage
-                instance.save()
-                pass
 
             if instance.gouruzijinchi:
                 ticket_poolpay(instance.pk)
                 instance.pay_status = 2
                 instance.save()
                 pass
-            else:
-                if instance.pay_status == 2:
-                    ticket_pay(instance.pk)
-                    pass
-
-            if instance.sell_status == 4:
-                ticket_sold(instance.pk)
-        return render(request, 'ticket/ticket_add.html',locals())
-        # return redirect('ticket_list')
+        # return render(request, 'ticket/ticket_add.html',locals())
+        return redirect('ticket_list')
     else:
-        return render(request, 'ticket/ticket_add.html',locals())
+        return render(request, 'ticket/ticket_add.html',context)
 #修改数据,函数中的pk代表数据的id
 def ticket_edit(request,  pk):
     ticket_ins = get_object_or_404(Ticket, pk=pk)
@@ -373,39 +353,58 @@ def get_ticketlists(col):
 @login_required
 def ticket_list(request):
     #从根据不同的请求，来获取相应的数据,并跳转至相应页面
-
+    if request.method == 'POST':
+        if 'all_tostore' in request.POST.keys():
+            print('all_tostore')
+            ids = request.POST['ids']
+            tickets = Ticket.objects.filter(id__in=ids.split(','))
+            for t in tickets:
+                if t.t_status == 5:
+                    t.t_status = 1
+                    t.save()
+                    ticket_outstore(t.pk)
+                    ticket_inpool(t.pk)
+            pass
+        elif 'all_topool' in request.POST.keys():
+            print('all_topool')
+            ids = request.POST['ids']
+            tickets = Ticket.objects.filter(id__in=ids.split(','))
+            for t in tickets:
+                if t.t_status == 1:
+                    t.t_status = 5
+                    t.save()
+                    ticket_outpool(t.pk)
+                    ticket_instore(t.pk)
+            pass
     # 将原先的data更名为raw_data
     raw_data = Ticket.objects.all().order_by('-goumairiqi')
     print(raw_data)
     list_template = 'ticket/ticket_list.html'
 
     #通过GET方法从提交的URL来获取相应参数
-    if request.method == 'GET':
-        #建立一个空的参数的字典
-        kwargs = {}
-        #建立一个空的查询语句
-        query = ''
-        #提交过来的GET值是一个迭代的键值对
-        for key in request.GET.keys():
-            value = request.GET[(key)]
-            print(key,value)
-            #刨去其中的token和page选项
-            if key != 'csrfmiddlewaretoken' and key != 'page' and (len(value)>0):
-                #由于线路和设备的外键均与node表格有关，当查询线路中的用户名称或设备信息中的使用部门时，可以直接通过以下方式跨表进行查找
-                if key == 'node':
-                    kwargs['node__node_name__contains'] = value
-                    #该query用于页面分页跳转时，能附带现有的搜索条件
-                    query += '&' + key + '=' + value
-                #其余的选项均通过key来辨别
-                else:
-                    kwargs[key] = value
-                    #该query用于页面分页跳转时，能附带现有的搜索条件
-                    query += '&' + key + '=' + value
-        #通过元始数据进行过滤，过滤条件为健对值的字典
-        data = raw_data.filter(**kwargs)
+    #建立一个空的参数的字典
+    kwargs = {}
+    #建立一个空的查询语句
+    query = ''
+    #提交过来的GET值是一个迭代的键值对
+    for key in request.GET.keys():
+        value = request.GET[(key)]
+        print(key,value)
+        #刨去其中的token和page选项
+        if key != 'csrfmiddlewaretoken' and key != 'page' and (len(value)>0):
+            #由于线路和设备的外键均与node表格有关，当查询线路中的用户名称或设备信息中的使用部门时，可以直接通过以下方式跨表进行查找
+            if key == 'node':
+                kwargs['node__node_name__contains'] = value
+                #该query用于页面分页跳转时，能附带现有的搜索条件
+                query += '&' + key + '=' + value
+            #其余的选项均通过key来辨别
+            else:
+                kwargs[key] = value
+                #该query用于页面分页跳转时，能附带现有的搜索条件
+                query += '&' + key + '=' + value
+    #通过元始数据进行过滤，过滤条件为健对值的字典
+    data = raw_data.filter(**kwargs)
     #如果没有从GET提交中获取信息，那么data则为元始数据
-    else:
-        data = raw_data
 
     #将分页的信息传递到展示页面中去
     data_list, page_range, count, page_nums = pagination(request, data)
@@ -531,6 +530,7 @@ def ticket_tocollect(request):
         #建立context字典，将值传递到相应页面
         context = {
             'data': raw_data,
+            'maipiaoren': get_ticketlists('maipiaoren'),
             'prices': prices,
             'index': index,
             'ids': ids,

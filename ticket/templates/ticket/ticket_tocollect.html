@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 
 {% block css %}
+    <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
@@ -151,11 +152,11 @@
                                 <input id="tiexianbtn" class="btn btn-success" value="按贴现计算" onclick="calctxlxoneb()"
                                        type="button">
 
-                            <h5>计息天数:<a id="jxtsd"></a>天</h5>
-                            <h5>贴现利息: <a id="txlxd"></a>元</h5>
-                            <h5>贴现金额: <a id="jined"></a>元</h5>
-                            <input id="exportbtn" class="btn btn-success" value="填入" onclick="exportbtn()"
-                                   type="button">
+                                <h5>计息天数:<a id="jxtsd"></a>天</h5>
+                                <h5>贴现利息: <a id="txlxd"></a>元</h5>
+                                <h5>贴现金额: <a id="jined"></a>元</h5>
+                                <input id="exportbtn" class="btn btn-success" value="填入" onclick="exportbtn()"
+                                       type="button">
                             </div>
                         </div>
                     </div>
@@ -165,7 +166,11 @@
                 <div class="col-xs-3">
                     <div class="form-group">
                         <label for="disabledTextInput">买票人</label>
-                        <input type="text" name="maipiaoren" class="form-control" required>
+                        <select class="js-single form-control" name="maipiaoren" required>
+                            {% for v in maipiaoren %}
+                                <option value="{{ v }}" >{{ v }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <table id="table_id" class="table table-bordered table-hover">
                         <thead>
@@ -258,6 +263,7 @@
     <!-- page script -->
     <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
 
     <script type="text/javascript">
         function delItem(that) {
@@ -311,8 +317,8 @@
                 tzts = 0;
             //alert(tzts);
             var ts = Math.floor(dqr.getTime() / (24 * 60 * 60 * 1000)) - Math.floor(txr.getTime() / (24 * 60 * 60 * 1000)) + tzts;
-            var txlx = Math.round(je * txlv * ts / 3 * 100) / 100 + je*sxf/10;
-            var jine = Math.round(je * 1000000 - je * txlv * ts / 3 * 100) / 100 - je*sxf/10;
+            var txlx = Math.round(je * txlv * ts / 3 * 100) / 100 + je * sxf / 10;
+            var jine = Math.round(je * 1000000 - je * txlv * ts / 3 * 100) / 100 - je * sxf / 10;
             if (isNaN(ts))
                 ts = 0;
             if (isNaN(txlx))
@@ -371,6 +377,9 @@
             return true;
         }
         $(document).ready(function () {
+            $('.js-single').select2({
+                tags: true
+            });
             var t = $('#table_id').DataTable({
                 'paging': false,
                 'lengthChange': false,

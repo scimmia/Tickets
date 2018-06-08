@@ -78,10 +78,8 @@ class Ticket(models.Model):
     chupiaoriqi = models.DateField(u'出票日期', )
     daoqiriqi = models.DateField(u'到期日期', )
     piaomianjiage = models.FloatField(u'票面价格(元)', default=0)
-    gouruhuilv = models.FloatField(u'购入利率', default=0)
     gourujiage = models.FloatField(u'购入价格', default=0)
     gouruzijinchi = models.BooleanField(u'资金池购入', default=False)
-    gourucard = models.ForeignKey( Card, related_name='buy_card', verbose_name=u'购入卡' ,  blank=True,null=True)
     gongyingshang = models.CharField(u'供应商', max_length=100)
     pay_status = models.IntegerField(
         u'状态',
@@ -91,9 +89,7 @@ class Ticket(models.Model):
     payorder = models.ForeignKey( Order, related_name='pay_order', verbose_name=u'付款订单' ,  blank=True,null=True)
     paytime = models.DateTimeField(u'付款时间', blank=True,null=True)
     maichuriqi = models.DateTimeField(u'卖出日期', blank=True,null=True)
-    maichulilv = models.FloatField(u'卖出利率', default=0)
     maichujiage = models.FloatField(u'卖出价格', default=0)
-    maichucard = models.ForeignKey( Card, related_name='sold_card',  verbose_name=u'卖出卡' ,  blank=True,null=True)
     maipiaoren = models.CharField(u'买票人', max_length=100, blank=True,null=True)
     sell_status = models.IntegerField(
         u'状态',

@@ -10,6 +10,7 @@
 {#{% endblock %}#}
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
 
     <script src="https://cdn.bootcss.com/jquery-validate/1.17.0/jquery.validate.js"></script>
 {% endblock %}
@@ -45,10 +46,21 @@
                             {{ form.t_type |as_crispy_field }}
                             {{ form.qianpaipiaohao |as_crispy_field }}
                             {{ form.piaohao |as_crispy_field }}
-                            {{ form.chupiaohang |as_crispy_field }}
+                            <div id="div_id_chupiaohang" class="form-group">
+                                <label for="id_chupiaohang" class="control-label  requiredField">
+                                    出票行<span class="asteriskField">*</span>
+                                </label>
+                                <div class="controls ">
+                                    <select class="js-single form-control" name="chupiaohang" id="id_chupiaohang"
+                                            required>
+                                        {% for v in chupiaohang %}
+                                            <option value="{{ v }}">{{ v }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
                             {{ form.chupiaoriqi |as_crispy_field }}
                             {{ form.daoqiriqi |as_crispy_field }}
-                            {{ form.piaomianjiage |as_crispy_field }}
                         </div>
                     </div>
 
@@ -60,7 +72,20 @@
                             <h3 class="box-title">买入信息</h3>
                         </div>
                         <div class="box-body">
-                            {{ form.gongyingshang |as_crispy_field }}
+                            <div id="div_id_gongyingshang" class="form-group">
+                                <label for="id_gongyingshang" class="control-label  requiredField">
+                                    供应商<span class="asteriskField">*</span>
+                                </label>
+                                <div class="controls ">
+                                    <select class="js-single form-control" name="gongyingshang" id="id_gongyingshang"
+                                            required>
+                                        {% for v in gongyingshang %}
+                                            <option value="{{ v }}">{{ v }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {{ form.piaomianjiage |as_crispy_field }}
                             <div id="div_id_gourujiage" class="form-group">
                                 <label for="id_gourujiage" class="control-label  requiredField">
                                     购入价格<span class="asteriskField">*</span>
@@ -73,8 +98,6 @@
                                 </div>
                             </div>
                             {{ form.gouruzijinchi |as_crispy_field }}
-                            {{ form.gourucard |as_crispy_field }}
-
                         </div>
 
                     </div>
@@ -171,13 +194,17 @@
                             <input id="tiexianbtn" class="btn btn-success" value="按贴现计算" onclick="calctxlxoneb()"
                                    type="button">
 
+                            <br>
+                            <br>
+                            <br>
+                            <h5>计息天数:<a id="jxtsd"></a>天</h5>
+                            <h5>贴现利息: <a id="txlxd"></a>元</h5>
+                            <h5>贴现金额: <a id="jined"></a>元</h5>
+                            <input id="exportbtn" class="btn btn-success" value="填入" onclick="exportbtn()"
+                                   type="button">
                         </div>
                     </div>
                     <div class="box-footer ">
-                        <h5>计息天数:<a id="jxtsd"></a>天</h5>
-                        <h5>贴现利息: <a id="txlxd"></a>元</h5>
-                        <h5>贴现金额: <a id="jined"></a>元</h5>
-                        <input id="exportbtn" class="btn btn-success" value="填入" onclick="exportbtn()" type="button">
                     </div>
                     <!-- /.box-body -->
                 </div>
@@ -191,9 +218,13 @@
 {% block script %}
 
     <!-- bootstrap datepicker -->
+    <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
     <script src="{% static 'plugins/datepicker/bootstrap-datepicker.js' %}"></script>
     <script type="text/javascript">
         $(function () {
+            $('.js-single').select2({
+                tags: true
+            });
 
             //Date picker
             $.fn.datepicker.dates['cn'] = {   //切换为中文显示
@@ -212,17 +243,6 @@
                 language: 'cn',           //语言
             });
             $("#id_t_status option[value='3']").remove();
-            $("#id_gourucard").attr("required", "true");
-            $("#id_gouruzijinchi").change(function () {
-                if ($("#id_gouruzijinchi").is(':checked')) {
-                    $("#div_id_gourucard").hide()
-                    $("#id_gourucard").val("")
-                    $("#id_gourucard").removeAttr('required');
-                } else {
-                    $("#div_id_gourucard").show()
-                    $("#id_gourucard").prop("required", "true");
-                }
-            });
         });
 
         function exportbtn() {
@@ -260,8 +280,8 @@
                 tzts = 0;
             //alert(tzts);
             var ts = Math.floor(dqr.getTime() / (24 * 60 * 60 * 1000)) - Math.floor(txr.getTime() / (24 * 60 * 60 * 1000)) + tzts;
-            var txlx = Math.round(je * txlv * ts / 3 * 100) / 100 + je*sxf/10;
-            var jine = Math.round(je * 1000000 - je * txlv * ts / 3 * 100) / 100 - je*sxf/10;
+            var txlx = Math.round(je * txlv * ts / 3 * 100) / 100 + je * sxf / 10;
+            var jine = Math.round(je * 1000000 - je * txlv * ts / 3 * 100) / 100 - je * sxf / 10;
             if (isNaN(ts))
                 ts = 0;
             if (isNaN(txlx))

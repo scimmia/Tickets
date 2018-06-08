@@ -4,6 +4,7 @@
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
 
 {% endblock %}
 {% block content-header %}
@@ -12,12 +13,14 @@
         <small>列表</small>
     </h1>
     <ol class="breadcrumb">
-        <a class="blue" href="{% url 'ticket_add' %}">
-        <button type="submit" class="btn btn-warning center-block" id="all_checked">
-            添加票据
-            <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
-        </button>
-        </a>
+        <li>
+            <a class="blue" href="{% url 'ticket_add' %}">
+                <button type="submit" class="btn btn-warning center-block" id="all_checked">
+                    添加票据
+                    <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+                </button>
+            </a>
+        </li>
     </ol>
 {% endblock %}
 {% block search_header %}
@@ -36,7 +39,7 @@
                 <form class="navbar-for navbar-container" role="search" method="get" action="">{% csrf_token %}
                     <div class="row">
 
-                        <div class="col-sm-2">
+                        <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon" id="chupiaohang__contains">票号</span>
                                 <input type="text" class="form-control" placeholder=""
@@ -57,7 +60,7 @@
                             </div>
                         </div>
 
-                        <div class="col-sm-2">
+                        <div class="col-sm-3">
                             <div class="input-group">
                                 <span class="input-group-addon">供应商</span>
                                 <select class="js-single form-control" name="gongyingshang">
@@ -88,7 +91,7 @@
 
                         <div class="col-sm-3">
                             <div class="input-group">
-                                <span class="input-group-addon" id="t_status">状态</span>
+                                <span class="input-group-addon" id="t_status">票据状态</span>
                                 <select class="form-control" name="t_status">
                                     <option value="">所有状态</option>
                                     <option value="1" {% if request.GET.t_status and request.GET.t_status == '1' %}
@@ -134,10 +137,7 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                             <div class="input-daterange input-group">
                                 <span class="input-group-addon" id="date-picker">票面价格</span>
                                 <input type="number" class="form-control" name="piaomianjiage__gt"
@@ -152,46 +152,8 @@
                             </div>
                         </div>
 
-                        <!-- /section:plugins/date-time.datepicker -->
-                        <div class="col-sm-4">
-                            <div class="input-daterange input-group">
-                                <span class="input-group-addon" id="date-picker">购买日期</span>
-                                <input type="text" class="form-control dateinput" name="goumairiqi__gt"
-                                       data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.goumairiqi__gt %} value=
-                                            {{ request.GET.goumairiqi__gt }}{% endif %}>
-                                <span class="input-group-addon">
-                                <i class="fa fa-exchange"></i>
-                            </span>
-                                <input type="text" class="form-control dateinput" name="goumairiqi__lt"
-                                       data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.goumairiqi__lt %} value=
-                                            {{ request.GET.goumairiqi__lt }}{% endif %}>
-
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-
-
-                            <div class="input-daterange input-group">
-                                <span class="input-group-addon" id="date-picker">卖出日期</span>
-                                <input type="text" class="form-control dateinput" name="maichuriqi__gt"
-                                       data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.maichuriqi__gt %} value=
-                                            {{ request.GET.maichuriqi__gt }}{% endif %}>
-                                <span class="input-group-addon">
-                                <i class="fa fa-exchange"></i>
-                            </span>
-                                <input type="text" class="form-control dateinput" name="maichuriqi__lt"
-                                       data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.maichuriqi__lt %} value=
-                                            {{ request.GET.maichuriqi__lt }}{% endif %}>
-
-                            </div>
-                        </div>
                     </div>
                     <div class="row">
-
                         <div class="col-sm-4">
 
 
@@ -241,16 +203,76 @@
 								</span>
                         </div>
                     </div>
+                    <div class="row">
+
+
+                        <!-- /section:plugins/date-time.datepicker -->
+                        <div class="col-sm-4">
+                            <div class="input-daterange input-group">
+                                <span class="input-group-addon" id="date-picker">购买日期</span>
+                                <input type="text" class="form-control dateinput" name="goumairiqi__gt"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.goumairiqi__gt %} value=
+                                            {{ request.GET.goumairiqi__gt }}{% endif %}>
+                                <span class="input-group-addon">
+                                <i class="fa fa-exchange"></i>
+                            </span>
+                                <input type="text" class="form-control dateinput" name="goumairiqi__lt"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.goumairiqi__lt %} value=
+                                            {{ request.GET.goumairiqi__lt }}{% endif %}>
+
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+
+
+                            <div class="input-daterange input-group">
+                                <span class="input-group-addon" id="date-picker">卖出日期</span>
+                                <input type="text" class="form-control dateinput" name="maichuriqi__gt"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.maichuriqi__gt %} value=
+                                            {{ request.GET.maichuriqi__gt }}{% endif %}>
+                                <span class="input-group-addon">
+                                <i class="fa fa-exchange"></i>
+                            </span>
+                                <input type="text" class="form-control dateinput" name="maichuriqi__lt"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.maichuriqi__lt %} value=
+                                            {{ request.GET.maichuriqi__lt }}{% endif %}>
+
+                            </div>
+                        </div>
+
+                    </div>
 
 
                 </form>
                 <!-- /.row -->
             </div>
         </div>
+        <form method='POST' action="" id="signupForm" class="form-inline"
+              onsubmit="return check();">{% csrf_token %}
+
+            <input name="ids" value="" style="display: none"
+                   class="textinput textInput form-control "
+                   id="id_ids" type="text">
+            <button type="submit" class="btn btn-warning breadcrumb" name="all_tostore">
+                入库
+                <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+            </button>
+            <button type="submit" class="btn btn-warning breadcrumb" name="all_topool">
+                入池
+                <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+            </button>
+        </form>
+
     </div>
 {% endblock %}
 
 {% block table_tr %}
+    <th style="display: none"></th>
+    <th style="display: none">ID</th>
     <th>类型</th>
     <th>购买日期</th>
     <th>出票行</th>
@@ -262,11 +284,10 @@
     <th>状态</th>
     <th>付款状态</th>
     <th>收款状态</th>
-    <th>
-
-    </th>
 {% endblock %}
 {% block table_td %}
+    <td style="display: none"></td>
+    <th style="display: none">{{ item.id }}</th>
     <td>
         {% if item.t_type == 1 %}
             <span class="label label-danger">纸
@@ -306,14 +327,10 @@
             <span class="label label-success">已收款
         {% endif %}
         </span></td>
-    <td>
-        <div class="hidden-sm hidden-xs action-buttons">
-            <a class="green" href="{% url 'ticket_edit' item.id %}" title="">
-                <i class="ace-icon fa fa-pencil bigger-130"></i>
-            </a></div>
-    </td>
 {% endblock %}
 {% block script %}
+    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
     <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
     <script src="{% static 'plugins/daterangepicker/moment.min.js' %}"></script>
     <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
@@ -342,6 +359,80 @@
             $('.js-single').select2({
                 height: '40px',
             });
+            var t = $('#table_id').DataTable({
+                'paging': false,
+                'lengthChange': true,
+                'searching': false,
+                'ordering': true,
+                'info': true,
+                'autoWidth': true,
+                "language": {
+                    "processing": "处理中...",
+                    "lengthMenu": "显示 _MENU_ 项结果",
+                    "zeroRecords": "没有匹配结果",
+                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "infoPostFix": "",
+                    "search": "搜索:",
+                    "searchPlaceholder": "搜索...",
+                    "url": "",
+                    "emptyTable": "表中数据为空",
+                    "loadingRecords": "载入中...",
+                    "infoThousands": ",",
+                    "paginate": {
+                        "first": "首页",
+                        "previous": "上页",
+                        "next": "下页",
+                        "last": "末页"
+                    },
+                    "aria": {
+                        "paginate": {
+                            'first': '首页',
+                            'previous': '上页',
+                            'next': '下页',
+                            'last': '末页'
+                        },
+                        "sortAscending": ": 以升序排列此列",
+                        "sortDescending": ": 以降序排列此列"
+                    },
+                    "decimal": "-",
+                    "thousands": "."
+                },
+                "columnDefs": [{
+                    'data': null,
+                    "orderable": false,
+                    "targets": 0,
+                    'defaultContent': "<input type ='checkbox' name='test' class='icheckbox_minimal' value=''>",
+                }, {
+                    "orderable": false, "targets": [0],  //设置第一列和最后一列不可排序
+                }],
+                "order": [[1, 'desc']]
+            });
+            $('#table_id tbody').on('click', 'tr', function () {
+                $(this).toggleClass('selected');
+                var a = t.rows('.selected').data();
+                console.log(a.length);
+                $("#selected_num").text(a.length);
+                var ids = '';
+                for (var i = 0; i < a.length; i++) {
+                    console.log(a[i][1]);
+                    ids = ids + parseFloat(a[i][1]) + ',';
+
+                }
+                ids = (ids.substring(ids.length - 1) == ',') ? ids.substring(0, ids.length - 1) : ids;
+                $("#id_ids").val(ids);
+            });
+
+            t.on('order.dt search.dt',
+                function () {
+                    t.column(0, {
+                        search: 'applied',
+                        order: 'applied'
+                    }).nodes().each(function (cell, i) {
+                        cell.innerHTML = i + 1;
+                    });
+                }).draw();
         });
 
     </script>
