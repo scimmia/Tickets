@@ -107,28 +107,55 @@
 
             </div>
 
-
             <div class="col-xs-3 pull-right">
-                <h3><b>已选择</b> <a id="selected_num">{{ selected_num }}</a><b>张</b></h3>
-                <h3><b>合计票面价格</b> <a id="selected_piaomian">{{ selected_piaomian }}</a><b>元</b></h3>
-                <h3><b>合计购入价格</b> <a id="selected_real">{{ selected_real }}</a><b>元</b></h3>
-                <form  method='POST' action="{% url 'ticket_createorder' %}" id="signupForm"  onsubmit="return check();">{% csrf_token %}
-                    <input name="ordertype" value="1" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_ordertype" type="text">
-                    <input name="fees" value="{}" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_fees" type="text">
-                    <input name="ids" value="{{ ids }}" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_ids" type="text">
-                    <button type="submit" class="btn btn-warning center-block" id="all_checked">
-                        生成{{ title }}订单
-                        <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
-                    </button>
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">{{ title }}订单信息:：</h3>
+                    </div>
+                    <div class="box-body">
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <th>已选择:</th>
+                                <td style="text-align:right;"><a id="selected_num">{{ selected_num }}</a><b>张</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>票面价格:</th>
+                                <td style="text-align:right;"><a
+                                        id="selected_piaomian">{{ selected_piaomian }}</a><b>元</b></td>
+                            </tr>
+                            <tr>
+                                <th>购入价格:</th>
+                                <td style="text-align:right;"><a id="selected_real">{{ selected_real }}</a><b>元</b>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="box-footer">
+                        <form method='POST' action="{% url 'ticket_createorder' %}" id="signupForm"
+                              onsubmit="return check();">{% csrf_token %}
+                            <input name="ordertype" value="1" style="display: none"
+                                   class="textinput textInput form-control"
+                                   id="id_ordertype" type="text">
+                            <input name="fees" value="{}" style="display: none"
+                                   class="textinput textInput form-control"
+                                   id="id_fees" type="text">
+                            <input name="ids" value="{{ ids }}" style="display: none"
+                                   class="textinput textInput form-control"
+                                   id="id_ids" type="text">
+                            <button type="submit" class="btn btn-warning center-block" id="all_checked">
+                                生成{{ title }}订单
+                                <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+                            </button>
 
-                </form>
+                        </form>
+
+                    </div>
+                </div>
             </div>
+
         </div>
     </section>
 
@@ -147,9 +174,9 @@
             sumFees();
         }
         function sumFees(that) {
-            var fees =new Array();
-            $("#thebody").find('tr').each(function(i, val) {
-                var fee =new Object();
+            var fees = new Array();
+            $("#thebody").find('tr').each(function (i, val) {
+                var fee = new Object();
                 fee.money = $(this).attr('data-money');
                 fee.name = $(this).attr('data-name');
                 fee.cardid = $(this).attr('data-cardid');
@@ -157,7 +184,7 @@
                 console.log(fee);
             });
             console.log(fees);
-                            $("#id_fees").val(JSON.stringify(fees));
+            $("#id_fees").val(JSON.stringify(fees));
 
         }
         $(document).ready(function () {
@@ -238,7 +265,7 @@
 
                     $('#thebody').append(trr);
                     sumFees();
-               }
+                }
             });
         });
     </script>

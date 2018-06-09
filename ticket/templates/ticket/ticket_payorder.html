@@ -107,20 +107,39 @@
                 </div>
 
             </div>
-
             <div class="col-xs-3 pull-right">
-                <h3><b>票据</b> <a>{{ order.ticket_count }}</a><b>张</b><b>合计票面价格</b> <a>{{ order.ticket_sum }}</a><b>元</b>
-                </h3>
-{#                <h3><b>合计{% if order.order_type == 1 %}购入{% elif order.order_type == 2 %}卖出{% endif %}价格</b> <a>{{ order.money }}</a><b>元</b></h3>#}
-{#                <h3><b>费用</b> <a>{{ order.fee_count }}</a><b>项</b><b>合计费用</b> <a>{{ order.fee_sum }}</a><b>元</b></h3>#}
-                <h3><b>总计应付</b> <a>{{ order.total_sum }}</a><b>元</b></h3>
-                <h3><b>已{% if order.order_type == 1 %}支付
-                {% elif order.order_type == 2 %}收取
-                {% endif %}</b> <a>{{ order.payfee_count }}</a><b>项</b><b>合计</b> <a>{{ order.payfee_sum }}</a><b>元</b>
-                </h3>
-                <h3><b>待{% if order.order_type == 1 %}支付
-                {% elif order.order_type == 2 %}收取
-                {% endif %}</b> <a>{{ order.needpay_sum }}</a><b>元</b></h3>
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">{% if order.order_type == 1 %}
+                            付款
+                        {% elif order.order_type == 2 %}
+                            收款
+                        {% endif %}信息:：</h3>
+                    </div>
+                    <div class="box-body">
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <th>票面价格:</th>
+                                <td style="text-align:right;"><a>{{ order.ticket_sum }}</a></td>
+                            </tr>
+                            <tr>
+                                <th>应{% if order.order_type == 1 %}支付{% elif order.order_type == 2 %}收取{% endif %}:</th>
+                                <td style="text-align:right;"><a>{{ order.total_sum }}</a></td>
+                            </tr>
+                            <tr>
+                                <th>已{% if order.order_type == 1 %}支付{% elif order.order_type == 2 %}收取{% endif %}:</th>
+                                <td style="text-align:right;"><a>{{ order.payfee_sum }}</a></td>
+                            </tr>
+                            <tr>
+                                <th>待{% if order.order_type == 1 %}支付{% elif order.order_type == 2 %}收取{% endif %}:</th>
+                                <td style="text-align:right;"><a>{{ order.needpay_sum }}</a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
             </div>
             <form method='POST' id="signupForm" action="" onsubmit="return check();">{% csrf_token %}
                 <div class="col-md-3">

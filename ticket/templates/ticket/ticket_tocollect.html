@@ -151,12 +151,12 @@
                                 </div>
                                 <input id="tiexianbtn" class="btn btn-success" value="按贴现计算" onclick="calctxlxoneb()"
                                        type="button">
-
+                                <br>
+                                <br>
+                                <br>
                                 <h5>计息天数:<a id="jxtsd"></a>天</h5>
                                 <h5>贴现利息: <a id="txlxd"></a>元</h5>
                                 <h5>贴现金额: <a id="jined"></a>元</h5>
-                                <input id="exportbtn" class="btn btn-success" value="填入" onclick="exportbtn()"
-                                       type="button">
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@
                         <label for="disabledTextInput">买票人</label>
                         <select class="js-single form-control" name="maipiaoren" required>
                             {% for v in maipiaoren %}
-                                <option value="{{ v }}" >{{ v }}</option>
+                                <option value="{{ v }}">{{ v }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -192,26 +192,52 @@
                     </table>
 
                 </div>
-
                 <div class="col-xs-3 pull-right">
-                    <h3><b>已选择</b> <a id="selected_num">{{ selected_num }}</a><b>张</b></h3>
-                    <h3><b>合计票面价格</b> <a id="selected_piaomian">{{ selected_piaomian }}</a><b>元</b></h3>
-                    <h3><b>合计购入价格</b> <a id="selected_real">{{ selected_real }}</a><b>元</b></h3>
-                    <h3><b>合计卖出价格</b> <a id="selected_maichu"></a><b>元</b></h3>
-                    <input name="ordertype" value="2" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_ordertype" type="text">
-                    <input name="fees" value="{}" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_fees" type="text">
-                    <input name="ids" value="{{ ids }}" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_ids" type="text">
-                    <button type="submit" class="btn btn-warning center-block" id="all_checked">
-                        生成{{ title }}订单
-                        <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
-                    </button>
-
+                    <div class="box box-success">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">{{ title }}订单信息:：</h3>
+                        </div>
+                        <div class="box-body">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>已选择:</th>
+                                    <td style="text-align:right;"><a id="selected_num">{{ selected_num }}</a><b>张</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>票面价格:</th>
+                                    <td style="text-align:right;"><a
+                                            id="selected_piaomian">{{ selected_piaomian }}</a><b>元</b></td>
+                                </tr>
+                                <tr>
+                                    <th>购入价格:</th>
+                                    <td style="text-align:right;"><a id="selected_real">{{ selected_real }}</a><b>元</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>卖出价格:</th>
+                                    <td style="text-align:right;"><a id="selected_maichu"></a><b>元</b></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="box-footer">
+                            <input name="ordertype" value="2" style="display: none"
+                                   class="textinput textInput form-control"
+                                   id="id_ordertype" type="text">
+                            <input name="fees" value="{}" style="display: none"
+                                   class="textinput textInput form-control"
+                                   id="id_fees" type="text">
+                            <input name="ids" value="{{ ids }}" style="display: none"
+                                   class="textinput textInput form-control"
+                                   id="id_ids" type="text">
+                            <button type="submit" class="btn btn-warning center-block" id="all_checked">
+                                生成{{ title }}订单
+                                <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </form>
 
