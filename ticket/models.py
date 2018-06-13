@@ -54,8 +54,8 @@ class Ticket(models.Model):
     )
     TICKET_STATUS= (
         (1,u'在库'),
-        (5,u'入池'),
-        (3, u'卖出'),
+        (5,u'在池'),
+        (3,u'卖出'),
     )
     TICKET_TYPES= (
         (1,u'纸票'),
@@ -130,7 +130,6 @@ class TicketsImport(models.Model):
         return self.piaohao
 
 class Fee(models.Model):
-    ticket = models.ForeignKey( Ticket, related_name='fee_ticket', verbose_name=u'票据' ,  blank=True,null=True)
     order = models.ForeignKey( Order, related_name='order_fee', verbose_name=u'订单费用' ,  blank=True,null=True)
     yinhangka = models.ForeignKey( Card, related_name='fee_card', verbose_name=u'银行卡' , blank=False,null=False)
     name = models.CharField(u'费用内容', max_length=50)
@@ -155,27 +154,6 @@ class Fee(models.Model):
     class Meta:
         verbose_name = '费用'
         verbose_name_plural = '费用'
-
-class TicketStatus(models.Model):
-    TICKET_STATUS= (
-        (1,u'在库'),
-        (3,u'卖出'),
-        (5,u'入池'),
-    )
-    ticket = models.ForeignKey( Ticket, related_name='status_ticket', verbose_name=u'票据')
-    t_status = models.IntegerField(
-        u'状态',
-        choices=TICKET_STATUS,
-        default=1,
-    )
-    pub_date = models.DateTimeField(u'登记时间', auto_now_add=True)
-    #登记人
-    status_signer = models.CharField(u'登记人',max_length=30,default='system')
-    def __str__(self):
-        return self.pub_date
-    class Meta:
-        verbose_name = '票据状态'
-        verbose_name_plural = '票据状态'
 
 class PoolFee(models.Model):
     ticket = models.ForeignKey( Ticket, related_name='poolfee_ticket', verbose_name=u'票据' ,  blank=True,null=True)

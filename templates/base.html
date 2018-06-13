@@ -124,16 +124,6 @@
                     {% endif %}
                 </div>
             </div>
-            <!-- search form -->
-            <form action="#" method="get" class="sidebar-form">
-                <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="Search...">
-                    <span class="input-group-btn">
-                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
-                </button>
-              </span>
-                </div>
-            </form>
             <!-- /.search form -->
             <!-- sidebar menu: : style can be found in sidebar.less -->
             <ul class="sidebar-menu">
@@ -173,17 +163,40 @@
                                 class="active"
                             {% endif %}><a href="{% url 'ticket_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
                     <li
-                            {% if '/ticket_payorders/' in request.path %}
+                            {% if '/ticket_needpay/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_payorders' %}"><i class="fa fa-circle-o"></i>待付款</a></li>
+                            {% endif %}><a href="{% url 'ticket_needpay' %}"><i class="fa fa-circle-o"></i>待付款</a></li>
                     <li
-                            {% if '/ticket_sellorders/' in request.path %}
+                            {% if '/ticket_needcollect/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_sellorders' %}"><i class="fa fa-circle-o"></i>待收款</a></li>
+                            {% endif %}><a href="{% url 'ticket_needcollect' %}"><i class="fa fa-circle-o"></i>待收款</a></li>
                     <li
                             {% if '/ticket_import/' in request.path %}
                                 class="active"
                             {% endif %}><a href="{% url 'ticket_import' %}"><i class="fa fa-circle-o"></i>导入</a></li>
+                </ul>
+                </li>
+                            {% if '/order/' in request.path %}
+                    <li class="active treeview">
+
+                        {% else %}
+                    <li class="treeview">
+                {% endif %}
+                <a href="#">
+                    <i class="fa fa-dashboard"></i> <span>订单</span>
+                    <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li
+                            {% if '/ticket_payorders/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'ticket_payorders' %}"><i class="fa fa-circle-o"></i>付款订单</a></li>
+                    <li
+                            {% if '/ticket_sellorders/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'ticket_sellorders' %}"><i class="fa fa-circle-o"></i>收款订单</a></li>
                 </ul>
                 </li>
                 {% if '/card/' in request.path %}
