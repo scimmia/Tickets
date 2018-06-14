@@ -114,7 +114,9 @@
                             付款
                         {% elif order.order_type == 2 %}
                             收款
-                        {% endif %}信息:：</h3>
+                        {% endif %}信息：</h3>
+                        {% if order.needpay_sum == 0 %}<span class="label label-danger pull-right">已完成</span>{% endif %}
+
                     </div>
                     <div class="box-body">
                         <table class="table">
@@ -138,7 +140,6 @@
                             </tbody>
                         </table>
                     </div>
-
                 </div>
             </div>
             <form method='POST' id="signupForm" action="" onsubmit="return check();">{% csrf_token %}
@@ -171,6 +172,7 @@
                         <!--表格头部-->
                         <th>费用内容</th>
                         <th>金额</th>
+                        <th>额外</th>
                         <th>相关银行卡</th>
                         </thead>
                         <!--表格内容-->
@@ -178,10 +180,17 @@
                         {% for i in payfee_data %}
                             <tr>
                                 <td>{{ i.name }}</td>
-                                <td><span>-{{ i.money }}</span></td>
+                                <td><span>{{ i.money }}</span></td>
+                                <td>        {% if i.fee_type == 3 %}
+                                    <span class="label label-danger">否
+                                {% elif i.fee_type == 5 %}
+                                    <span class="label label-success">支出
+                                {% elif i.fee_type == 7 %}
+                                    <span class="label label-info">收入
+                                {% endif %}</span></td>
                                 <td>
                                     {% if i.yinhangka %}
-                                        <span class="label label-success">{{ i.yinhangka }}
+                                        <span>{{ i.yinhangka }}
                                     {% else %}
                                         <span class="label label-danger">无
                                     {% endif %}
@@ -271,9 +280,14 @@
                         cell.innerHTML = i + 1;
                     });
                 }).draw();
-            $('#id_money').attr("max", "{{ order.needpay_sum }}")
-            $('#id_money').attr("min", "0")
-
+            $("#div_id_fee_status").hide()
+            $("#id_isOrderFee").change(function () {
+                if ($("#id_isOrderFee").is(':checked')) {
+                    $("#div_id_fee_status").show()
+                } else {
+                    $("#div_id_fee_status").hide()
+                }
+            });
         });
     </script>
 

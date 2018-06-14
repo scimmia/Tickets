@@ -138,18 +138,6 @@ def ticket_outpool(ticket_pk):
     pool.save()
     pass
 
-def ticket_pay(ticket_pk):
-    ticket = Ticket.objects.get(pk=ticket_pk)
-    card = Card.objects.get(pk=ticket.gourucard.pk)
-    fee_ins = Fee()
-    fee_ins.ticket = ticket
-    fee_ins.yinhangka = card
-    fee_ins.money = 0 - ticket.gourujiage
-    fee_ins.name = '购票付款'
-    fee_ins.save()
-    card.money = card.money + fee_ins.money
-    card.save()
-
 def ticket_poolpay(ticket_pk):
     ticket = Ticket.objects.get(pk=ticket_pk)
     p = Pool.objects.last()
@@ -158,24 +146,12 @@ def ticket_poolpay(ticket_pk):
     pool = Pool()
     pool.totalmoney = p.totalmoney
     pool.promoney = p.promoney
-    pool.unusemoney = p.unusemoney - ticket.piaomianjiage
-    pool.usedmoney = p.usedmoney + ticket.piaomianjiage
+    pool.unusemoney = p.unusemoney - ticket.gourujiage
+    pool.usedmoney = p.usedmoney + ticket.gourujiage
     pool.ticket = ticket
-    pool.money = 0 - ticket.piaomianjiage
+    pool.money = 0 - ticket.gourujiage
     pool.pool_status = 5
     pool.save()
-
-def ticket_sold(ticket_pk):
-    ticket = Ticket.objects.get(pk=ticket_pk)
-    card = Card.objects.get(pk=ticket.maichucard.pk)
-    fee_ins = Fee()
-    fee_ins.ticket = ticket
-    fee_ins.yinhangka = card
-    fee_ins.money = ticket.gourujiage
-    fee_ins.name = '卖票收款'
-    fee_ins.save()
-    card.money = card.money + fee_ins.money
-    card.save()
 
 def card_fee(card_pk,money,name):
     card = Card.objects.get(pk=card_pk)
@@ -220,126 +196,21 @@ def ticket_add(request):
         return redirect('ticket_list')
     else:
         return render(request, 'ticket/ticket_add.html',context)
-#修改数据,函数中的pk代表数据的id
-def ticket_edit(request,  pk):
-    ticket_ins = get_object_or_404(Ticket, pk=pk)
-    message = None
-
-    #从TaskForm获取相关信息
-    if request.method == 'POST':
-        POST = request.POST.copy()
-        if ticket_ins.t_status == 3:
-            POST['t_status'] = ticket_ins.t_status
-            POST['maichulilv'] = ticket_ins.maichulilv
-            POST['maichujiage'] = ticket_ins.maichujiage
-            POST['maichucard'] = ticket_ins.maichucard.pk
-            POST['maipiaoren'] = ticket_ins.maipiaoren
-            POST['lirun'] = ticket_ins.lirun
-        POST['qianpaipiaohao'] = ticket_ins.qianpaipiaohao
-        POST['piaohao'] = ticket_ins.piaohao
-        POST['chupiaohang'] = ticket_ins.chupiaohang
-        POST['chupiaoriqi'] = ticket_ins.chupiaoriqi
-        POST['daoqiriqi'] = ticket_ins.daoqiriqi
-        POST['piaomianjiage'] = ticket_ins.piaomianjiage
-        POST['gongyingshang'] = ticket_ins.gongyingshang
-        POST['gouruhuilv'] = ticket_ins.gouruhuilv
-        POST['gourujiage'] = ticket_ins.gourujiage
-        POST['gouruzijinchi'] = ticket_ins.gouruzijinchi
-        if not ticket_ins.gouruzijinchi:
-            POST['gourucard'] = ticket_ins.gourucard.pk
-        POST['lirun'] = ticket_ins.lirun
-        if ticket_ins.pay_status == 2:
-            POST['pay_status'] = ticket_ins.pay_status
-        if ticket_ins.sell_status == 4:
-            POST['sell_status'] = ticket_ins.sell_status
-        form = TicketEditForm(POST, instance=ticket_ins )
-        if form.is_valid():
-            if ('t_status' in form.changed_data) and (request.POST.get('t_status') == '3')\
-                    and (not request.POST.get('maichucard')):
-                    message = u'请选择“卖出卡”'
-            elif ('t_status' in form.changed_data) and (request.POST.get('t_status') == '3')\
-                    and (not request.POST.get('maipiaoren')):
-                    message = u'请填写“买票人”'
-            else:
-                instance = form.save(commit=False)
-                if 't_status' in form.changed_data:
-                    old_s = Ticket.objects.get(pk=pk).t_status
-                    new_s = form.cleaned_data.get('t_status')
-                    if old_s != new_s:
-                        if old_s == 1:#出库
-                            ticket_outstore(pk)
-                        elif old_s == 5:#出池
-                            ticket_outpool(pk)
-                        if new_s == 1:#入库
-                            ticket_instore(pk)
-                        elif new_s == 5:#入池
-                            ticket_inpool(pk)
-                        elif new_s == 5:#卖出
-                            # ticket_outpool(pk)
-                            instance.maichujiage = instance.piaomianjiage * (1 - instance.maichuhuilv)
-                            instance.lirun = instance.maichujiage - instance.gourujiage
-                            pass
-
-                    pass
-                if 'pay_status' in form.changed_data:
-                    if form.cleaned_data.get('pay_status') == 2:
-                        ticket_pay(pk)
-                    pass
-                if 'sell_status' in form.changed_data:
-                    if form.cleaned_data.get('sell_status') == 2:
-                        ticket_sold(pk)
-                    pass
-                instance.save()
-                message = None
-                # return render(request, 'ticket/ticket_edit.html', locals())
-                return redirect('ticket_edit', pk=pk)
-
-    else:
-        form = TicketEditForm(request.POST or None, instance=ticket_ins)
-
-    form.fields['qianpaipiaohao'].disabled = True
-    form.fields['piaohao'].disabled = True
-    form.fields['chupiaohang'].disabled = True
-    form.fields['chupiaoriqi'].disabled = True
-    form.fields['daoqiriqi'].disabled = True
-    form.fields['gongyingshang'].disabled = True
-    form.fields['gouruhuilv'].disabled = True
-    form.fields['piaomianjiage'].disabled = True
-    form.fields['gourujiage'].disabled = True
-    form.fields['gouruzijinchi'].disabled = True
-    form.fields['gourucard'].disabled = True
-    if (not message) and ticket_ins.pay_status == 2:
-        form.fields['pay_status'].disabled = True
-    if (not message) and ticket_ins.sell_status == 4:
-        form.fields['sell_status'].disabled = True
-    if (not message) and ticket_ins.t_status == 3:
-        form.fields['t_status'].disabled = True
-        form.fields['maichulilv'].disabled = True
-        form.fields['maichujiage'].disabled = True
-        form.fields['maichucard'].disabled = True
-        form.fields['maipiaoren'].disabled = True
-    form.fields['lirun'].disabled = True
-    return render(request, 'ticket/ticket_edit.html', locals())
 def ticket_index(request,  pk):
     ticket_ins = get_object_or_404(Ticket, pk=pk)
-    fee_data = Fee.objects.filter(ticket=pk).order_by('-pub_date')
-    data_list, page_range, count, page_nums = pagination(request, fee_data)
-
-
     form = TicketEditForm(request.POST or None, instance=ticket_ins)
-    feeform = TicketFeeForm(request.POST or None)
-    if request.method == 'POST':
-        if feeform.is_valid():
-            instance = feeform.save(commit=False)
-            instance.ticket = Ticket.objects.get(id = pk)
-            instance.save()
-            instance.yinhangka.money = instance.yinhangka.money - instance.money * 2
-            # instance.yinhangka.save()
-            redirect('ticket_index',pk=pk)
 
     for m in form.fields:
         form.fields[m].disabled = True
     return render(request, 'ticket/ticket_index.html', locals())
+def ticket_fix(request):
+    if request.method == 'POST':
+        pk = request.POST['t_id']
+        t = Ticket.objects.get(pk = pk)
+        t.gourujiage = float(request.POST['t_gourujiage'])
+        t.save()
+        return redirect('ticket_index',pk)
+    return redirect('ticket_list')
 
 def get_ticketlists(col):
     gys = Ticket.objects.values(col).annotate(Count('id'))
@@ -363,8 +234,8 @@ def ticket_list(request):
                     if t.t_status == 5:
                         t.t_status = 1
                         t.save()
-                        ticket_outstore(t.pk)
-                        ticket_inpool(t.pk)
+                        ticket_outpool(t.pk)
+                        ticket_instore(t.pk)
             pass
         elif 'all_topool' in request.POST.keys():
             print('all_topool')
@@ -375,8 +246,8 @@ def ticket_list(request):
                     if t.t_status == 1:
                         t.t_status = 5
                         t.save()
-                        ticket_outpool(t.pk)
-                        ticket_instore(t.pk)
+                        ticket_outstore(t.pk)
+                        ticket_inpool(t.pk)
             pass
     # 将原先的data更名为raw_data
     raw_data = Ticket.objects.all().order_by('-goumairiqi')
@@ -429,7 +300,7 @@ def ticket_needselect(request,index):
 
     if index == 1:
         title = '付款'
-        raw_data = Ticket.objects.filter(pay_status=1,payorder=None).order_by('-goumairiqi')
+        raw_data = Ticket.objects.filter(pay_status=1,payorder=None,gourujiage__gt=0).order_by('-goumairiqi')
     else:
         title = '收款'
         raw_data = Ticket.objects.filter(sell_status=3,sellorder=None).order_by('-goumairiqi')
@@ -576,9 +447,12 @@ def ticket_createorder(request):
             if order.order_type == 1:
                 order.money = order.money + t.gourujiage
             elif order.order_type == 2:
-                t.maichujiage = request.POST['maichujiage'+str(t.piaomianjiage)]
+                t.maichujiage = float(request.POST['maichujiage'+str(t.piaomianjiage)])
                 t.save()
                 order.money = order.money + int(request.POST['maichujiage'+str(t.piaomianjiage)])
+            if t.gourujiage > 0 and t.maichujiage > 0:
+                t.lirun = t.maichujiage - t.gourujiage
+                t.save()
         order.total_sum = order.money + order.fee_sum
         order.payfee_sum = 0
         order.needpay_sum = order.total_sum - order.payfee_sum
@@ -597,55 +471,69 @@ def ticket_payorder(request,  pk):
     order = Order.objects.get(pk=pk)
     ticket_data = Ticket.objects.filter(payorder=pk).order_by('-goumairiqi')
     fee_data = Fee.objects.filter(order=pk,fee_type=1).order_by('-pub_date')
-    payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=3)|Q(fee_type=5))).order_by('-pub_date')
+    payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=3)|Q(fee_type=5)|Q(fee_type=7))).order_by('-pub_date')
     list_template = 'ticket/ticket_payorder.html'
     feeform = TicketOrderFeeForm(request.POST or None)
     # feeform.fields['money'].max_value = needpay_sum
     if request.method == 'POST':
         if feeform.is_valid():
-            instance = feeform.save(commit=False)
-            instance.order = order
-            if feeform.cleaned_data.get('isOrderFee'):
-                instance.fee_type = 5
+            if feeform.cleaned_data.get('money')>order.needpay_sum:
+                message = u'付款金额不能大于待支付金额'
             else:
-                instance.fee_type = 3
-                order.payfee_count = order.payfee_count + 1
-                order.payfee_sum = order.payfee_sum + instance.money
-                order.needpay_sum = order.total_sum - order.payfee_sum
-                order.save()
+                cardmoneyadd = False
+                instance = feeform.save(commit=False)
+                instance.order = order
+                if feeform.cleaned_data.get('isOrderFee'):
+                    if feeform.cleaned_data.get('fee_status') == '1':#收入
+                        instance.fee_type = 7
+                    elif feeform.cleaned_data.get('fee_status') == '2':#支出
+                        instance.fee_type = 5
+                        instance.money = -1 * instance.money
+                else:
+                    order.payfee_count = order.payfee_count + 1
+                    order.payfee_sum = order.payfee_sum + instance.money
+                    order.needpay_sum = order.total_sum - order.payfee_sum
+                    order.save()
+                    instance.fee_type = 3
+                    instance.money = -1 * instance.money
+                instance.save()
+                instance.yinhangka.money = instance.yinhangka.money + instance.money
+                instance.yinhangka.save()
 
-            instance.save()
-            instance.yinhangka.money = instance.yinhangka.money - instance.money
-            instance.yinhangka.save()
-
-            redirect('ticket_payorder',pk=pk)
+                redirect('ticket_payorder',pk=pk)
     return render(request,list_template,locals())
 def ticket_sellorder(request,  pk):
     order_ins = get_object_or_404(Order, pk=pk)
     order = Order.objects.get(pk=pk)
     ticket_data = Ticket.objects.filter(sellorder=pk).order_by('-goumairiqi')
     fee_data = Fee.objects.filter(order=pk,fee_type=2).order_by('-pub_date')
-    payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=4)|Q(fee_type=6))).order_by('-pub_date')
+    payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=4)|Q(fee_type=6)|Q(fee_type=8))).order_by('-pub_date')
     list_template = 'ticket/ticket_sellorder.html'
     feeform = TicketOrderFeeForm(request.POST or None)
     if request.method == 'POST':
         if feeform.is_valid():
-            instance = feeform.save(commit=False)
-            instance.order = order
-            if feeform.cleaned_data.get('isOrderFee'):
-                instance.fee_type = 6
-                instance.yinhangka.money = instance.yinhangka.money - instance.money
+            if feeform.cleaned_data.get('money')>order.needpay_sum:
+                message = u'收款金额不能大于待收取金额'
             else:
-                instance.fee_type = 4
+                instance = feeform.save(commit=False)
+                instance.order = order
+                if feeform.cleaned_data.get('isOrderFee'):
+                    if feeform.cleaned_data.get('fee_status') == '1':#收入
+                        instance.fee_type = 8
+                    elif feeform.cleaned_data.get('fee_status') == '2':#支出
+                        instance.fee_type = 6
+                        instance.money = -1 * instance.money
+                else:
+                    instance.fee_type = 4
+                    order.payfee_count = order.payfee_count + 1
+                    order.payfee_sum = order.payfee_sum + instance.money
+                    order.needpay_sum = order.total_sum - order.payfee_sum
+                    order.save()
+                instance.save()
                 instance.yinhangka.money = instance.yinhangka.money + instance.money
-                order.payfee_count = order.payfee_count + 1
-                order.payfee_sum = order.payfee_sum + instance.money
-                order.needpay_sum = order.total_sum - order.payfee_sum
-                order.save()
-            instance.save()
-            instance.yinhangka.save()
+                instance.yinhangka.save()
 
-            redirect('ticket_sellorder',pk=pk)
+                redirect('ticket_sellorder',pk=pk)
     return render(request,list_template,locals())
 def ticket_import(request):
     context = {}
@@ -744,54 +632,19 @@ def handle_upload_file(file):
 #显示各列表信息
 @login_required
 def card_list(request):
-    #从根据不同的请求，来获取相应的数据,并跳转至相应页面
-
-    # 将原先的data更名为raw_data
     raw_data = Card.objects.all()
     print(raw_data)
     list_template = 'ticket/card_list.html'
-    sub_title = '银行卡信息'
-
-    #通过GET方法从提交的URL来获取相应参数
-    if request.method == 'GET':
-        #建立一个空的参数的字典
-        kwargs = {}
-        #建立一个空的查询语句
-        query = ''
-        #提交过来的GET值是一个迭代的键值对
-        for key in request.GET.keys():
-            value = request.GET.getlist(key)
-            #刨去其中的token和page选项
-            if key != 'csrfmiddlewaretoken' and key != 'page':
-                #由于线路和设备的外键均与node表格有关，当查询线路中的用户名称或设备信息中的使用部门时，可以直接通过以下方式跨表进行查找
-                if key == 'node':
-                    kwargs['node__node_name__contains'] = value
-                    #该query用于页面分页跳转时，能附带现有的搜索条件
-                    query += '&' + key + '=' + value
-                #其余的选项均通过key来辨别
-                else:
-                    kwargs[key + '__contains'] = value
-                    #该query用于页面分页跳转时，能附带现有的搜索条件
-                    query += '&' + key + '=' + value
-        #通过元始数据进行过滤，过滤条件为健对值的字典
-        data = raw_data.filter(**kwargs)
-    #如果没有从GET提交中获取信息，那么data则为元始数据
-    else:
-        data = raw_data
-    print(data)
 
     #将分页的信息传递到展示页面中去
-    data_list, page_range, count, page_nums = pagination(request, data)
+    data_list, page_range, count, page_nums = pagination(request, raw_data)
     #建立context字典，将值传递到相应页面
     context = {
         'data': data_list,
-        'query': query,
         'page_range': page_range,
         'count': count,
         'edit_url':'',
         'page_nums': page_nums,
-        'page_title': '基础资料',
-        'sub_title': sub_title,
     }
     print(context)
     #跳转到相应页面，并将值传递过去
@@ -810,8 +663,6 @@ def card_add(request):
     context = {
         'form': form,
         'page_title': '银行卡处理',
-        'sub_title': '新建银行卡',
-        'sub_title': '新建银行卡',
     }
     return render(request, 'ticket/card_add.html',  context)
 
@@ -837,6 +688,10 @@ def card_edit(request,  pk):
             fee_ins = Fee()
             fee_ins.yinhangka = card
             fee_ins.money = float(request.POST['fee'])
+            fee_ins.fee_type = 11
+            if request.POST['p_status'] == '4':#银行卡取出
+                fee_ins.money = -1 * fee_ins.money
+                fee_ins.fee_type = 12
             fee_ins.name = request.POST['feebeizhu'].strip(' ')
             fee_ins.save()
             card_ins.money = card_ins.money + fee_ins.money

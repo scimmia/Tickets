@@ -137,12 +137,16 @@ class Fee(models.Model):
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
     FEE_TYPE= (
+        (11,u'银行卡存入'),
+        (12,u'银行卡取出'),
         (1,u'付款订单'),
         (2,u'付款订单'),
         (3,u'付款支付'),
         (4,u'收款收取'),
-        (5,u'付款费用'),
-        (6,u'收款费用'),
+        (5,u'付款费用支出'),
+        (6,u'收款费用支出'),
+        (7,u'付款费用收入'),
+        (8,u'收款费用收入'),
     )
     fee_type = models.IntegerField(
         u'费用类型',

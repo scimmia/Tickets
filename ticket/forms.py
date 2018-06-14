@@ -41,6 +41,14 @@ class TicketFeeForm(ModelForm):
         exclude = ['ticket','order','fee_type','pub_date',]
 class TicketOrderFeeForm(ModelForm):
     isOrderFee = forms.BooleanField(label="是否额外费用",required=False,)
+    fee_status = forms.ChoiceField(label="额外费用类型",required=False,
+        choices=(
+            (1, "收入"),
+            (2, "支出"),
+        ),
+        widget=forms.Select,
+        initial='2',
+    )
     #自定义ModelForm的内容
     class Meta:
         #该ModelForm参照Model: Node

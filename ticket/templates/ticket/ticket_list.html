@@ -98,7 +98,7 @@
                                             selected{% endif %}>在库
                                     </option>
                                     <option value="5" {% if request.GET.t_status and request.GET.t_status == '5' %}
-                                            selected{% endif %}>入池
+                                            selected{% endif %}>在池
                                     </option>
                                     <option value="3" {% if request.GET.t_status and request.GET.t_status == '3' %}
                                             selected{% endif %}>卖出
@@ -310,7 +310,7 @@
         {% elif item.t_status == 3 %}
             <span class="label label-danger">卖出
         {% elif item.t_status == 5 %}
-            <span class="label label-info">入池
+            <span class="label label-info">在池
         {% endif %}
         </span></td>
     <td>

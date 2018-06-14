@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^ticket/ticket_add/', views.ticket_add, name='ticket_add'),
     url(r'^ticket/ticket_import', views.ticket_import, name='ticket_import'),
     url(r'^ticket/ticket_index/(?P<pk>\d+)/$', views.ticket_index, name='ticket_index'),
+    url(r'^ticket/ticket_fix/', views.ticket_fix, name='ticket_fix'),
     # url(r'^ticket_delete/(?P<pk>\d+)/$', views.ticket_delete, name='ticket_delete'),
     # url(r'^ticket_finish/(?P<pk>\d+)/$', views.ticket_finish, name='ticket_finish'),
 
