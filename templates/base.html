@@ -171,6 +171,10 @@
                                 class="active"
                             {% endif %}><a href="{% url 'ticket_needcollect' %}"><i class="fa fa-circle-o"></i>待收款</a></li>
                     <li
+                            {% if '/tickets_needfix/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'tickets_needfix' %}"><i class="fa fa-circle-o"></i>待补充</a></li>
+                    <li
                             {% if '/ticket_import/' in request.path %}
                                 class="active"
                             {% endif %}><a href="{% url 'ticket_import' %}"><i class="fa fa-circle-o"></i>导入</a></li>

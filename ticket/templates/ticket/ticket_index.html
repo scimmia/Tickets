@@ -76,7 +76,7 @@
                 </div>
                 <!-- /.box -->
             </div>
-            <div class="col-md-4" {% if ticket_ins.gourujiage > 0 %}
+            <div class="col-md-4" {% if ticket_ins.pay_status == 2 %}
                  style="display: none"
             {% endif %}>
                 <div class="box box-danger">
@@ -85,13 +85,6 @@
                     </div>
                     <div class="box-body">
 
-                        <div class="col-md-12">
-                            <span class="destit">票面金额 (万元)</span>
-                            <div class="inp-box">
-                                <input name="je" class="textinput textInput form-control" value=""
-                                       type="number">
-                            </div>
-                        </div>
                         <div class="col-md-6" style="display: block;">
                             <div class="li-inpbox">
                                 <span class="destit">月利率 (‰)</span>
@@ -210,7 +203,7 @@
         });
 
         function calctxlxoneb() {
-            var je = $("input[name='je']").val();
+            var je = $("#id_piaomianjiage").val()/10000.0;
             var everyten = $("input[name='everyten']").val();
             var ts = 0;
             var txlx = Math.round(everyten * je) / 10;
@@ -226,7 +219,7 @@
         }
 
         function calctxlxone() {
-            var je = $("input[name='je']").val();
+            var je = $("#id_piaomianjiage").val()/10000.0;
             var txlv = $("input[name='txlv']").val();
             var pjenddate = $("input[name='pjenddate']").val();
             var outpjdate = $("input[name='outpjdate']").val();

@@ -296,6 +296,18 @@ def ticket_list(request):
     #跳转到相应页面，并将值传递过去
     return render(request,list_template,context)
 
+@login_required
+def tickets_needfix(request):
+    raw_data = Ticket.objects.filter(pay_status=1,payorder=None,gourujiage=0).order_by('-goumairiqi')
+    print(raw_data)
+    list_template = 'ticket/tickets_needfix.html'
+    context = {
+        'data': raw_data,
+    }
+    print(context)
+    #跳转到相应页面，并将值传递过去
+    return render(request,list_template,context)
+
 def ticket_needselect(request,index):
 
     if index == 1:
@@ -587,6 +599,7 @@ def ticket_import(request):
                 m.chupiaoriqi = item.chupiaoriqi
                 m.daoqiriqi = item.daoqiriqi
                 m.piaomianjiage = item.piaomianjiage
+                m.gourujiage = item.piaomianjiage
                 m.gongyingshang = item.chupiaoren
                 m.save()
                 pass

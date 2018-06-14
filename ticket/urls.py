@@ -19,6 +19,7 @@ urlpatterns = [
 
     # 任务列表
     url(r'^ticket/ticket_list/', views.ticket_list, name='ticket_list'),
+    url(r'^ticket/tickets_needfix/', views.tickets_needfix, name='tickets_needfix'),
     url(r'^ticket/ticket_needpay/', views.ticket_needpay, name='ticket_needpay'),
     url(r'^ticket/ticket_needcollect/', views.ticket_needcollect, name='ticket_needcollect'),
     url(r'^ticket/ticket_topay/', views.ticket_topay, name='ticket_topay'),
