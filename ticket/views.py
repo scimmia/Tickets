@@ -17,7 +17,8 @@ from django.urls import reverse
 
 from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm
-from ticket.models import Card, Fee, Ticket,Order, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport
+from ticket.models import Card, Fee, Ticket, Order, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport, \
+    StoreTicketsImport
 
 
 @login_required
@@ -614,6 +615,151 @@ def ticket_import(request):
     # context['forma'] = form
     return render(request, 'ticket/ticket_import.html',  locals())
 
+
+def flow_import(request):
+    context = {}
+    # 如果form通过POST方法发送数据
+    if request.method == 'GET':
+        stamp = request.GET.get('stamp')
+        items = StoreTicketsImport.objects.filter(stamp=stamp)
+    if request.method == "POST":
+        if 'upfile' in request.POST.keys():
+            stamp = uuid.uuid1()
+            path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
+            if not os.path.exists(path):
+                os.makedirs(path)
+            with open(path + 'tmp.csv', 'wb+')as destination:
+                for chunk in request.FILES['file'].chunks():
+                    destination.write(chunk)
+            with open(path + 'tmp.csv', mode='r', encoding='utf-8', newline='') as f:
+                # 此处读取到的数据是将每行数据当做列表返回的
+                reader = csv.reader(f)
+                for row in reader:
+                    # 此时输出的是一行行的列表
+                    # print(row)
+                    a = len(row)
+                    if len(row) == 10:
+                        if row[0].startswith('2'):
+                            m = StoreTicketsImport()
+                            m.stamp = stamp
+                            m.qianpaipiaohao = row[1]
+                            m.piaohao = row[2]
+                            m.maipiaoriqi = row[0].replace(' ','').replace('\t','').replace('/','-')
+                            m.chupiaoren = row[9]
+                            m.piaomianjiage = float(row[6].replace(',',''))
+                            if row[7].isdigit():
+                                m.piaomianlixi = float(row[7])
+                            m.chupiaoriqi = row[4].replace(' ','').replace('\t','').replace('/','-')
+                            m.daoqiriqi = row[5].replace(' ','').replace('\t','').replace('/','-')
+                            m.leixing = '流水表'
+                            m.chupiaohang = row[3]
+                            m.save()
+                            print(row)
+
+            return redirect('%s?stamp=%s' % (reverse('flow_import'),stamp))
+        elif 'savefile' in request.POST.keys():
+            stamp = request.GET.get('stamp')
+            print(stamp)
+            StoreTicketsImport.objects.filter(stamp=stamp).update(saved=True)
+            items = StoreTicketsImport.objects.filter(stamp=stamp)
+            for item in items:
+                m = Ticket()
+                m.qianpaipiaohao = item.qianpaipiaohao
+                m.piaohao = item.piaohao
+                m.chupiaohang = item.chupiaohang
+                m.chupiaoriqi = item.chupiaoriqi
+                m.daoqiriqi = item.daoqiriqi
+                m.piaomianjiage = item.piaomianjiage
+                m.gourujiage = item.piaomianjiage - item.piaomianlixi
+                m.pay_status = 2
+                m.gongyingshang = item.chupiaoren
+                m.save()
+                m.goumairiqi = item.maipiaoriqi
+                m.save()
+                pass
+
+            return redirect('ticket_list')
+            pass
+        # return redirect('ticket_import',)
+
+    # 如果是通过GET方法请求数据，返回一个空的表单
+    # else:
+        # form = NameForm()
+    # context['forma'] = form
+    return render(request, 'ticket/ticket_import.html',  locals())
+
+def pool_import(request):
+    context = {}
+    # 如果form通过POST方法发送数据
+    if request.method == 'GET':
+        stamp = request.GET.get('stamp')
+        items = StoreTicketsImport.objects.filter(stamp=stamp)
+    if request.method == "POST":
+        if 'upfile' in request.POST.keys():
+            stamp = uuid.uuid1()
+            path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
+            if not os.path.exists(path):
+                os.makedirs(path)
+            with open(path + 'tmp.csv', 'wb+')as destination:
+                for chunk in request.FILES['file'].chunks():
+                    destination.write(chunk)
+            with open(path + 'tmp.csv', mode='r', encoding='utf-8', newline='') as f:
+                # 此处读取到的数据是将每行数据当做列表返回的
+                reader = csv.reader(f)
+                for row in reader:
+                    # 此时输出的是一行行的列表
+                    # print(row)
+                    a = len(row)
+                    if len(row) == 10:
+                        if row[0].startswith('2'):
+                            m = StoreTicketsImport()
+                            m.stamp = stamp
+                            m.qianpaipiaohao = row[1]
+                            m.piaohao = row[2]
+                            m.maipiaoriqi = row[0].replace(' ','').replace('\t','').replace('/','-')
+                            m.chupiaoren = row[9]
+                            m.piaomianjiage = float(row[6].replace(',',''))
+                            m.piaomianlixi = m.piaomianjiage - float(row[8].replace(',',''))
+                            m.chupiaoriqi = row[4].replace(' ','').replace('\t','').replace('/','-')
+                            m.daoqiriqi = row[5].replace(' ','').replace('\t','').replace('/','-')
+                            m.leixing = '流水表'
+                            m.chupiaohang = row[3]
+                            m.save()
+                            print(row)
+
+            return redirect('%s?stamp=%s' % (reverse('pool_import'),stamp))
+        elif 'savefile' in request.POST.keys():
+            stamp = request.GET.get('stamp')
+            print(stamp)
+            StoreTicketsImport.objects.filter(stamp=stamp).update(saved=True)
+            items = StoreTicketsImport.objects.filter(stamp=stamp)
+            for item in items:
+                m = Ticket()
+                m.qianpaipiaohao = item.qianpaipiaohao
+                m.piaohao = item.piaohao
+                m.chupiaohang = item.chupiaohang
+                m.chupiaoriqi = item.chupiaoriqi
+                m.daoqiriqi = item.daoqiriqi
+                m.piaomianjiage = item.piaomianjiage
+                m.gourujiage = item.piaomianjiage - item.piaomianlixi
+                m.pay_status = 2
+                m.t_status = 5
+                m.gongyingshang = item.chupiaoren
+                m.save()
+                m.goumairiqi = item.maipiaoriqi
+                m.save()
+                ticket_inpool(m.pk)
+                pass
+
+            return redirect('ticket_list')
+            pass
+        # return redirect('ticket_import',)
+
+    # 如果是通过GET方法请求数据，返回一个空的表单
+    # else:
+        # form = NameForm()
+    # context['forma'] = form
+    return render(request, 'ticket/ticket_import.html',  locals())
 
 def handle_upload_file(file):
     path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
