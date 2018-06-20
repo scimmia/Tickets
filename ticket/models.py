@@ -18,7 +18,9 @@ class Card(models.Model):
 class Order(models.Model):
     ORDER_TYPE= (
         (1,u'付款订单'),
-        (2,u'付款订单'),
+        (2,u'收款订单'),
+        (3,u'付款订单'),
+        (4,u'收款订单'),
     )
     order_type = models.IntegerField(
         u'订单类型',
@@ -206,6 +208,20 @@ class PoolFee(models.Model):
     class Meta:
         verbose_name = '资金池费用'
         verbose_name_plural = '资金池费用'
+class SuperLoan(models.Model):
+    name = models.CharField(u'贷款内容', max_length=50)
+    money = models.FloatField(u'金额', default=0)
+    ispoolrepay = models.BooleanField(u'是否保证金还款',default=False)
+    yinhangka = models.ForeignKey( Card, related_name='loan_card', verbose_name=u'还款银行卡' , blank=True,null=True)
+    isfinished = models.BooleanField(u'是否还清',default=False)
+    repay_date = models.DateTimeField(u'还款日期', blank=True,null=True)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+    class Meta:
+        verbose_name = '超短贷'
+        verbose_name_plural = '超短贷'
 
 class StoreFee(models.Model):
     ticket = models.ForeignKey( Ticket, related_name='storefee_ticket', verbose_name=u'票据' ,  blank=True,null=True)
@@ -236,6 +252,7 @@ class Pool(models.Model):
     usedmoney = models.FloatField(u'已用额度', default=0)
     ticket = models.ForeignKey( Ticket, related_name='pool_ticket', verbose_name=u'票据' ,  blank=True,null=True)
     card = models.ForeignKey( Card, related_name='pool_card', verbose_name=u'银行卡' ,  blank=True,null=True)
+    loan = models.ForeignKey( SuperLoan, related_name='pool_loan', verbose_name=u'超短贷' ,  blank=True,null=True)
     money = models.FloatField(u'金额', default=0)
     pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
 
@@ -245,6 +262,9 @@ class Pool(models.Model):
         (3,u'保证金收入'),
         (4,u'保证金支出'),
         (5,u'开票付款'),
+        (6,u'新增超短贷'),
+        (7,u'超短贷还款'),
+        (8,u'保证金还超短贷'),
     )
     pool_status = models.IntegerField(
         u'费用内容',

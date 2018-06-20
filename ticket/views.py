@@ -1,6 +1,8 @@
 import csv
+import datetime
 import json
 import os
+import time
 import uuid
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -16,9 +18,10 @@ from django.template import loader
 from django.urls import reverse
 
 from ticket.filters import TicketFilter
-from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm
+from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm, \
+    SuperLoanForm
 from ticket.models import Card, Fee, Ticket, Order, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport, \
-    StoreTicketsImport
+    StoreTicketsImport, SuperLoan
 
 
 @login_required
@@ -922,6 +925,96 @@ def pool_dash(request):
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/pool_dash.html', context)
+
+
+def loan_create(loan):
+    p = Pool.objects.last()
+    if not p:
+        p = Pool()
+    pool = Pool()
+    pool.totalmoney = p.totalmoney - loan.money
+    pool.promoney = p.promoney
+    pool.unusemoney = p.unusemoney - loan.money
+    pool.usedmoney = p.usedmoney
+    pool.loan = loan
+    pool.money = 0 - loan.money
+    pool.pool_status = 6
+    pool.save()
+    pass
+def loan_repay(loan):
+    p = Pool.objects.last()
+    if not p:
+        p = Pool()
+    pool = Pool()
+    pool.totalmoney = p.totalmoney + loan.money
+    pool.promoney = p.promoney
+    pool.unusemoney = p.unusemoney + loan.money
+    pool.usedmoney = p.usedmoney
+    pool.loan = loan
+    pool.money = loan.money
+    pool.pool_status = 7
+    pool.save()
+    pass
+def loan_promoneypay(loan):
+    p = Pool.objects.last()
+    if not p:
+        p = Pool()
+    pool = Pool()
+    pool.totalmoney = p.totalmoney - loan.money
+    pool.promoney = p.promoney - loan.money
+    pool.unusemoney = p.unusemoney
+    pool.usedmoney = p.usedmoney
+    pool.loan = loan
+    pool.money = 0 - loan.money
+    pool.pool_status = 8
+    pool.save()
+    pass
+
+def pool_loan(request):
+    loan_data = SuperLoan.objects.all().order_by('-pub_date')
+    card_data = Card.objects.all()
+
+    form = SuperLoanForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            loan = SuperLoan()
+            loan.name = form.cleaned_data.get('name')
+            loan.money = form.cleaned_data.get('money')
+            loan.save()
+            loan_create(loan)
+            return redirect('pool_loan')
+
+    context = {
+        'data': loan_data,
+        'card_data': card_data,
+        'form':form,
+    }
+    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
+    return render(request, 'ticket/pool_superloan.html', context)
+
+def pool_loan_repay(request):
+    if request.method == 'POST':
+        ids = request.POST['ids']
+        if len(ids) > 0:
+            loans = SuperLoan.objects.filter(id__in=ids.split(','))
+
+            for t in loans:
+                if not t.isfinished:
+                    t.isfinished = True
+                    if 'all_pool' in request.POST.keys():
+                        t.ispoolrepay = True
+                        loan_promoneypay(t)
+                    elif 'all_card' in request.POST.keys():
+                        t.ispoolrepay = False
+                        t.yinhangka = Card.objects.get(id = int(request.POST['yinhangka']))
+                        card_fee(t.yinhangka.pk,0-t.money,'还超短贷')
+                    t.repay_date = datetime.datetime.now()
+                    t.save()
+                    loan_repay(t)
+
+        return redirect('pool_loan')
+    return redirect('pool_loan')
+
 
 def pool_pro(request):
     pool = Pool.objects.last()

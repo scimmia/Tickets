@@ -1,0 +1,240 @@
+{% extends "ticket/dashboard.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            超短贷
+        </h1>
+    </section>
+
+    <section class="content">
+        <div class="row">
+
+            <div class="col-xs-8">
+                <table id="table_id" class="table table-bordered table-hover">
+                    <thead>
+                    <!--表格头部-->
+                    <th style="display: none"></th>
+                    <th style="display: none">ID</th>
+                    <th>添加日期</th>
+                    <th>贷款内容</th>
+                    <th>金额</th>
+                    <th style="display: none">是否还清</th>
+                    <th>还款情况</th>
+                    </thead>
+                    <!--表格内容-->
+                    <tbody>
+                    {% for item in data %}
+                        <tr>
+                            <!--通过for循环从data取出的具体表格内容-->
+                            <td style="display: none"></td>
+                            <th style="display: none">{{ item.id }}</th>
+                            <td>{{ item.pub_date }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.money }}</td>
+                            <td style="display: none">{{ item.isfinished }}</td>
+                            <td>
+                                {% if item.isfinished %}
+                                    {% if item.ispoolrepay %}
+                                        <span class="label label-success">保证金还款
+                                    {% else %}
+                                        <span class="label label-info">{{ item.yinhangka }}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="label label-danger">无
+                                {% endif %}
+                                </span></td>
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+            <form method='POST' id="signupForm" action="" onsubmit="return check();">{% csrf_token %}
+                <div class="col-md-3">
+
+                    <div class="box box-danger">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">新增超短贷：</h3>
+                        </div>
+                        <div class="box-body">
+                            {{ form | crispy }}
+                        </div>
+
+                        <button type="submit" class="btn btn-danger center-block" id="add_fee">
+                            提交
+                            <i class="ace-icon fa fa-cart-plus icon-on-right bigger-110"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+            <div class="col-xs-3 pull-left">
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">新增还款：</h3>
+                    </div>
+                    <div class="box-body">
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <th>已选择:</th>
+                                <td style="text-align:right;"><a id="selected_num">{{ order.total_sum }}</a>张</td>
+                            </tr>
+                            <tr>
+                                <th>合计金额:</th>
+                                <td style="text-align:right;"><a id="selected_piaomian">{{ order.payfee_sum }}</a>元</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <form method='POST' action="{% url 'pool_loan_repay' %}" id="signupForm"
+                          onsubmit="return check();">{% csrf_token %}
+                        <input name="ids" value="" style="display: none"
+                                                       class="textinput textInput form-control"
+                                                       id="id_ids" type="text">
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-warning center-block" name="all_pool">
+                                保证金还款
+                                <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+                            </button>
+                        </div>
+                        <div class="box-footer">
+                            <div class="input-group">
+                                <span class="input-group-addon">银行卡</span>
+                                <select class="js-single form-control" name="yinhangka">
+                                    {% for v in card_data %}
+                                        <option value="{{ v.id }}">{{ v.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-warning center-block" name="all_card">
+                                银行卡还款
+                                <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+
+            </div>
+        </div>
+        <div class="row">
+
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block script %}
+    <!-- page script -->
+    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+            var t = $('#table_id').DataTable({
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'ordering': true,
+                'info': true,
+                'autoWidth': false,
+                'scrollY': 250,
+                "language": {
+                    "processing": "处理中...",
+                    "lengthMenu": "显示 _MENU_ 项结果",
+                    "zeroRecords": "没有匹配结果",
+                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "infoPostFix": "",
+                    "search": "搜索:",
+                    "searchPlaceholder": "搜索...",
+                    "url": "",
+                    "emptyTable": "表中数据为空",
+                    "loadingRecords": "载入中...",
+                    "infoThousands": ",",
+                    "paginate": {
+                        "first": "首页",
+                        "previous": "上页",
+                        "next": "下页",
+                        "last": "末页"
+                    },
+                    "aria": {
+                        "paginate": {
+                            'first': '首页',
+                            'previous': '上页',
+                            'next': '下页',
+                            'last': '末页'
+                        },
+                        "sortAscending": ": 以升序排列此列",
+                        "sortDescending": ": 以降序排列此列"
+                    },
+                    "decimal": "-",
+                    "thousands": "."
+                },
+                "columnDefs": [{
+                    'data': null,
+                    "orderable": false,
+                    "targets": 0,
+                    'defaultContent': "<input type ='checkbox' name='test' class='icheckbox_minimal' value=''>",
+                }, {
+                    "orderable": false, "targets": [0],  //设置第一列和最后一列不可排序
+                }],
+                "order": [[1, 'asc']]
+            });
+            $('#table_id tbody').on('click', 'tr', function () {
+                $(this).toggleClass('selected');
+                var a = t.rows('.selected').data();
+                console.log(a.length);
+                $("#selected_num").text(a.length);
+                var total = 0;
+                var ids = '';
+                for (var i = 0; i < a.length; i++) {
+                    console.log(a[i][1]);
+                    total = total + parseFloat(a[i][4]);
+                    ids = ids + parseFloat(a[i][1]) + ',';
+
+                }
+                ids = (ids.substring(ids.length - 1) == ',') ? ids.substring(0, ids.length - 1) : ids;
+
+                $("#selected_piaomian").text(total);
+                $("#id_selected_piaomian").val(total);
+                $("#id_selected_num").val(a.length);
+                $("#id_ids").val(ids);
+
+            });
+
+            t.on('order.dt search.dt',
+                function () {
+                    t.column(0, {
+                        search: 'applied',
+                        order: 'applied'
+                    }).nodes().each(function (cell, i) {
+                        cell.innerHTML = i + 1;
+                    });
+                }).draw();
+            $('.js-single').select2({
+                height: '40px',
+            });
+        });
+    </script>
+
+{% endblock %}

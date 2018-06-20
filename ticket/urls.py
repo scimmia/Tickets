@@ -47,6 +47,8 @@ urlpatterns = [
 
     url(r'^pool/pool_dash/', views.pool_dash, name='pool_dash'),
     url(r'^pool/pool_pro/', views.pool_pro, name='pool_pro'),
+    url(r'^pool/pool_loan/', views.pool_loan, name='pool_loan'),
+    url(r'^pool/pool_loan_repay/', views.pool_loan_repay, name='pool_loan_repay'),
     # url(r'^card/card_add/', views.card_add, name='card_add'),
     # url(r'^card/card_edit/(?P<pk>\d+)/$', views.card_edit, name='card_edit'),
     # url(r'^card/card_delete/(?P<pk>\d+)/$', views.ticket_delete, name='ticket_delete'),
