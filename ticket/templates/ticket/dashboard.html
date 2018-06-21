@@ -3,9 +3,21 @@
 {% block title %}仪表盘{% endblock %}
 
 {% block css %}
-
-
-
+<style type="text/css">
+.tabtop13 td{
+	background-color:#ffffff;
+	height:25px;
+	line-height:150%;
+}
+.font-center{ text-align:center}
+.btbg{background:#e9faff !important;}
+.titfont {
+	font-size: 16px;
+	font-weight: bold;
+	color: #255e95;
+	background-color:#e9faff;
+}
+</style>
 {% endblock %}
 
 
@@ -32,30 +44,46 @@
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <table class="table table-bordered table-striped">
+                        <table class="table table-bordered table-striped" border="0" cellspacing="1" cellpadding="4"  align="center">
                             <tbody>
                             <tr>
-                                <th colspan="2">库存</th>
-                                <th colspan="2">在池</th>
+                                <th class="btbg font-center titfont"></th>
+                                <th class="btbg font-center titfont" align="center" >库存</th>
+                                <th  class="btbg font-center titfont">在池</th>
                             </tr>
                             <tr>
-                                <th>电票</th>
-                                <th>纸票</th>
-                                <th>电票</th>
-                                <th>纸票</th>
+                                <th class="btbg font-center titfont" rowspan="2">电票</th>
+                                <td ><span class="pull-right">{{ kudianc }}张</span> </td>
+                                <td ><span class="pull-right">{{ chidianc }}张</span></td>
                             </tr>
                             <tr>
-                                <td>{{ kudianc }}张，{{ kudians }}元</td>
-                                <td>{{ kuzhic }}张，{{ kuzhis }}元</td>
-                                <td>{{ chidianc }}张，{{ chidians }}元</td>
-                                <td>{{ chizhic }}张，{{ chizhis }}元</td>
+                                <td><span class="pull-right">{{ kudians }}元</span></td>
+                                <td><span class="pull-right">{{ chidians }}元</span></td>
                             </tr>
                             <tr>
-                                <td colspan="2" align="center">{{ kuc }}张，{{ kus }}元</td>
-                                <td colspan="2" align="center">{{ chic }}张，{{ chis }}元</td>
+                                <th class="btbg font-center titfont" rowspan="2">纸票</th>
+                                <td><span class="pull-right">{{ kuzhic }}张</span></td>
+                                <td><span class="pull-right">{{ chizhic }}张</span></td>
                             </tr>
                             <tr>
-                                <td colspan="4" align="center">{{ allc }}张，{{ alls }}元</td>
+                                <td><span class="pull-right">{{ kuzhis }}元</span></td>
+                                <td><span class="pull-right">{{ chizhis }}元</span></td>
+                            </tr>
+                            <tr>
+                                <th class="btbg font-center titfont" rowspan="2">合计</th>
+                                <td><span class="pull-right">{{ kuc }}张</span></td>
+                                <td><span class="pull-right">{{ chic }}张</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="pull-right">{{ kus }}元</span></td>
+                                <td><span class="pull-right">{{ chis }}元</span></td>
+                            </tr>
+                            <tr>
+                                <th class="btbg font-center titfont" rowspan="2" >总计</th>
+                                <td  colspan="2" align="center">{{ allc }}张</td>
+                            </tr>
+                            <tr>
+                                <td  colspan="2" align="center">{{ alls }}元</td>
                             </tr>
                             </tbody>
                         </table>

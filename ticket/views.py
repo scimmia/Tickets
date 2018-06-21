@@ -39,20 +39,20 @@ def dashboard(request):
         if t['t_status'] == 1:
             if t['t_type'] == 1:
                 kuzhic = t['t_count']
-                kuzhis = t['sum_money']
+                kuzhis = round(t['sum_money'],2)
                 pass
             elif t['t_type'] == 2:
                 kudianc = t['t_count']
-                kudians = t['sum_money']
+                kudians = round(t['sum_money'],2)
                 pass
         elif t['t_status'] == 5:
             if t['t_type'] == 1:
                 chizhic = t['t_count']
-                chizhis = t['sum_money']
+                chizhis = round(t['sum_money'],2)
                 pass
             elif t['t_type'] == 2:
                 chidianc = t['t_count']
-                chidians = t['sum_money']
+                chidians = round(t['sum_money'],2)
                 pass
         pass
     kuc = kudianc + kuzhic
