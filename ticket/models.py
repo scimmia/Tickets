@@ -19,8 +19,6 @@ class Order(models.Model):
     ORDER_TYPE= (
         (1,u'付款订单'),
         (2,u'收款订单'),
-        (3,u'付款订单'),
-        (4,u'收款订单'),
     )
     order_type = models.IntegerField(
         u'订单类型',
@@ -35,6 +33,32 @@ class Order(models.Model):
     payfee_sum = models.FloatField(u'已支付金额', default=0)
     payfee_count = models.IntegerField(u'已支付数目', default=0)
     total_sum = models.FloatField(u'总金额', default=0)
+    needpay_sum = models.FloatField(u'剩余金额', default=0)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '订单'
+        verbose_name_plural = '订单'
+
+    def __str__(self):
+        return self.order_type
+class Loan_Order(models.Model):
+    ORDER_TYPE= (
+        (3,u'借款订单'),
+        (4,u'贷款订单'),
+    )
+    order_type = models.IntegerField(
+        u'订单类型',
+        choices=ORDER_TYPE,
+        default=3,
+    )
+    jiedairen = models.CharField(u'借贷人', max_length=100)
+    yinhangka = models.ForeignKey( Card, related_name='loanorder_card', verbose_name=u'借贷卡' , blank=False,null=False)
+    money_benjin = models.FloatField(u'本金', default=0)
+    money_lixi = models.FloatField(u'利息', default=0)
+    money_total = models.FloatField(u'应收付金额', default=0)
+    payfee_sum = models.FloatField(u'已支付金额', default=0)
+    payfee_count = models.IntegerField(u'已支付数目', default=0)
     needpay_sum = models.FloatField(u'剩余金额', default=0)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
@@ -156,9 +180,25 @@ class StoreTicketsImport(models.Model):
         verbose_name_plural = '导入票据'
     def __str__(self):
         return self.piaohao
+class SuperLoan(models.Model):
+    name = models.CharField(u'贷款内容', max_length=50)
+    money = models.FloatField(u'金额', default=0)
+    ispoolrepay = models.BooleanField(u'是否保证金还款',default=False)
+    yinhangka = models.ForeignKey( Card, related_name='loan_card', verbose_name=u'还款银行卡' , blank=True,null=True)
+    isfinished = models.BooleanField(u'是否还清',default=False)
+    repay_date = models.DateTimeField(u'还款日期', blank=True,null=True)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+    class Meta:
+        verbose_name = '超短贷'
+        verbose_name_plural = '超短贷'
 
 class Fee(models.Model):
     order = models.ForeignKey( Order, related_name='order_fee', verbose_name=u'订单费用' ,  blank=True,null=True)
+    loanorder = models.ForeignKey( Loan_Order, related_name='loanorder_fee', verbose_name=u'借贷费用' ,  blank=True,null=True)
+    superloan = models.ForeignKey( SuperLoan, related_name='superloan_fee', verbose_name=u'超短贷' ,  blank=True,null=True)
     yinhangka = models.ForeignKey( Card, related_name='fee_card', verbose_name=u'银行卡' , blank=False,null=False)
     name = models.CharField(u'费用内容', max_length=50)
     money = models.FloatField(u'金额', default=0)
@@ -167,6 +207,17 @@ class Fee(models.Model):
     FEE_TYPE= (
         (11,u'银行卡存入'),
         (12,u'银行卡取出'),
+        (21,u'从保证金提取'),
+        (22,u'充值到保证金'),
+        (31,u'还超短贷'),
+        (41,u'借款给他人'),
+        (42,u'从他人处贷款'),
+        (43,u'收回借款'),
+        (44,u'偿还贷款'),
+        (45,u'收回借款费用支出'),
+        (46,u'偿还贷款费用支出'),
+        (47,u'收回借款费用收入'),
+        (48,u'偿还贷款费用收入'),
         (1,u'付款订单'),
         (2,u'付款订单'),
         (3,u'付款支付'),
@@ -208,20 +259,6 @@ class PoolFee(models.Model):
     class Meta:
         verbose_name = '资金池费用'
         verbose_name_plural = '资金池费用'
-class SuperLoan(models.Model):
-    name = models.CharField(u'贷款内容', max_length=50)
-    money = models.FloatField(u'金额', default=0)
-    ispoolrepay = models.BooleanField(u'是否保证金还款',default=False)
-    yinhangka = models.ForeignKey( Card, related_name='loan_card', verbose_name=u'还款银行卡' , blank=True,null=True)
-    isfinished = models.BooleanField(u'是否还清',default=False)
-    repay_date = models.DateTimeField(u'还款日期', blank=True,null=True)
-    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-    class Meta:
-        verbose_name = '超短贷'
-        verbose_name_plural = '超短贷'
 
 class StoreFee(models.Model):
     ticket = models.ForeignKey( Ticket, related_name='storefee_ticket', verbose_name=u'票据' ,  blank=True,null=True)

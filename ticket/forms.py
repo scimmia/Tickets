@@ -2,7 +2,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from ticket.models import Ticket, Card, Pool, Fee
+from ticket.models import Ticket, Card, Pool, Fee, Loan_Order
 
 
 class TicketForm(ModelForm):
@@ -38,7 +38,7 @@ class TicketFeeForm(ModelForm):
         model = Fee
 
         #在Form中不显示node_signer这个字段
-        exclude = ['ticket','order','fee_type','pub_date',]
+        fields = ['yinhangka','name','money',]
 class TicketOrderFeeForm(ModelForm):
     isOrderFee = forms.BooleanField(label="是否额外费用",required=False,)
     fee_status = forms.ChoiceField(label="额外费用类型",required=False,
@@ -54,8 +54,7 @@ class TicketOrderFeeForm(ModelForm):
         #该ModelForm参照Model: Node
         model = Fee
 
-        #在Form中不显示node_signer这个字段
-        exclude = ['ticket','order','fee_type','pub_date',]
+        fields = ['yinhangka','name','money',]
 class CardForm(ModelForm):
     #自定义ModelForm的内容
     class Meta:
@@ -75,12 +74,6 @@ class PoolForm(ModelForm):
         widget=forms.Select,
         initial='1',
     )
-
-    # def __init__(self, *args, **kwargs):
-    #     # first call parent's constructor
-    #     super(PoolForm, self).__init__(*args, **kwargs)
-    #     # there's a `fields` property now
-    #     self.fields['card'].required = True
     class Meta:
         #该ModelForm参照Model: Node
         model = Pool
@@ -90,3 +83,10 @@ class PoolForm(ModelForm):
 class SuperLoanForm(forms.Form):
     name = forms.CharField(label="贷款内容",required=True)
     money = forms.FloatField(label="金额",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+class LoanForm(ModelForm):
+    class Meta:
+        #该ModelForm参照Model: Node
+        model = Loan_Order
+        #在Form中不显示node_signer这个字段
+        fields = ['jiedairen','money_benjin','money_lixi','yinhangka',]

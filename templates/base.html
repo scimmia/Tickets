@@ -169,7 +169,8 @@
                     <li
                             {% if '/ticket_needcollect/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_needcollect' %}"><i class="fa fa-circle-o"></i>待收款</a></li>
+                            {% endif %}><a href="{% url 'ticket_needcollect' %}"><i class="fa fa-circle-o"></i>待收款</a>
+                    </li>
                     <li
                             {% if '/tickets_needfix/' in request.path %}
                                 class="active"
@@ -180,7 +181,7 @@
                             {% endif %}><a href="{% url 'ticket_import' %}"><i class="fa fa-circle-o"></i>导入</a></li>
                 </ul>
                 </li>
-                            {% if '/order/' in request.path %}
+                {% if '/order/' in request.path %}
                     <li class="active treeview">
 
                         {% else %}
@@ -196,11 +197,38 @@
                     <li
                             {% if '/ticket_payorders/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_payorders' %}"><i class="fa fa-circle-o"></i>付款订单</a></li>
+                            {% endif %}><a href="{% url 'ticket_payorders' %}"><i class="fa fa-circle-o"></i>付款订单</a>
+                    </li>
                     <li
                             {% if '/ticket_sellorders/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_sellorders' %}"><i class="fa fa-circle-o"></i>收款订单</a></li>
+                            {% endif %}><a href="{% url 'ticket_sellorders' %}"><i class="fa fa-circle-o"></i>收款订单</a>
+                    </li>
+                </ul>
+                </li>
+                {% if '/loan/' in request.path %}
+                    <li class="active treeview">
+
+                        {% else %}
+                    <li class="treeview">
+                {% endif %}
+                <a href="#">
+                    <i class="fa fa-dashboard"></i> <span>借贷</span>
+                    <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li
+                            {% if '/borrow_list/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'borrow_list' %}"><i class="fa fa-circle-o"></i>借款订单</a>
+                    </li>
+                    <li
+                            {% if '/loan_list/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'loan_list' %}"><i class="fa fa-circle-o"></i>贷款订单</a>
+                    </li>
                 </ul>
                 </li>
                 {% if '/card/' in request.path %}
@@ -266,7 +294,8 @@
                     <li
                             {% if '/inpoolPercent' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'inpoolPercent' %}"><i class="fa fa-circle-o"></i>入池额度比例</a></li>
+                            {% endif %}><a href="{% url 'inpoolPercent' %}"><i class="fa fa-circle-o"></i>入池额度比例</a>
+                    </li>
                 </ul>
                 </li>
             </ul>

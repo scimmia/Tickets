@@ -19,9 +19,9 @@ from django.urls import reverse
 
 from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm, \
-    SuperLoanForm
+    SuperLoanForm, LoanForm
 from ticket.models import Card, Fee, Ticket, Order, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport, \
-    StoreTicketsImport, SuperLoan
+    StoreTicketsImport, SuperLoan, Loan_Order
 
 
 @login_required
@@ -157,15 +157,17 @@ def ticket_poolpay(ticket_pk):
     pool.pool_status = 5
     pool.save()
 
-def card_fee(card_pk,money,name):
+def card_fee(card_pk,money,name,fee_type):
     card = Card.objects.get(pk=card_pk)
     fee_ins = Fee()
     fee_ins.yinhangka = card
     fee_ins.money = money
     fee_ins.name = name
+    fee_ins.fee_type = fee_type
     fee_ins.save()
     card.money = card.money + fee_ins.money
     card.save()
+    return fee_ins
 
 #增加
 def ticket_add(request):
@@ -874,6 +876,108 @@ def card_edit(request,  pk):
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/card_edit.html', context)
+
+
+def loan_orderlist(request,index):
+    #从根据不同的请求，来获取相应的数据,并跳转至相应页面
+    if index == 3:
+        isloan = False
+    else:
+        isloan = True
+    list_template = 'ticket/loan_orders.html'
+
+    loanform = LoanForm(request.POST or None)
+    if request.method == 'POST':
+        if loanform.is_valid():
+            instance = loanform.save(commit=False)
+            instance.order_type = index
+            instance.money_total = loanform.cleaned_data.get('money_benjin')+loanform.cleaned_data.get('money_lixi')
+            instance.needpay_sum = loanform.cleaned_data.get('money_benjin')+loanform.cleaned_data.get('money_lixi')
+            instance.save()
+            if index == 3:
+                fee = card_fee(instance.yinhangka.pk, 0 - loanform.cleaned_data.get('money_benjin'), '借款给他人',41)
+                fee.loanorder = instance
+                fee.save()
+                return redirect('borrow_list')
+            else:
+                fee = card_fee(instance.yinhangka.pk, loanform.cleaned_data.get('money_benjin'), '从他人处贷款',42)
+                fee.loanorder = instance
+                fee.save()
+                return redirect('loan_list')
+            pass
+    raw_data = Loan_Order.objects.filter(order_type=index).order_by('-pub_date')
+    context = {
+        'data': raw_data,
+        'isloan': isloan,
+        'loanform': loanform,
+    }
+    return render(request,list_template,context)
+def borrow_list(request):
+    return loan_orderlist(request,3)
+def loan_list(request):
+    return loan_orderlist(request,4)
+def loanorder(request,  pk):
+    order = Loan_Order.objects.get(pk=pk)
+    payfee_data = Fee.objects.filter(Q(loanorder=pk)&(Q(fee_type=40 + order.order_type)|Q(fee_type=42 + order.order_type)|Q(fee_type=44 + order.order_type))).order_by('-pub_date')
+    list_template = 'ticket/loan_order.html'
+    feeform = TicketOrderFeeForm(request.POST or None)
+    if request.method == 'POST':
+        if feeform.is_valid():
+            if feeform.cleaned_data.get('money')>order.needpay_sum and (not feeform.cleaned_data.get('isOrderFee')):
+                message = u'收款金额不能大于待收取金额'
+            else:
+                instance = feeform.save(commit=False)
+                instance.loanorder = order
+                # if order.order_type == 3:#收借款
+                #     if feeform.cleaned_data.get('isOrderFee'):
+                #         if feeform.cleaned_data.get('fee_status') == '1':  # 收入
+                #             instance.fee_type = 47
+                #         elif feeform.cleaned_data.get('fee_status') == '2':  # 支出
+                #             instance.fee_type = 45
+                #             instance.money = -1 * instance.money
+                #     else:
+                #         instance.fee_type = 43
+                #         order.payfee_count = order.payfee_count + 1
+                #         order.payfee_sum = order.payfee_sum + instance.money
+                #         order.needpay_sum = order.total_sum - order.payfee_sum
+                #         order.save()
+                # elif order.order_type == 4:#还贷款
+                #     if feeform.cleaned_data.get('isOrderFee'):
+                #         if feeform.cleaned_data.get('fee_status') == '1':  # 收入
+                #             instance.fee_type = 48
+                #         elif feeform.cleaned_data.get('fee_status') == '2':  # 支出
+                #             instance.fee_type = 46
+                #             instance.money = -1 * instance.money
+                #     else:
+                #         order.payfee_count = order.payfee_count + 1
+                #         order.payfee_sum = order.payfee_sum + instance.money
+                #         order.needpay_sum = order.total_sum - order.payfee_sum
+                #         order.save()
+                #         instance.fee_type = 44
+                #         instance.money = -1 * instance.money
+
+                if feeform.cleaned_data.get('isOrderFee'):
+                    if feeform.cleaned_data.get('fee_status') == '1':  # 收入
+                        instance.fee_type = 44+order.order_type
+                    elif feeform.cleaned_data.get('fee_status') == '2':  # 支出
+                        instance.fee_type = 42+order.order_type
+                        instance.money = -1 * instance.money
+                else:
+                    instance.fee_type = 40+order.order_type
+                    order.payfee_count = order.payfee_count + 1
+                    order.payfee_sum = order.payfee_sum + instance.money
+                    order.needpay_sum = order.needpay_sum - instance.money
+                    order.save()
+                    if order.order_type == 4:  # 还贷款
+                        instance.money = -1 * instance.money
+
+                instance.save()
+                instance.yinhangka.money = instance.yinhangka.money + instance.money
+                instance.yinhangka.save()
+
+                return redirect('loanorder',pk=pk)
+    return render(request,list_template,locals())
+
 def pool_dash(request):
     pool = Pool.objects.last()
     pool_data = Pool.objects.all().order_by('-pub_date')
@@ -897,11 +1001,11 @@ def pool_dash(request):
                 p = Pool()
             money = pool.money
             if form.cleaned_data.get('p_status') == '4':
-                card_fee(pool.card.pk, money, '从保证金提取')
+                card_fee(pool.card.pk, money, '从保证金提取',21)
                 money = 0 - money
                 pool.pool_status = 4
             else:
-                card_fee(pool.card.pk, 0-money,'充值到保证金')
+                card_fee(pool.card.pk, 0-money,'充值到保证金',22)
                 pool.pool_status = 3
 
             pool.totalmoney = p.totalmoney + money
@@ -1007,7 +1111,9 @@ def pool_loan_repay(request):
                     elif 'all_card' in request.POST.keys():
                         t.ispoolrepay = False
                         t.yinhangka = Card.objects.get(id = int(request.POST['yinhangka']))
-                        card_fee(t.yinhangka.pk,0-t.money,'还超短贷')
+                        fee = card_fee(t.yinhangka.pk,0-t.money,'还超短贷',31)
+                        fee.superloan = t
+                        fee.save()
                     t.repay_date = datetime.datetime.now()
                     t.save()
                     loan_repay(t)

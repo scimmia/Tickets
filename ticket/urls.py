@@ -38,6 +38,9 @@ urlpatterns = [
     url(r'^ticket/ticket_fix/', views.ticket_fix, name='ticket_fix'),
     # url(r'^ticket_delete/(?P<pk>\d+)/$', views.ticket_delete, name='ticket_delete'),
     # url(r'^ticket_finish/(?P<pk>\d+)/$', views.ticket_finish, name='ticket_finish'),
+    url(r'^loan/borrow_list/', views.borrow_list, name='borrow_list'),
+    url(r'^loan/loan_list/', views.loan_list, name='loan_list'),
+    url(r'^loan/order/(?P<pk>\d+)/$', views.loanorder, name='loanorder'),
 
     url(r'^card/card_list/', views.card_list, name='card_list'),
     url(r'^card/card_add/', views.card_add, name='card_add'),
