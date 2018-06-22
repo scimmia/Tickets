@@ -62,7 +62,7 @@ def dashboard(request):
     allc = kuc + chic
     alls = kus + chis
     print(ts)
-    return render(request, 'ticket\dashboard.html', locals())
+    return render(request, 'ticket/dashboard.html', locals())
 
 #用户登陆选项，所有的函数将会返回一个template_response的实例，用来描绘页面，同时你也可以在return之前增加一些特定的功能
 #用户登陆
