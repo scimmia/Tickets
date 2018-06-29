@@ -984,6 +984,7 @@ def pool_dash(request):
     data_list, page_range, count, page_nums = pagination(request, pool_data)
     form = PoolForm(request.POST or None)
     form.fields['card'].required = True
+    loanform = SuperLoanForm(request.POST or None)
 
     count_t = Ticket.objects.filter(t_status=5).count()
     sum_money = 0
@@ -1026,11 +1027,12 @@ def pool_dash(request):
         'count': count,
         'page_nums': page_nums,
         'form':form,
+        'loanform':loanform,
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/pool_dash.html', context)
 
-
+#新建超短贷，资金池变化
 def loan_create(loan):
     p = Pool.objects.last()
     if not p:
@@ -1040,11 +1042,13 @@ def loan_create(loan):
     pool.promoney = p.promoney
     pool.unusemoney = p.unusemoney - loan.money
     pool.usedmoney = p.usedmoney
+    pool.loanmoney = p.loanmoney + loan.money
     pool.loan = loan
     pool.money = 0 - loan.money
     pool.pool_status = 6
     pool.save()
     pass
+#偿还超短贷，资金池变化
 def loan_repay(loan):
     p = Pool.objects.last()
     if not p:
@@ -1054,11 +1058,13 @@ def loan_repay(loan):
     pool.promoney = p.promoney
     pool.unusemoney = p.unusemoney + loan.money
     pool.usedmoney = p.usedmoney
+    pool.loanmoney = p.loanmoney - loan.money
     pool.loan = loan
     pool.money = loan.money
     pool.pool_status = 7
     pool.save()
     pass
+#保证金还款，仅涉及保证金变化
 def loan_promoneypay(loan):
     p = Pool.objects.last()
     if not p:
@@ -1075,23 +1081,19 @@ def loan_promoneypay(loan):
     pass
 
 def pool_loan(request):
-    loan_data = SuperLoan.objects.all().order_by('-pub_date')
-    card_data = Card.objects.all()
-
     form = SuperLoanForm(request.POST or None)
     if request.method == 'POST':
         if form.is_valid():
             loan = SuperLoan()
-            loan.name = form.cleaned_data.get('name')
             loan.money = form.cleaned_data.get('money')
             loan.save()
             loan_create(loan)
-            return redirect('pool_loan')
-
+            return redirect('pool_dash')
+    loan_data = SuperLoan.objects.all().order_by('pub_date')
+    card_data = Card.objects.all()
     context = {
         'data': loan_data,
         'card_data': card_data,
-        'form':form,
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/pool_superloan.html', context)
@@ -1120,7 +1122,6 @@ def pool_loan_repay(request):
 
         return redirect('pool_loan')
     return redirect('pool_loan')
-
 
 def pool_pro(request):
     pool = Pool.objects.last()

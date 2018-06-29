@@ -181,7 +181,6 @@ class StoreTicketsImport(models.Model):
     def __str__(self):
         return self.piaohao
 class SuperLoan(models.Model):
-    name = models.CharField(u'贷款内容', max_length=50)
     money = models.FloatField(u'金额', default=0)
     ispoolrepay = models.BooleanField(u'是否保证金还款',default=False)
     yinhangka = models.ForeignKey( Card, related_name='loan_card', verbose_name=u'还款银行卡' , blank=True,null=True)
@@ -190,7 +189,7 @@ class SuperLoan(models.Model):
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.money
     class Meta:
         verbose_name = '超短贷'
         verbose_name_plural = '超短贷'
@@ -285,6 +284,7 @@ class Pool(models.Model):
     create_date = models.DateField(u'添加日期', auto_now_add=True)
     totalmoney = models.FloatField(u'总额度', default=0)
     promoney = models.FloatField(u'保证金', default=0)
+    loanmoney = models.FloatField(u'超短贷', default=0)
     unusemoney = models.FloatField(u'可用额度', default=0)
     usedmoney = models.FloatField(u'已用额度', default=0)
     ticket = models.ForeignKey( Ticket, related_name='pool_ticket', verbose_name=u'票据' ,  blank=True,null=True)

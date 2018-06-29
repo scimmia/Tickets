@@ -81,7 +81,6 @@ class PoolForm(ModelForm):
         fields = ['p_status','money','card',]
 
 class SuperLoanForm(forms.Form):
-    name = forms.CharField(label="贷款内容",required=True)
     money = forms.FloatField(label="金额",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
 class LoanForm(ModelForm):
