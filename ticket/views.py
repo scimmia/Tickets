@@ -891,8 +891,9 @@ def loan_orderlist(request,index):
         if loanform.is_valid():
             instance = loanform.save(commit=False)
             instance.order_type = index
-            instance.money_total = loanform.cleaned_data.get('money_benjin')+loanform.cleaned_data.get('money_lixi')
-            instance.needpay_sum = loanform.cleaned_data.get('money_benjin')+loanform.cleaned_data.get('money_lixi')
+            if loanform.cleaned_data.get('isMonthlilv'):
+                instance.monet_lilv = loanform.cleaned_data.get('money_lilv')*12
+            instance.needpay_sum = loanform.cleaned_data.get('money_benjin')
             instance.save()
             if index == 3:
                 fee = card_fee(instance.yinhangka.pk, 0 - loanform.cleaned_data.get('money_benjin'), '借款给他人',41)
@@ -906,6 +907,10 @@ def loan_orderlist(request,index):
                 return redirect('loan_list')
             pass
     raw_data = Loan_Order.objects.filter(order_type=index).order_by('-pub_date')
+    for t in raw_data:
+        t.needpay_sum = t.money_benjin - t.payed_benjin
+        t.totallixi = round(t.needpay_sum * t.money_lilv * (datetime.date.today() - t.order_date).days / 360 + t.money_lixi,2)
+        t.needpay_lixi = round(t.totallixi - t.payed_lixi,2)
     context = {
         'data': raw_data,
         'isloan': isloan,

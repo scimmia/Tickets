@@ -84,8 +84,9 @@ class SuperLoanForm(forms.Form):
     money = forms.FloatField(label="金额",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
 class LoanForm(ModelForm):
+    isMonthlilv = forms.BooleanField(label="是否月利率",required=False,)
+
     class Meta:
         #该ModelForm参照Model: Node
         model = Loan_Order
-        #在Form中不显示node_signer这个字段
-        fields = ['jiedairen','money_benjin','money_lixi','yinhangka',]
+        fields = ['jiedairen','money_benjin','isMonthlilv','money_lilv','order_date','yinhangka',]
