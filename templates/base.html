@@ -220,14 +220,14 @@
                 </a>
                 <ul class="treeview-menu">
                     <li
-                            {% if '/borrow_list/' in request.path %}
+                            {% if '/borrow_status/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'borrow_list' %}"><i class="fa fa-circle-o"></i>借款订单</a>
+                            {% endif %}><a href="{% url 'borrow_status' %}"><i class="fa fa-circle-o"></i>借款订单</a>
                     </li>
                     <li
-                            {% if '/loan_list/' in request.path %}
+                            {% if '/loan_status/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'loan_list' %}"><i class="fa fa-circle-o"></i>贷款订单</a>
+                            {% endif %}><a href="{% url 'loan_status' %}"><i class="fa fa-circle-o"></i>贷款订单</a>
                     </li>
                 </ul>
                 </li>

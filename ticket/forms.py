@@ -40,7 +40,6 @@ class TicketFeeForm(ModelForm):
         #在Form中不显示node_signer这个字段
         fields = ['yinhangka','name','money',]
 class TicketOrderFeeForm(ModelForm):
-    isOrderFee = forms.BooleanField(label="是否额外费用",required=False,)
     fee_status = forms.ChoiceField(label="额外费用类型",required=False,
         choices=(
             (1, "收入"),

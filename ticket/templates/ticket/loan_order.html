@@ -45,8 +45,16 @@
                                 <td style="text-align:right;"><a>{{ order.money_benjin }}</a></td>
                             </tr>
                             <tr>
-                                <th>利息:</th>
-                                <td style="text-align:right;"><a>{{ order.money_lixi }}</a></td>
+                                <th>已{% if order.order_type == 4  %}还{% else %}收{% endif %}本金:</th>
+                                <td style="text-align:right;"><a>{{ order.payed_benjin }}</a></td>
+                            </tr>
+                            <tr>
+                                <th>累计利息:</th>
+                                <td style="text-align:right;"><a>{{ order.totallixi }}</a></td>
+                            </tr>
+                            <tr>
+                                <th>已{% if order.order_type == 4  %}还{% else %}收{% endif %}利息:</th>
+                                <td style="text-align:right;"><a>{{ order.payed_lixi }}</a></td>
                             </tr>
                             </tbody>
                         </table>
@@ -55,16 +63,12 @@
                         <table class="table">
                             <tbody>
                             <tr>
-                                <th>应{% if order.order_type == 4 %}支付{% elif order.order_type == 3 %}收取{% endif %}:</th>
-                                <td style="text-align:right;"><a>{{ order.money_total }}</a></td>
+                                <th>待{% if order.order_type == 4  %}还{% else %}收{% endif %}本金:</th>
+                                <td style="text-align:right;{% if order.needpay_sum > 0 %}color: red{% endif %}">{{ order.needpay_sum }}</td>
                             </tr>
                             <tr>
-                                <th>已{% if order.order_type == 4 %}支付{% elif order.order_type == 3 %}收取{% endif %}:</th>
-                                <td style="text-align:right;"><a>{{ order.payfee_sum }}</a></td>
-                            </tr>
-                            <tr>
-                                <th>待{% if order.order_type == 4 %}支付{% elif order.order_type == 3 %}收取{% endif %}:</th>
-                                <td style="text-align:right;"><a>{{ order.needpay_sum }}</a></td>
+                                <th>待{% if order.order_type == 4  %}还{% else %}收{% endif %}利息:</th>
+                                <td style="text-align:right;{% if order.needpay_lixi > 0 %}color: red{% endif %}">{{ order.needpay_lixi }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -85,10 +89,13 @@
                             {{ feeform | crispy }}
                         </div>
 
-                        <button type="submit" class="btn btn-danger center-block" id="add_fee">
-                            提交
-                            <i class="ace-icon fa fa-cart-plus icon-on-right bigger-110"></i>
-                        </button>
+                        <div class="box-footer">
+
+                            <input class="btn btn-primary" name="benjin" value="{% if order.order_type == 4  %}还{% else %}收{% endif %}本" type="submit">
+                            <input class="btn btn-success" name="lixi" value="{% if order.order_type == 4  %}还{% else %}收{% endif %}息" type="submit">
+                            <input class="btn btn-danger" name="fee" value="费用" type="submit">
+                        </div>
+
                     </div>
 
                 </div>
@@ -208,14 +215,6 @@
                         cell.innerHTML = i + 1;
                     });
                 }).draw();
-            $("#div_id_fee_status").hide()
-            $("#id_isOrderFee").change(function () {
-                if ($("#id_isOrderFee").is(':checked')) {
-                    $("#div_id_fee_status").show()
-                } else {
-                    $("#div_id_fee_status").hide()
-                }
-            });
         });
     </script>
 
