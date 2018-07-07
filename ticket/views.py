@@ -1039,11 +1039,13 @@ def pool_dash(request):
 
     count_t = Ticket.objects.filter(t_status=5).count()
     sum_money = 0
-    print(count_t)
     if count_t > 0:
         sum_money = Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values('sum_money')[0].get('sum_money')
-        print(str(Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values('sum_money').query))
-        print(sum_money)
+        # print(str(Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values('sum_money').query))
+    count_chikai = Ticket.objects.filter(gouruzijinchi=True).count()
+    sum_chikai = 0
+    if count_chikai > 0:
+        sum_chikai = Ticket.objects.filter(gouruzijinchi=True).aggregate(Sum('piaomianjiage')).get('piaomianjiage__sum')
     if request.method == 'POST':
         if form.is_valid():
             # 创建实例，需要做些数据处理，暂不做保存
@@ -1073,6 +1075,8 @@ def pool_dash(request):
         'data': data_list,
         'sum_money': sum_money,
         'count_t': count_t,
+        'sum_chikai': sum_chikai,
+        'count_chikai': count_chikai,
         'item': pool,
         'page_range': page_range,
         'count': count,

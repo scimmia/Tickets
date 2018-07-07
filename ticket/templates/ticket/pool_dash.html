@@ -59,6 +59,10 @@
                                 <th>超短贷:</th>
                                 <td style="text-align:right;"><a href="{% url 'pool_loan' %}">{{ item.loanmoney }}</a></td>
                             </tr>
+                            <tr>
+                                <th>池开票:{{ count_chikai }}张</th>
+                                <td style="text-align:right;"><a href="{% url 'ticket_list' %}?gouruzijinchi=True">{{ sum_chikai }}</a></td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>

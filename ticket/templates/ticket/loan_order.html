@@ -93,7 +93,7 @@
 
                             <input class="btn btn-primary" name="benjin" value="{% if order.order_type == 4  %}还{% else %}收{% endif %}本" type="submit">
                             <input class="btn btn-success" name="lixi" value="{% if order.order_type == 4  %}还{% else %}收{% endif %}息" type="submit">
-                            <input class="btn btn-danger" name="fee" value="费用" type="submit">
+                            <input class="btn btn-danger" style="display:none;" name="fee" value="费用" type="submit">
                         </div>
 
                     </div>
@@ -107,7 +107,7 @@
                         <!--表格头部-->
                         <th>费用内容</th>
                         <th>金额</th>
-                        <th>额外</th>
+                        <th style="display:none;" >额外</th>
                         <th>相关银行卡</th>
                         </thead>
                         <!--表格内容-->
@@ -116,7 +116,7 @@
                             <tr>
                                 <td>{{ i.name }}</td>
                                 <td><span>{{ i.money }}</span></td>
-                                <td>        {% if i.fee_type == 3 %}
+                                <td style="display:none;" >        {% if i.fee_type == 3 %}
                                     <span class="label label-danger">否
                                 {% elif i.fee_type == 5 %}
                                     <span class="label label-success">支出
@@ -162,7 +162,6 @@
                 'ordering': true,
                 'info': true,
                 'autoWidth': false,
-                'scrollY': 250,
                 "language": {
                     "processing": "处理中...",
                     "lengthMenu": "显示 _MENU_ 项结果",
@@ -196,25 +195,9 @@
                     "decimal": "-",
                     "thousands": "."
                 },
-                "columnDefs": [{
-                    'data': null,
-                    "orderable": false,
-                    "targets": 0,
-                    'defaultContent': "<input type ='checkbox' name='test' class='icheckbox_minimal' value=''>",
-                }, {
-                    "orderable": false, "targets": [0],  //设置第一列和最后一列不可排序
-                }],
                 "order": [[1, 'asc']]
             });
-            t.on('order.dt search.dt',
-                function () {
-                    t.column(0, {
-                        search: 'applied',
-                        order: 'applied'
-                    }).nodes().each(function (cell, i) {
-                        cell.innerHTML = i + 1;
-                    });
-                }).draw();
+            $('#div_id_fee_status').hide();
         });
     </script>
 
