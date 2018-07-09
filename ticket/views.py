@@ -194,9 +194,10 @@ def ticket_add(request):
                 ticket_inpool(instance.pk)
 
             if instance.gouruzijinchi:
-                ticket_poolpay(instance.pk)
                 instance.pay_status = 2
+                instance.gourujiage = instance.piaomianjiage
                 instance.save()
+                ticket_poolpay(instance.pk)
                 pass
         # return render(request, 'ticket/ticket_add.html',locals())
         return redirect('ticket_list')
