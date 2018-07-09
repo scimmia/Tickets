@@ -182,11 +182,12 @@ class StoreTicketsImport(models.Model):
     def __str__(self):
         return self.piaohao
 class SuperLoan(models.Model):
-    money = models.FloatField(u'金额', default=0)
-    ispoolrepay = models.BooleanField(u'是否保证金还款',default=False)
-    yinhangka = models.ForeignKey( Card, related_name='loan_card', verbose_name=u'还款银行卡' , blank=True,null=True)
-    isfinished = models.BooleanField(u'是否还清',default=False)
-    repay_date = models.DateTimeField(u'还款日期', blank=True,null=True)
+    money_benjin = models.FloatField(u'本金', default=0)
+    needpay_sum = models.FloatField(u'待还本金', default=0)
+    payed_benjin = models.FloatField(u'已还本金', default=0)
+    money_lixi = models.FloatField(u'利息', default=0)
+    payed_lixi = models.FloatField(u'已还利息', default=0)
+    needpay_lixi = models.FloatField(u'待还利息', default=0)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
     def __str__(self):
@@ -194,6 +195,17 @@ class SuperLoan(models.Model):
     class Meta:
         verbose_name = '超短贷'
         verbose_name_plural = '超短贷'
+
+class SuperLoanFee(models.Model):
+    superloan = models.ForeignKey( SuperLoan, related_name='superloan_fee_a', verbose_name=u'超短贷' ,  blank=True,null=True)
+    name = models.CharField(u'费用内容', max_length=50)
+    money = models.FloatField(u'金额', default=0)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+    def __str__(self):
+        return self.name
+    class Meta:
+        verbose_name = '超短贷费用'
+        verbose_name_plural = '超短贷费用'
 
 class Fee(models.Model):
     order = models.ForeignKey( Order, related_name='order_fee', verbose_name=u'订单费用' ,  blank=True,null=True)
@@ -220,6 +232,8 @@ class Fee(models.Model):
         (48,u'偿还贷款费用收入'),
         (49,u'收回借款利息'),
         (50,u'偿还贷款利息'),
+        (51,u'偿还超短贷本金'),
+        (52,u'偿还超短贷利息'),
         (1,u'付款订单'),
         (2,u'付款订单'),
         (3,u'付款支付'),
@@ -240,27 +254,6 @@ class Fee(models.Model):
         verbose_name = '费用'
         verbose_name_plural = '费用'
 
-class PoolFee(models.Model):
-    ticket = models.ForeignKey( Ticket, related_name='poolfee_ticket', verbose_name=u'票据' ,  blank=True,null=True)
-    money = models.FloatField(u'金额', default=0)
-    pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
-    create_date = models.DateField(u'添加日期', auto_now_add=True)
-
-    POOLFEE_STATUS= (
-        (1,u'入池'),
-        (2,u'出池'),
-        (5,u'保证金'),
-    )
-    poolfee_status = models.IntegerField(
-        u'费用内容',
-        choices=POOLFEE_STATUS,
-        default=1,
-    )
-    def __str__(self):
-        return self.poolfee_status
-    class Meta:
-        verbose_name = '资金池费用'
-        verbose_name_plural = '资金池费用'
 
 class StoreFee(models.Model):
     ticket = models.ForeignKey( Ticket, related_name='storefee_ticket', verbose_name=u'票据' ,  blank=True,null=True)

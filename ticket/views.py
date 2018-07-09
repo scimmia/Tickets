@@ -19,9 +19,9 @@ from django.urls import reverse
 
 from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm, \
-    SuperLoanForm, LoanForm
-from ticket.models import Card, Fee, Ticket, Order, StoreFee, PoolFee, Pool, InpoolPercent, TicketsImport, \
-    StoreTicketsImport, SuperLoan, Loan_Order
+    SuperLoanForm, LoanForm, SuperLoanFeeForm
+from ticket.models import Card, Fee, Ticket, Order, StoreFee, Pool, InpoolPercent, TicketsImport, \
+    StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee
 
 
 @login_required
@@ -1093,54 +1093,57 @@ def loan_create(loan):
     if not p:
         p = Pool()
     pool = Pool()
-    pool.totalmoney = p.totalmoney - loan.money
+    pool.totalmoney = p.totalmoney
     pool.promoney = p.promoney
-    pool.unusemoney = p.unusemoney - loan.money
-    pool.usedmoney = p.usedmoney
-    pool.loanmoney = p.loanmoney + loan.money
+    pool.unusemoney = p.unusemoney - loan.money_benjin
+    pool.usedmoney = p.usedmoney + loan.money_benjin
+    pool.loanmoney = p.loanmoney + loan.money_benjin
     pool.loan = loan
-    pool.money = 0 - loan.money
+    pool.money = 0 - loan.money_benjin
     pool.pool_status = 6
     pool.save()
     pass
 #偿还超短贷，资金池变化
-def loan_repay(loan):
+def loan_repay(superloan,money):
     p = Pool.objects.last()
     if not p:
         p = Pool()
     pool = Pool()
-    pool.totalmoney = p.totalmoney + loan.money
+    pool.totalmoney = p.totalmoney
     pool.promoney = p.promoney
-    pool.unusemoney = p.unusemoney + loan.money
-    pool.usedmoney = p.usedmoney
-    pool.loanmoney = p.loanmoney - loan.money
-    pool.loan = loan
-    pool.money = loan.money
+    pool.unusemoney = p.unusemoney + money
+    pool.usedmoney = p.usedmoney - money
+    pool.loanmoney = p.loanmoney - money
+    pool.loan = superloan
+    pool.money = money
     pool.pool_status = 7
     pool.save()
     pass
 #保证金还款，仅涉及保证金变化
-def loan_promoneypay(loan):
+def loan_promoneypay(superloan,money):
     p = Pool.objects.last()
     if not p:
         p = Pool()
     pool = Pool()
-    pool.totalmoney = p.totalmoney - loan.money
-    pool.promoney = p.promoney - loan.money
+    pool.totalmoney = p.totalmoney - money
+    pool.promoney = p.promoney - money
     pool.unusemoney = p.unusemoney
     pool.usedmoney = p.usedmoney
-    pool.loan = loan
-    pool.money = 0 - loan.money
+    pool.loan = superloan
+    pool.money = 0 - money
     pool.pool_status = 8
     pool.save()
     pass
 
-def pool_loan(request):
+def pool_loans(request):
     form = SuperLoanForm(request.POST or None)
     if request.method == 'POST':
         if form.is_valid():
             loan = SuperLoan()
-            loan.money = form.cleaned_data.get('money')
+            loan.money_benjin = form.cleaned_data.get('benjin')
+            loan.money_lixi = form.cleaned_data.get('lixi')
+            loan.needpay_sum = form.cleaned_data.get('benjin')
+            loan.needpay_lixi = form.cleaned_data.get('lixi')
             loan.save()
             loan_create(loan)
             return redirect('pool_dash')
@@ -1151,7 +1154,57 @@ def pool_loan(request):
         'card_data': card_data,
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
-    return render(request, 'ticket/pool_superloan.html', context)
+    return render(request, 'ticket/pool_loans.html', context)
+
+def pool_loan(request,  pk):
+    order = SuperLoan.objects.get(pk=pk)
+    card_data = Card.objects.all()
+    # payfee_data = SuperLoanFee.objects.filter(superloan=order).order_by('-pub_date')
+    payfee_data = Fee.objects.filter(Q(superloan=order)&(Q(fee_type=51)|Q(fee_type=52))).order_by('-pub_date')
+    poolfee_data = SuperLoanFee.objects.filter(superloan=order).order_by('-pub_date')
+    poolfeeform = SuperLoanFeeForm(request.POST or None)
+    if request.method == 'POST':
+        if poolfeeform.is_valid():
+            money = poolfeeform.cleaned_data.get('money')
+            if 'benjin' in request.POST.keys():
+                if poolfeeform.cleaned_data.get('money') > order.needpay_sum:
+                    message = u'金额不能大于待还本金'
+                else:
+                    order.payed_benjin = order.payed_benjin + money
+                    order.needpay_sum = order.needpay_sum - money
+                    order.save()
+                    loan_repay(order,money)
+                    if 'zijinchipay' in request.POST.keys():
+                        # 资金池还款
+                        instance = SuperLoanFee()
+                        instance.superloan = order
+                        instance.money = 0 - money
+                        instance.name = '保证金还超短贷本金'
+                        instance.save()
+                        loan_promoneypay(order,money)
+                        pass
+                    else:
+                        # 银行卡还款
+                        fee = card_fee(Card.objects.get(id = int(request.POST['yinhangka'])).pk, 0 - money, '银行卡还超短贷本金', 51)
+                        fee.superloan = order
+                        fee.save()
+                    return redirect('pool_loan', pk=pk)
+                pass
+            elif 'lixi' in request.POST.keys():
+                if poolfeeform.cleaned_data.get('money') > order.needpay_lixi:
+                    message = u'金额不能大于待还利息'
+                else:
+                    order.payed_lixi = order.payed_lixi + money
+                    order.needpay_lixi = order.needpay_lixi - money
+                    order.save()
+                    fee = card_fee(Card.objects.get(id=int(request.POST['yinhangka'])).pk, 0 - money, '银行卡还超短贷利息', 52)
+                    fee.superloan = order
+                    fee.save()
+
+                    return redirect('pool_loan', pk=pk)
+                pass
+
+    return render(request, 'ticket/pool_superloan.html', locals())
 
 def pool_loan_repay(request):
     if request.method == 'POST':
@@ -1175,8 +1228,8 @@ def pool_loan_repay(request):
                     t.save()
                     loan_repay(t)
 
-        return redirect('pool_loan')
-    return redirect('pool_loan')
+        return redirect('pool_loans')
+    return redirect('pool_loans')
 
 def pool_pro(request):
     pool = Pool.objects.last()

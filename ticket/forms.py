@@ -80,6 +80,10 @@ class PoolForm(ModelForm):
         fields = ['p_status','money','card',]
 
 class SuperLoanForm(forms.Form):
+    benjin = forms.FloatField(label="本金",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    lixi = forms.FloatField(label="利息",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+class SuperLoanFeeForm(forms.Form):
     money = forms.FloatField(label="金额",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
 class LoanForm(ModelForm):

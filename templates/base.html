@@ -274,9 +274,9 @@
                                 class="active"
                             {% endif %}><a href="{% url 'pool_dash' %}"><i class="fa fa-circle-o"></i>概览</a></li>
                     <li
-                            {% if '/pool_loan/' in request.path %}
+                            {% if '/pool_loans/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'pool_loan' %}"><i class="fa fa-circle-o"></i>超短贷</a></li>
+                            {% endif %}><a href="{% url 'pool_loans' %}"><i class="fa fa-circle-o"></i>超短贷</a></li>
                 </ul>
                 </li>
                 {% if '/sysconfig/' in request.path %}

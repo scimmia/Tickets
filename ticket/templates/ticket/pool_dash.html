@@ -57,7 +57,7 @@
                             </tr>
                             <tr>
                                 <th>超短贷:</th>
-                                <td style="text-align:right;"><a href="{% url 'pool_loan' %}">{{ item.loanmoney }}</a></td>
+                                <td style="text-align:right;"><a href="{% url 'pool_loans' %}">{{ item.loanmoney }}</a></td>
                             </tr>
                             <tr>
                                 <th>池开票:{{ count_chikai }}张</th>
@@ -93,7 +93,7 @@
                 </form>
 
             </div>
-                <form method='POST' id="signupForm" action="{% url 'pool_loan' %}" onsubmit="return check();">{% csrf_token %}
+                <form method='POST' id="signupForm" action="{% url 'pool_loans' %}" onsubmit="return check();">{% csrf_token %}
                 <div class="col-md-3">
 
                     <div class="box box-danger">
