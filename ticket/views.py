@@ -19,9 +19,9 @@ from django.urls import reverse
 
 from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm, \
-    SuperLoanForm, LoanForm, SuperLoanFeeForm
+    SuperLoanForm, LoanForm, SuperLoanFeeForm, CardTransForm
 from ticket.models import Card, Fee, Ticket, Order, StoreFee, Pool, InpoolPercent, TicketsImport, \
-    StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee
+    StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee, CardTrans
 
 
 @login_required
@@ -877,6 +877,24 @@ def card_edit(request,  pk):
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/card_edit.html', context)
+
+#修改数据,函数中的pk代表数据的id
+def card_trans(request):
+    form = CardTransForm(request.POST or None)
+    data = CardTrans.objects.all().order_by('-pub_date')
+    if request.method == 'POST':
+        if form.is_valid():
+            instance = form.save(commit=False)
+            if instance.fromCard == instance.toCard:
+                message = u'请选择不同的银行卡'
+            elif instance.money <= 0:
+                message = u'金额小于0'
+            else:
+                instance.save()
+                card_fee(instance.fromCard.pk, 0 - instance.money, '银行卡转出', 14)
+                card_fee(instance.toCard.pk, instance.money, '银行卡转入', 13)
+                return redirect('card_trans', )
+    return render(request, 'ticket/card_trans.html', locals())
 
 def loan_liststatus(request,index):
     #从根据不同的请求，来获取相应的数据,并跳转至相应页面

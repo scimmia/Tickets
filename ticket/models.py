@@ -219,6 +219,8 @@ class Fee(models.Model):
     FEE_TYPE= (
         (11,u'银行卡存入'),
         (12,u'银行卡取出'),
+        (13,u'银行卡转入'),
+        (14,u'银行卡转出'),
         (21,u'从保证金提取'),
         (22,u'充值到保证金'),
         (31,u'还超短贷'),
@@ -320,3 +322,9 @@ class InpoolPercent(models.Model):
 
     def __str__(self):
         return self.inpoolPer
+
+class CardTrans(models.Model):
+    fromCard = models.ForeignKey( Card, related_name='tran_from_card', verbose_name=u'源银行卡' , blank=False,null=False)
+    money = models.FloatField(u'金额', default=0)
+    toCard = models.ForeignKey( Card, related_name='tran_to_card', verbose_name=u'目标银行卡' , blank=False,null=False)
+    pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)

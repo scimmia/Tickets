@@ -2,7 +2,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from ticket.models import Ticket, Card, Pool, Fee, Loan_Order
+from ticket.models import Ticket, Card, Pool, Fee, Loan_Order, CardTrans
 
 
 class TicketForm(ModelForm):
@@ -55,7 +55,10 @@ class CardForm(ModelForm):
         model = Card
         #在Form中不显示node_signer这个字段
         exclude = ['money']
-
+class CardTransForm(ModelForm):
+    class Meta:
+        model = CardTrans
+        exclude = ['pub_date']
 
 class PoolForm(ModelForm):
     #自定义ModelForm的内容

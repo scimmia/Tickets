@@ -49,6 +49,7 @@ urlpatterns = [
     url(r'^card/card_edit/(?P<pk>\d+)/$', views.card_edit, name='card_edit'),
     # url(r'^card/card_delete/(?P<pk>\d+)/$', views.ticket_delete, name='ticket_delete'),
     url(r'^card/card_index/(?P<pk>\d+)/$', views.card_edit, name='card_index'),
+    url(r'^card/card_trans/', views.card_trans, name='card_trans'),
 
     url(r'^pool/pool_dash/', views.pool_dash, name='pool_dash'),
     url(r'^pool/pool_pro/', views.pool_pro, name='pool_pro'),

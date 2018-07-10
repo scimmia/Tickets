@@ -254,6 +254,10 @@
                             {% if '/card_add/' in request.path %}
                                 class="active"
                             {% endif %}><a href="{% url 'card_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
+                    <li
+                            {% if '/card_trans/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'card_trans' %}"><i class="fa fa-circle-o"></i>转账</a></li>
                 </ul>
                 </li>
                 {% if '/pool/' in request.path %}
