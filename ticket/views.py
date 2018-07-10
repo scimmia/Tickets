@@ -798,18 +798,9 @@ def handle_upload_file(file):
 @login_required
 def card_list(request):
     raw_data = Card.objects.all()
-    print(raw_data)
     list_template = 'ticket/card_list.html'
-
-    #将分页的信息传递到展示页面中去
-    data_list, page_range, count, page_nums = pagination(request, raw_data)
-    #建立context字典，将值传递到相应页面
     context = {
-        'data': data_list,
-        'page_range': page_range,
-        'count': count,
-        'edit_url':'',
-        'page_nums': page_nums,
+        'data': raw_data,
     }
     print(context)
     #跳转到相应页面，并将值传递过去
@@ -847,6 +838,7 @@ def card_edit(request,  pk):
         #任务联系人为可编辑选项，并填充原先的任务联系人
         card_ins.name = request.POST['name']
         card_ins.beizhu = request.POST['beizhu']
+        card_ins.card_type = request.POST['card_type']
 
         card = Card.objects.get(id = card_ins.id)
         if request.POST['fee'].strip(' ') != '':

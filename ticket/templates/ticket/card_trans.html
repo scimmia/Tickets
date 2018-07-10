@@ -42,23 +42,23 @@
                 <table id="table_id" class="table table-bordered table-hover">
                     <thead>
                     <!--表格头部-->
-                    <th style="display: none"></th>
-                    <th style="display: none">ID</th>
                     <th>添加日期</th>
-                    <th>源银行卡</th>
+                    <th>转出账户</th>
                     <th>金额</th>
-                    <th>目标银行卡</th>
+                    <th>转入账户</th>
                     </thead>
                     <!--表格内容-->
                     <tbody>
                     {% for item in data %}
                         <tr>
-                            <td style="display: none"></td>
-                            <th style="display: none">{{ item.id }}</th>
                             <td>{{ item.pub_date }}</td>
-                            <td>{{ item.fromCard }}</td>
+                            <td><a class="green" href="{% url 'card_edit' item.fromCard.id %}" title="编辑信息">
+                                {{ item.fromCard }}
+                            </a></td>
                             <td>{{ item.money }}</td>
-                            <td>{{ item.toCard }}</td>
+                            <td><a class="green" href="{% url 'card_edit' item.toCard.id %}" title="编辑信息">
+                                {{ item.toCard }}
+                            </a></td>
                         </tr>
 
                     {% endfor %}
@@ -123,7 +123,7 @@
                     "decimal": "-",
                     "thousands": "."
                 },
-                "order": [[1, 'desc']]
+                "order": [[0, 'desc']]
             });
         });
     </script>

@@ -34,6 +34,15 @@
                                                               class="textinput textInput form-control" required=""
                                                               id="id_name" type="text"></div>
                             </div>
+                            <div id="div_id_card_type" class="form-group"><label for="id_card_type"
+                                                                                 class="control-label  requiredField">
+                                账户类型<span class="asteriskField">*</span> </label>
+                                <div class="controls "><select name="card_type" class="select form-control"
+                                                               id="id_card_type">
+                                    <option value="1" {% if item.card_type == 1 %}selected=""{% endif %}>私户</option>
+                                    <option value="2" {% if item.card_type == 2 %}selected=""{% endif %}>公户</option>
+                                </select></div>
+                            </div>
                             <div id="div_id_beizhu" class="form-group"><label for="id_beizhu"
                                                                               class="control-label  requiredField">
                                 备注<span class="asteriskField">*</span> </label>

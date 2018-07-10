@@ -3,6 +3,15 @@ from django.db import models
 # Create your models here.
 
 class Card(models.Model):
+    CARD_TYPE= (
+        (1,u'私户'),
+        (2,u'公户'),
+    )
+    card_type = models.IntegerField(
+        u'账户类型',
+        choices=CARD_TYPE,
+        default=1,
+    )
     name = models.CharField(u'银行卡', max_length=50)
     money = models.FloatField(u'金额', default=0)
     beizhu = models.CharField(u'备注', max_length=100)
@@ -324,7 +333,7 @@ class InpoolPercent(models.Model):
         return self.inpoolPer
 
 class CardTrans(models.Model):
-    fromCard = models.ForeignKey( Card, related_name='tran_from_card', verbose_name=u'源银行卡' , blank=False,null=False)
+    fromCard = models.ForeignKey( Card, related_name='tran_from_card', verbose_name=u'转出账户' , blank=False,null=False)
     money = models.FloatField(u'金额', default=0)
-    toCard = models.ForeignKey( Card, related_name='tran_to_card', verbose_name=u'目标银行卡' , blank=False,null=False)
+    toCard = models.ForeignKey( Card, related_name='tran_to_card', verbose_name=u'转入账户' , blank=False,null=False)
     pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
