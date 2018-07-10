@@ -1127,9 +1127,9 @@ def loan_promoneypay(superloan,money):
         p = Pool()
     pool = Pool()
     pool.totalmoney = p.totalmoney - money
-    pool.promoney = p.promoney - money
-    pool.unusemoney = p.unusemoney
+    pool.unusemoney = p.unusemoney - money
     pool.usedmoney = p.usedmoney
+    pool.promoney = p.promoney - money
     pool.loan = superloan
     pool.money = 0 - money
     pool.pool_status = 8
@@ -1198,9 +1198,20 @@ def pool_loan(request,  pk):
                     order.payed_lixi = order.payed_lixi + money
                     order.needpay_lixi = order.needpay_lixi - money
                     order.save()
-                    fee = card_fee(Card.objects.get(id=int(request.POST['yinhangka'])).pk, 0 - money, '银行卡还超短贷利息', 52)
-                    fee.superloan = order
-                    fee.save()
+                    if 'zijinchipay' in request.POST.keys():
+                        # 资金池还款
+                        instance = SuperLoanFee()
+                        instance.superloan = order
+                        instance.money = 0 - money
+                        instance.name = '保证金还超短贷利息'
+                        instance.save()
+                        loan_promoneypay(order,money)
+                        pass
+                    else:
+                        # 银行卡还款
+                        fee = card_fee(Card.objects.get(id=int(request.POST['yinhangka'])).pk, 0 - money, '银行卡还超短贷利息', 52)
+                        fee.superloan = order
+                        fee.save()
 
                     return redirect('pool_loan', pk=pk)
                 pass

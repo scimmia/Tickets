@@ -8,12 +8,6 @@ from ticket.models import Ticket, Card, Pool, Fee, Loan_Order
 class TicketForm(ModelForm):
 
     fenshu = forms.IntegerField(label="份数",required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
-    # maichuriqi = forms.DateTimeField(label="卖出日期", editable=False)
-    # def clean(self):
-    #     if (not self.cleaned_data.get('gouruzijinchi')) and (not self.cleaned_data.get('gourucard')):
-    #         raise forms.ValidationError(u"两次密码必须一致")
-    #     self._validate_unique = True
-    #     return self.cleaned_data
 
     #自定义ModelForm的内容
     class Meta:

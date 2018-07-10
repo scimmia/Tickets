@@ -74,7 +74,7 @@
                                 <label for="id_zijinchipay" class="">
                                     <input type="checkbox" name="zijinchipay" class="checkboxinput"
                                            id="id_zijinchipay">
-                                    资金池还款
+                                    保证金还款
                                 </label>
                             </div>
                             <div id="div_id_yinhangka" class="form-group" style="display: block;"><label
@@ -197,12 +197,10 @@
             $('#div_id_fee_status').hide();
             $("#id_zijinchipay").change(function () {
                 if ($("#id_zijinchipay").is(':checked')) {
-                    $("#lixi").hide()
                     $("#div_id_yinhangka").hide()
                     $("#id_yinhangka").val("")
                     $("#id_yinhangka").removeAttr('required');
                 } else {
-                    $("#lixi").show()
                     $("#div_id_yinhangka").show()
                     $("#id_yinhangka").prop("required", "true");
                 }
