@@ -1380,7 +1380,7 @@ def bestmix(request):
                     d = 0
                     while d <= min(maxd,count-a-b-b):
                         e = count-a-b-b-d
-                        if a * valuea + b * valueb + b * valuec + d * valued + e * valuee == money_sum:
+                        if (not(valued == 0 and d>0)) and ((not(valuee == 0 and e>0))) and a * valuea + b * valueb + b * valuec + d * valued + e * valuee == money_sum:
                             value = []
                             value.append(a)
                             value.append(b)
