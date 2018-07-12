@@ -49,7 +49,7 @@
                             </tr>
                             <tr>
                                 <th>入池票:{{ count_t }}张</th>
-                                <td style="text-align:right;"><a href="{% url 'ticket_list' %}?t_status=5">{{ sum_money }}</a></td>
+                                <td style="text-align:right;"><a href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__gt={{ today }}" >{{ sum_money }}</a></td>
                             </tr>
                             <tr>
                                 <th>保证金:</th>

@@ -61,4 +61,8 @@ urlpatterns = [
     # url(r'^card/card_delete/(?P<pk>\d+)/$', views.ticket_delete, name='ticket_delete'),
     # url(r'^card/card_index/(?P<pk>\d+)/$', views.card_edit, name='card_index'),
 
+    url(r'^tool/bestmix/', views.bestmix, name='bestmix'),
+    url(r'^tool/avgday/', views.avgday, name='avgday'),
+    url(r'^tool/counter/', views.counter, name='counter'),
+
 ]

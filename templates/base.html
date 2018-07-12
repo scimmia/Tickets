@@ -188,7 +188,7 @@
                     <li class="treeview">
                 {% endif %}
                 <a href="#">
-                    <i class="fa fa-dashboard"></i> <span>订单</span>
+                    <i class="fa fa-balance-scale"></i> <span>订单</span>
                     <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
@@ -213,7 +213,7 @@
                     <li class="treeview">
                 {% endif %}
                 <a href="#">
-                    <i class="fa fa-dashboard"></i> <span>借贷</span>
+                    <i class="fa fa-exchange"></i> <span>借贷</span>
                     <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
@@ -238,7 +238,7 @@
                     <li class="treeview">
                 {% endif %}
                 <a href="#">
-                    <i class="fa fa-dashboard"></i> <span>银行卡</span>
+                    <i class="fa fa-credit-card"></i> <span>银行卡</span>
                     <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
@@ -250,10 +250,6 @@
                                 class="active"
                             {% endif %}>
                         <a href="{% url 'card_list' %}"><i class="fa fa-circle-o"></i>列表</a></li>
-                    <li
-                            {% if '/card_add/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'card_add' %}"><i class="fa fa-circle-o"></i>新增</a></li>
                     <li
                             {% if '/card_trans/' in request.path %}
                                 class="active"
@@ -267,7 +263,7 @@
                     <li class="treeview">
                 {% endif %}
                 <a href="#">
-                    <i class="fa fa-table"></i> <span>资金池</span>
+                    <i class="fa fa-line-chart"></i> <span>资金池</span>
                     <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
@@ -281,6 +277,35 @@
                             {% if '/pool_loans/' in request.path %}
                                 class="active"
                             {% endif %}><a href="{% url 'pool_loans' %}"><i class="fa fa-circle-o"></i>超短贷</a></li>
+                </ul>
+                </li>
+                {% if '/tool/' in request.path %}
+                    <li class="active treeview">
+                        {% else %}
+                    <li class="treeview">
+                {% endif %}
+                <a href="#">
+                    <i class="fa fa-calculator"></i> <span>计算器</span>
+                    <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li
+                            {% if '/bestmix' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'bestmix' %}"><i class="fa fa-circle-o"></i>票据配比</a>
+                    </li>
+                    <li
+                            {% if '/avgday' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'avgday' %}"><i class="fa fa-circle-o"></i>平均天数</a>
+                    </li>
+                    <li
+                            {% if '/counter' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'counter' %}"><i class="fa fa-circle-o"></i>利率</a>
+                    </li>
                 </ul>
                 </li>
                 {% if '/sysconfig/' in request.path %}

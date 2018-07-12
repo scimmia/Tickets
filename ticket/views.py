@@ -19,7 +19,7 @@ from django.urls import reverse
 
 from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm, \
-    SuperLoanForm, LoanForm, SuperLoanFeeForm, CardTransForm
+    SuperLoanForm, LoanForm, SuperLoanFeeForm, CardTransForm, BestMixForm
 from ticket.models import Card, Fee, Ticket, Order, StoreFee, Pool, InpoolPercent, TicketsImport, \
     StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee, CardTrans
 
@@ -1047,8 +1047,8 @@ def pool_dash(request):
     form = PoolForm(request.POST or None)
     form.fields['card'].required = True
     loanform = SuperLoanForm(request.POST or None)
-
-    count_t = Ticket.objects.filter(t_status=5).count()
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    count_t = Ticket.objects.filter(Q(t_status=5)&Q(daoqiriqi__gt=today)).count()
     sum_money = 0
     if count_t > 0:
         sum_money = Ticket.objects.filter(t_status=5).values('t_status').annotate(sum_money=Sum('piaomianjiage')).values('sum_money')[0].get('sum_money')
@@ -1085,6 +1085,7 @@ def pool_dash(request):
     context = {
         'data': data_list,
         'sum_money': sum_money,
+        'today': today,
         'count_t': count_t,
         'sum_chikai': sum_chikai,
         'count_chikai': count_chikai,
@@ -1329,7 +1330,75 @@ def inpoolPercent(request):
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/inpoolPer.html',  context)
+def bestmix(request):
+    form = BestMixForm(request.POST or None)
+    keys = []
+    values = []
+    if request.method == 'POST':
+        if form.is_valid():
+            money_sum = form.cleaned_data.get('money')
+            count = form.cleaned_data.get('count')
+            valuea = form.cleaned_data.get('valuea')
+            valueta = form.cleaned_data.get('valueta')
+            valueb = form.cleaned_data.get('valueb')
+            valuetb = form.cleaned_data.get('valuetb')
+            valuec = form.cleaned_data.get('valuec')
+            valuetc = form.cleaned_data.get('valuetc')
+            valued = form.cleaned_data.get('valued')
+            valuetd = form.cleaned_data.get('valuetd')
+            valuee = form.cleaned_data.get('valuee')
+            valuete = form.cleaned_data.get('valuete')
+            # if
+            maxa = min(count,money_sum/valuea)
+            maxb = min(count,money_sum/valueb)
+            maxc = min(count,money_sum/valuec)
+            maxd = 0
+            maxe = 0
+            keys.append(valuea)
+            keys.append(valueb)
+            keys.append(valuec)
+            keys.append(valued)
+            keys.append(valuee)
+            keys.append('总和')
+            if valued is None:
+                valued = 0
+            if valuetd is None:
+                valuetd = 0
+            if valuee is None:
+                valuee = 0
+            if valuete is None:
+                valuete = 0
 
+            if valued > 0:
+                maxd = min(count, money_sum / valued)
+            if valuee > 0:
+                maxe = min(count, money_sum / valuee)
+            a = 0
+            while a <= maxa:
+                b = 0
+                while b <= min(maxb,maxc):
+                    d = 0
+                    while d <= min(maxd,count-a-b-b):
+                        e = count-a-b-b-d
+                        if a * valuea + b * valueb + b * valuec + d * valued + e * valuee == money_sum:
+                            value = []
+                            value.append(a)
+                            value.append(b)
+                            value.append(b)
+                            value.append(d)
+                            value.append(e)
+                            value.append(
+                                a * valuea * valueta + b * valueb * valuetb + b * valuec * valuetc + d * valued * valuetd + e * valuee * valuete)
+                            values.append(value)
+                        d = d + 1
+                    b = b + 1
+                a = a + 1
+            pass
+    return render(request, 'ticket/tool_bestmix.html', locals())
+def avgday(request):
+    return render(request, 'ticket/tool_avgday.html')
+def counter(request):
+    return render(request, 'ticket/tool_counter.html')
 #分页函数
 def pagination(request, queryset, display_amount=10, after_range_num = 5,before_range_num = 4):
     #按参数分页

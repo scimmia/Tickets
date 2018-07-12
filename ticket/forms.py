@@ -90,3 +90,17 @@ class LoanForm(ModelForm):
         #该ModelForm参照Model: Node
         model = Loan_Order
         fields = ['jiedairen','money_benjin','isMonthlilv','money_lilv','order_date','yinhangka',]
+
+class BestMixForm(forms.Form):
+    money = forms.IntegerField(label="总金额",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    count = forms.IntegerField(label="总张数",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valuea = forms.IntegerField(label="面值A",required=True, min_value=1,widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valueta = forms.IntegerField(label="实际A",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valueb = forms.IntegerField(label="面值B",required=True, min_value=1,widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valuetb = forms.IntegerField(label="实际B",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valuec = forms.IntegerField(label="面值C",required=True, min_value=1,widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valuetc = forms.IntegerField(label="实际C",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valued = forms.IntegerField(label="面值D",required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valuetd = forms.IntegerField(label="实际D",required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valuee = forms.IntegerField(label="面值E",required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    valuete = forms.IntegerField(label="实际E",required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
