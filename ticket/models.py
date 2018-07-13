@@ -199,8 +199,6 @@ class SuperLoan(models.Model):
     needpay_lixi = models.FloatField(u'待还利息', default=0)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
-    def __str__(self):
-        return self.money
     class Meta:
         verbose_name = '超短贷'
         verbose_name_plural = '超短贷'

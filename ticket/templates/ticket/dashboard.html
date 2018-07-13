@@ -3,21 +3,28 @@
 {% block title %}仪表盘{% endblock %}
 
 {% block css %}
-<style type="text/css">
-.tabtop13 td{
-	background-color:#ffffff;
-	height:25px;
-	line-height:150%;
-}
-.font-center{ text-align:center}
-.btbg{background:#e9faff !important;}
-.titfont {
-	font-size: 16px;
-	font-weight: bold;
-	color: #255e95;
-	background-color:#e9faff;
-}
-</style>
+    <style type="text/css">
+        .tabtop13 td {
+            background-color: #ffffff;
+            height: 25px;
+            line-height: 150%;
+        }
+
+        .font-center {
+            text-align: center
+        }
+
+        .btbg {
+            background: #e9faff !important;
+        }
+
+        .titfont {
+            font-size: 16px;
+            font-weight: bold;
+            color: #255e95;
+            background-color: #e9faff;
+        }
+    </style>
 {% endblock %}
 
 
@@ -44,52 +51,97 @@
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <table class="table table-bordered table-striped" border="0" cellspacing="1" cellpadding="4"  align="center">
+                        <table class="table table-bordered table-striped" border="0" cellspacing="1" cellpadding="4"
+                               align="center">
                             <tbody>
                             <tr>
                                 <th class="btbg font-center titfont"></th>
-                                <th class="btbg font-center titfont" align="center" >库存</th>
-                                <th  class="btbg font-center titfont">在池</th>
+                                <th class="btbg font-center titfont" align="center">库存</th>
+                                <th class="btbg font-center titfont">在池</th>
                             </tr>
                             <tr>
-                                <th class="btbg font-center titfont" rowspan="2">电票</th>
-                                <td ><span class="pull-right">{{ kudianc }}张</span> </td>
-                                <td ><span class="pull-right">{{ chidianc }}张</span></td>
+                                <th class="btbg font-center titfont">电票</th>
+                                <td><a href="{% url 'ticket_list' %}?t_status=1&t_type=2">
+                                    <span class="pull-left">{{ kudianc }}张</span>
+                                    <span class="pull-right">{{ kudians }}元</span></a></td>
+                                <td><a href="{% url 'ticket_list' %}?t_status=5&t_type=2">
+                                    <span class="pull-left">{{ chidianc }}张</span>
+                                    <span class="pull-right">{{ chidians }}元</span></a></td>
                             </tr>
                             <tr>
-                                <td><span class="pull-right">{{ kudians }}元</span></td>
-                                <td><span class="pull-right">{{ chidians }}元</span></td>
+                                <th class="btbg font-center titfont">纸票</th>
+                                <td><a href="{% url 'ticket_list' %}?t_status=1&t_type=1">
+                                    <span class="pull-left">{{ kuzhic }}张</span>
+                                    <span class="pull-right">{{ kuzhis }}元</span></a></td>
+                                <td><a href="{% url 'ticket_list' %}?t_status=5&t_type=1">
+                                    <span class="pull-left">{{ chizhic }}张</span>
+                                    <span class="pull-right">{{ chizhis }}元</span></a></td>
                             </tr>
                             <tr>
-                                <th class="btbg font-center titfont" rowspan="2">纸票</th>
-                                <td><span class="pull-right">{{ kuzhic }}张</span></td>
-                                <td><span class="pull-right">{{ chizhic }}张</span></td>
+                                <th class="btbg font-center titfont">合计</th>
+                                <td><span class="pull-left">{{ kuc }}张</span>
+                                    <span class="pull-right">{{ kus }}元</span></td>
+                                <td><span class="pull-left">{{ chic }}张</span>
+                                    <span class="pull-right">{{ chis }}元</span>
+                                </td>
                             </tr>
                             <tr>
-                                <td><span class="pull-right">{{ kuzhis }}元</span></td>
-                                <td><span class="pull-right">{{ chizhis }}元</span></td>
-                            </tr>
-                            <tr>
-                                <th class="btbg font-center titfont" rowspan="2">合计</th>
-                                <td><span class="pull-right">{{ kuc }}张</span></td>
-                                <td><span class="pull-right">{{ chic }}张</span></td>
-                            </tr>
-                            <tr>
-                                <td><span class="pull-right">{{ kus }}元</span></td>
-                                <td><span class="pull-right">{{ chis }}元</span></td>
-                            </tr>
-                            <tr>
-                                <th class="btbg font-center titfont" rowspan="2" >总计</th>
-                                <td  colspan="2" align="center">{{ allc }}张</td>
-                            </tr>
-                            <tr>
-                                <td  colspan="2" align="center">{{ alls }}元</td>
+                                <th class="btbg font-center titfont" rowspan="2">总计</th>
+                                <td colspan="2" align="center">
+                                    <span>{{ allc }}张</span>
+                                    <span>{{ alls }}元</span></td>
                             </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">提醒</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <table class="table table-bordered table-striped" border="0" cellspacing="1" cellpadding="4"
+                               align="center">
+                            <tbody>
+                            <tr>
+                                <th class="btbg font-center titfont">三日内到期<br>池开库存票</th>
+                                <td><a href="{% url 'ticket_list' %}?t_status=1&daoqiriqi__lte={{ threeday }}">
+                                    <span class="pull-left">{{ daoqikucun_count }}张</span>
+                                    <span class="pull-right">{{ daoqikucun_sum }}元</span></a></td>
+                            </tr>
+                            <tr>
+                                <th class="btbg font-center titfont">本日到期<br>在池票</th>
+                                <td><a href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__lte={{ today }}">
+                                    <span class="pull-left">{{ daoqizaichi_count }}张</span>
+                                    <span class="pull-right">{{ daoqizaichi_sum }}元</span></a></td>
+                            </tr>
+                            <tr>
+                                <th class="btbg font-center titfont">月底到期<br>未还超短贷</th>
+                                <td><a href="{% url 'pool_loans' %}">
+                                    <span class="pull-left">{{ loan_count }}条</span>
+                                    <span class="pull-right">{{ loan_sum }}元</span></a></td>
+                            </tr>
+                            <tr>
+                                <th class="btbg font-center titfont">待收借款</th>
+                                <td><a href="{% url 'borrow_status' %}">
+                                    <span class="pull-left">{{ daishou_count }}条</span>
+                                    <span class="pull-right">{{ daishou_sum }}元</span></a></td>
+                            </tr>
+                            <tr>
+                                <th class="btbg font-center titfont">待还贷款</th>
+                                <td><a href="{% url 'loan_status' %}">
+                                    <span class="pull-left">{{ daifu_count }}条</span>
+                                    <span class="pull-right">{{ daifu_sum }}元</span></a></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div class="row">
             <div class="col-md-6">
@@ -149,149 +201,9 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'plugins/echarts.js' %}"></script>
-    <!-- page script -->
 
     <script type="text/javascript">
 
-        // 顶部服务器状态百分率圆图
-        $(function () {
-            /* jQueryKnob */
-
-            $(".knob").knob({
-                /*change : function (value) {
-          //console.log("change : " + value);
-          },
-          release : function (value) {
-          console.log("release : " + value);
-          },
-          cancel : function () {
-          console.log("cancel : " + this.value);
-          },*/
-                draw: function () {
-                    // "tron" case
-                    if (this.$.data(
-                        'skin') == 'tron'
-                    ) {
-
-                        var a = this.angle(this.cv)  // Angle
-                            , sa = this.startAngle          // Previous start angle
-                            , sat = this.startAngle         // Start angle
-                            , ea                            // Previous end angle
-                            , eat = sat + a                 // End angle
-                            , r = true;
-
-                        this.g.lineWidth = this.lineWidth;
-
-                        this.o.cursor
-                        && (sat = eat - 0.3)
-                        && (eat = eat + 0.3);
-
-                        if (this.o.displayPrevious) {
-                            ea = this.startAngle + this.angle(this.value);
-                            this.o.cursor
-                            && (sa = ea - 0.3)
-                            && (ea = ea + 0.3);
-                            this.g.beginPath();
-                            this.g.strokeStyle = this.previousColor;
-                            this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sa, ea, false);
-                            this.g.stroke();
-                        }
-
-                        this.g.beginPath();
-                        this.g.strokeStyle = r ? this.o.fgColor : this.fgColor;
-                        this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, sat, eat, false);
-                        this.g.stroke();
-
-                        this.g.lineWidth = 2;
-                        this.g.beginPath();
-                        this.g.strokeStyle = this.o.fgColor;
-                        this.g.arc(this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
-                        this.g.stroke();
-
-                        return false;
-                    }
-                }
-            });
-            /* END JQUERY KNOB */
-        });
-
-        //不同状态资产数量统计 柱状图
-        $(function () {
-            // 基于准备好的dom，初始化echarts实例
-            var myChart = echarts.init(document.getElementById('barChart'));
-
-            // 指定图表的配置项和数据
-            var option = {
-                color: ['#3398DB'],
-                title: {
-                    text: '数量'
-                },
-                tooltip: {},
-                legend: {
-                    data: ['']
-                },
-                xAxis: {
-                    data: ["在线", "下线", "故障", "备用", "未知"]
-                },
-                yAxis: {},
-                series:
-                    [{
-                        name: '数量',
-                        type: 'bar',
-                        barWidth: '50%',
-                        data: [{{ upline }}, {{ offline }}, {{ breakdown }}, {{ backup }}, {{ unknown }}]
-                    }]
-            };
-            // 使用刚指定的配置项和数据显示图表。
-            myChart.setOption(option);
-        });
-
-        //资产类型数量统计 饼图
-        $(function () {
-            // 基于准备好的dom，初始化echarts实例
-            var myChart = echarts.init(document.getElementById('donutChart'));
-
-            // 指定图表的配置项和数据
-            option = {
-                title: {
-                    x: 'center'
-                },
-                tooltip: {
-                    trigger: 'item',
-                    formatter: "{a} <br/>{b} : {c} ({d}%)"
-                },
-                legend: {
-                    orient: 'vertical',
-                    left: 'left',
-                    data: ['服务器', '网络设备', '存储设备', '安全设备', '软件资产']
-                },
-                series: [
-                    {
-                        name: '资产类型',
-                        type: 'pie',
-                        radius: '55%',
-                        center: ['50%', '60%'],
-                        data: [
-                            {value:{{ server_number }}, name: '服务器'},
-                            {value:{{ networkdevice_number }}, name: '网络设备'},
-                            {value:{{ storagedevice_number }}, name: '存储设备'},
-                            {value:{{ securitydevice_number }}, name: '安全设备'},
-                            {value:{{ software_number }}, name: '软件资产'}
-                        ],
-                        itemStyle: {
-                            emphasis: {
-                                shadowBlur: 10,
-                                shadowOffsetX: 0,
-                                shadowColor: 'rgba(0, 0, 0, 0.5)'
-                            }
-                        }
-                    }
-                ]
-            };
-            // 使用刚指定的配置项和数据显示图表。
-            myChart.setOption(option);
-        });
 
     </script>
 

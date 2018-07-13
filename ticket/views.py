@@ -56,12 +56,49 @@ def dashboard(request):
                 pass
         pass
     kuc = kudianc + kuzhic
-    kus = kudians + kuzhis
+    kus = round(kudians + kuzhis,2)
     chic = chidianc + chizhic
-    chis = chidians + chizhis
+    chis = round(chidians + chizhis,2)
     allc = kuc + chic
-    alls = kus + chis
+    alls = round(kus + chis,2)
+
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    threeday = (datetime.datetime.now() + datetime.timedelta(days =3)).strftime("%Y-%m-%d")
+    # count_t = Ticket.objects.filter(Q(t_status=5)&Q(daoqiriqi__gt=today)).count()
+    ts = Ticket.objects.filter(Q(t_status=5)&Q(daoqiriqi__lte=today)).values('t_status').annotate(t_count = Count('id'),sum_money=Sum('piaomianjiage'))
+    daoqizaichi_count = 0
+    daoqizaichi_sum = 0
+    for t in ts:
+        if t['t_status'] == 5:
+            daoqizaichi_count = t['t_count']
+            daoqizaichi_sum = round(t['sum_money'],2)
+    ts = Ticket.objects.filter(Q(t_status=1)&Q(daoqiriqi__lte=threeday)).values('t_status').annotate(t_count = Count('id'),sum_money=Sum('piaomianjiage'))
+    daoqikucun_count = 0
+    daoqikucun_sum = 0
+    for t in ts:
+        if t['t_status'] == 1:
+            daoqikucun_count = t['t_count']
+            daoqikucun_sum = round(t['sum_money'],2)
+    # ts = SuperLoan.objects.filter(Q(needpay_sum__gt=0)|Q(needpay_lixi__gt=0)).annotate(t_count = Count('id'),sum_money=Sum('needpay_sum'),sum_lixi=Sum('needpay_lixi'))
+
+    loan_count = SuperLoan.objects.filter(Q(needpay_sum__gt=0)|Q(needpay_lixi__gt=0)).count()
+    loan_sum = SuperLoan.objects.filter(Q(needpay_sum__gt=0)|Q(needpay_lixi__gt=0)).aggregate(Sum('needpay_sum')).get('needpay_sum__sum')
+    # payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=3)|Q(fee_type=5)|Q(fee_type=7))).order_by('-pub_date')
+
+    ts =  Loan_Order.objects.filter(Q(needpay_sum__gt=0)).values('order_type').annotate(t_count = Count('id'),sum_money=Sum('needpay_sum'))
+    daishou_count = 0
+    daishou_sum = 0
+    daifu_count = 0
+    daifu_sum = 0
+    for t in ts:
+        if t['order_type'] == 4:
+            daifu_count = t['t_count']
+            daifu_sum = round(t['sum_money'],2)
+        if t['order_type'] == 3:
+            daishou_count = t['t_count']
+            daishou_sum = round(t['sum_money'],2)
     print(ts)
+
     return render(request, 'ticket/dashboard.html', locals())
 
 #用户登陆选项，所有的函数将会返回一个template_response的实例，用来描绘页面，同时你也可以在return之前增加一些特定的功能
