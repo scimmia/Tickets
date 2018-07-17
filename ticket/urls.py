@@ -56,6 +56,7 @@ urlpatterns = [
     url(r'^pool/pool_loans/', views.pool_loans, name='pool_loans'),
     url(r'^pool/pool_loan/(?P<pk>\d+)/$', views.pool_loan, name='pool_loan'),
     url(r'^pool/pool_loan_repay/', views.pool_loan_repay, name='pool_loan_repay'),
+    url(r'^pool/pool_tickets/', views.pool_tickets, name='pool_tickets'),
     # url(r'^card/card_add/', views.card_add, name='card_add'),
     # url(r'^card/card_edit/(?P<pk>\d+)/$', views.card_edit, name='card_edit'),
     # url(r'^card/card_delete/(?P<pk>\d+)/$', views.ticket_delete, name='ticket_delete'),

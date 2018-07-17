@@ -277,6 +277,10 @@
                             {% if '/pool_loans/' in request.path %}
                                 class="active"
                             {% endif %}><a href="{% url 'pool_loans' %}"><i class="fa fa-circle-o"></i>超短贷</a></li>
+                    <li
+                            {% if '/pool_tickets/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'pool_tickets' %}"><i class="fa fa-circle-o"></i>池开票</a></li>
                 </ul>
                 </li>
                 {% if '/tool/' in request.path %}

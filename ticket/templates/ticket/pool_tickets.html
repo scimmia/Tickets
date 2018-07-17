@@ -1,0 +1,205 @@
+{% extends "ticket/res_list.html" %}
+{% load staticfiles %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
+
+{% endblock %}
+{% block content-header %}
+    <h1>
+        池开票
+        <small>待还款列表</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li>
+                    <form method='POST' action="" id="signupForm" class="form-inline  pull-right"
+              onsubmit="return check();">{% csrf_token %}
+
+            <input name="ids" value="" style="display: none"
+                   class="textinput textInput form-control "
+                   id="id_ids" type="text">
+            <button type="submit" class="btn btn-yahoo breadcrumb" name="all_topool">
+                保证金还款
+                <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+            </button>
+        </form>
+
+        </li>
+    </ol>
+{% endblock %}
+{% block search_header %}
+    <div class="col-xs-12">
+
+    </div>
+{% endblock %}
+
+{% block table_tr %}
+    <th style="display: none"></th>
+    <th style="display: none">ID</th>
+    <th>类型</th>
+    <th>购买日期</th>
+    <th>出票行</th>
+    <th>票面价格</th>
+    <th>购入价格</th>
+    <th>卖出价格</th>
+    <th>出票日期</th>
+    <th>到期日期</th>
+    <th>状态</th>
+    <th>付款状态</th>
+    <th>收款状态</th>
+{% endblock %}
+{% block table_td %}
+    <td style="display: none"></td>
+    <th style="display: none">{{ item.id }}</th>
+    <td>
+        {% if item.t_type == 1 %}
+            <span class="label label-danger">纸
+        {% elif item.t_type == 2 %}
+            <span class="label label-success">电
+        {% endif %}
+        </span></td>
+    <td><a class="green" href="{% url 'ticket_index' item.id %}" title="查看信息">
+        {{ item.goumairiqi }}
+    </a></td>
+    <td>{{ item.chupiaohang }}</td>
+    <td>{{ item.piaomianjiage }}</td>
+    <td>{{ item.gourujiage }}</td>
+    <td>{{ item.maichujiage }}</td>
+    <td>{{ item.chupiaoriqi }}</td>
+    <td>{{ item.daoqiriqi }}</td>
+    <td>
+        {% if item.t_status == 1 %}
+            <span class="label label-success">在库
+        {% elif item.t_status == 3 %}
+            <span class="label label-danger">卖出
+        {% elif item.t_status == 5 %}
+            <span class="label label-info">在池
+        {% endif %}
+        </span></td>
+    <td>
+        {% if item.pay_status == 1 %}
+            <span class="label label-danger">待付款
+        {% elif item.pay_status == 2 %}
+            <span class="label label-success">已付款
+        {% endif %}
+        </span></td>
+    <td>
+        {% if item.sell_status == 3 %}
+            <span class="label label-danger">待收款
+        {% elif item.sell_status == 4 %}
+            <span class="label label-success">已收款
+        {% endif %}
+        </span></td>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
+    <script src="{% static 'plugins/daterangepicker/moment.min.js' %}"></script>
+    <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
+    <!-- bootstrap datepicker -->
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker.js' %}"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            //Date picker
+            $.fn.datepicker.dates['cn'] = {   //切换为中文显示
+                days: ["周日", "周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+                daysShort: ["日", "一", "二", "三", "四", "五", "六", "七"],
+                daysMin: ["日", "一", "二", "三", "四", "五", "六", "七"],
+                months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+                monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+                today: "今天",
+                clear: "清除"
+            };
+            $('.dateinput').datepicker({
+                autoclose: true, //自动关闭
+                clearBtn: true,          //显示清除按钮
+                format: 'yyyy-mm-dd',
+                language: 'cn',           //语言
+            });
+            $('#reservation').daterangepicker()
+            $('.js-single').select2({
+                height: '40px',
+            });
+            var t = $('#table_id').DataTable({
+                'paging': false,
+                'lengthChange': true,
+                'searching': false,
+                'ordering': true,
+                'info': true,
+                'autoWidth': true,
+                "language": {
+                    "processing": "处理中...",
+                    "lengthMenu": "显示 _MENU_ 项结果",
+                    "zeroRecords": "没有匹配结果",
+                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "infoPostFix": "",
+                    "search": "搜索:",
+                    "searchPlaceholder": "搜索...",
+                    "url": "",
+                    "emptyTable": "表中数据为空",
+                    "loadingRecords": "载入中...",
+                    "infoThousands": ",",
+                    "paginate": {
+                        "first": "首页",
+                        "previous": "上页",
+                        "next": "下页",
+                        "last": "末页"
+                    },
+                    "aria": {
+                        "paginate": {
+                            'first': '首页',
+                            'previous': '上页',
+                            'next': '下页',
+                            'last': '末页'
+                        },
+                        "sortAscending": ": 以升序排列此列",
+                        "sortDescending": ": 以降序排列此列"
+                    },
+                    "decimal": "-",
+                    "thousands": "."
+                },
+                "columnDefs": [{
+                    'data': null,
+                    "orderable": false,
+                    "targets": 0,
+                    'defaultContent': "<input type ='checkbox' name='test' class='icheckbox_minimal' value=''>",
+                }, {
+                    "orderable": false, "targets": [0],  //设置第一列和最后一列不可排序
+                }],
+                "order": [[1, 'desc']]
+            });
+            $('#table_id tbody').on('click', 'tr', function () {
+                $(this).toggleClass('selected');
+                var a = t.rows('.selected').data();
+                console.log(a.length);
+                $("#selected_num").text(a.length);
+                var ids = '';
+                for (var i = 0; i < a.length; i++) {
+                    console.log(a[i][1]);
+                    ids = ids + parseFloat(a[i][1]) + ',';
+
+                }
+                ids = (ids.substring(ids.length - 1) == ',') ? ids.substring(0, ids.length - 1) : ids;
+                $("#id_ids").val(ids);
+            });
+
+            t.on('order.dt search.dt',
+                function () {
+                    t.column(0, {
+                        search: 'applied',
+                        order: 'applied'
+                    }).nodes().each(function (cell, i) {
+                        cell.innerHTML = i + 1;
+                    });
+                }).draw();
+        });
+
+    </script>
+
+{% endblock %}

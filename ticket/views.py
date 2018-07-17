@@ -494,7 +494,7 @@ def ticket_createorder(request):
         if order.order_type == 1:
             Ticket.objects.filter(id__in=ids.split(',')).update(pay_status =2,payorder=order,paytime=order.pub_date)
         elif order.order_type == 2:
-            Ticket.objects.filter(id__in=ids.split(',')).update(sell_status = 4,sellorder=order,selltime=order.pub_date,maipiaoren = request.POST['maipiaoren'])
+            Ticket.objects.filter(id__in=ids.split(',')).update(t_status = 3 ,sell_status = 4,sellorder=order,selltime=order.pub_date,maipiaoren = request.POST['maipiaoren'])
 
         tickets = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
         for t in tickets:
@@ -1184,6 +1184,22 @@ def loan_promoneypay(superloan,money):
     pool.save()
     pass
 
+#保证金还池开票款，仅涉及保证金变化
+def ticket_promoneypay(ticket):
+    p = Pool.objects.last()
+    if not p:
+        p = Pool()
+    pool = Pool()
+    money = ticket.gourujiage
+    pool.totalmoney = p.totalmoney - money
+    pool.unusemoney = p.unusemoney - money
+    pool.usedmoney = p.usedmoney
+    pool.promoney = p.promoney - money
+    pool.ticket = ticket
+    pool.money = 0 - money
+    pool.pool_status = 9
+    pool.save()
+    pass
 def pool_loans(request):
     form = SuperLoanForm(request.POST or None)
     if request.method == 'POST':
@@ -1290,6 +1306,28 @@ def pool_loan_repay(request):
 
         return redirect('pool_loans')
     return redirect('pool_loans')
+
+def pool_tickets(request):
+    if request.method == 'POST':
+        if 'ids' in request.POST.keys():
+            ids = request.POST['ids']
+            if len(ids) > 0:
+                tickets = Ticket.objects.filter(id__in=ids.split(','))
+                for t in tickets:
+                    if not t.payedzijinchi:
+                        t.payedzijinchi = True
+                        t.save()
+                        ticket_promoneypay(t)
+            pass
+
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    raw_data = Ticket.objects.filter(Q(gouruzijinchi=True)&Q(payedzijinchi=False)&Q(daoqiriqi__lte=today)).order_by('-goumairiqi')
+    context = {
+        'data': raw_data,
+    }
+    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
+    return render(request, 'ticket/pool_tickets.html', context)
+
 
 def pool_pro(request):
     pool = Pool.objects.last()

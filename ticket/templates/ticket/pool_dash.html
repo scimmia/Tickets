@@ -145,6 +145,8 @@
                                             <span class="label label-warning">超短贷还款</span>
                                         {% elif i.pool_status == 8 %}
                                             <span class="label label-primary">保证金还超短贷</span>
+                                        {% elif i.pool_status == 9 %}
+                                            <span class="label label-primary">保证金还池开票</span>
                                         {% endif %}</td>
                                     <td>
                                         {% if i.money > 0 %}

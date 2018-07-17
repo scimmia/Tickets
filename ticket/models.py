@@ -92,6 +92,7 @@ class Ticket(models.Model):
         (1,u'在库'),
         (5,u'在池'),
         (3,u'卖出'),
+        (7,u'在池到期'),
     )
     TICKET_TYPES= (
         (1,u'纸票'),
@@ -116,6 +117,7 @@ class Ticket(models.Model):
     piaomianjiage = models.FloatField(u'票面价格(元)', default=0)
     gourujiage = models.FloatField(u'购入价格', default=0)
     gouruzijinchi = models.BooleanField(u'资金池购入', default=False)
+    payedzijinchi = models.BooleanField(u'保证金还款', default=False)
     gongyingshang = models.CharField(u'供应商', max_length=100)
     pay_status = models.IntegerField(
         u'状态',
@@ -307,6 +309,7 @@ class Pool(models.Model):
         (6,u'新增超短贷'),
         (7,u'超短贷还款'),
         (8,u'保证金还超短贷'),
+        (9,u'保证金还池开票'),
     )
     pool_status = models.IntegerField(
         u'费用内容',
