@@ -338,3 +338,27 @@ class CardTrans(models.Model):
     money = models.FloatField(u'金额', default=0)
     toCard = models.ForeignKey( Card, related_name='tran_to_card', verbose_name=u'转入账户' , blank=False,null=False)
     pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
+
+class OperLog(models.Model):
+    OPER_TYPE= (
+        (101,u'新建开票'),
+        (102,u'新建池开票'),
+        (103,u'票据入库'),
+        (104,u'票据入池'),
+        (105,u'票据在池到期'),
+        (106,u'票据导入'),
+    )
+    oper_type = models.IntegerField(
+        u'操作类型',
+        choices=OPER_TYPE,
+        default=101,
+    )
+    detail = models.CharField(u'相关票据卡', max_length=255, blank=False,null=False)
+    contdetail = models.TextField(u'详情', blank=False,null=False)
+
+    pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
+    class Meta:
+        verbose_name = '操作记录'
+        verbose_name_plural = '操作记录'
+    def __str__(self):
+        return self.get_oper_type_display()

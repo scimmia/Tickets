@@ -312,6 +312,25 @@
                     </li>
                 </ul>
                 </li>
+                {% if '/log/' in request.path %}
+                    <li class="active treeview">
+                        {% else %}
+                    <li class="treeview">
+                {% endif %}
+                <a href="#">
+                    <i class="fa fa-newspaper-o"></i> <span>操作记录</span>
+                    <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li
+                            {% if '/log_list' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'log_list' %}"><i class="fa fa-circle-o"></i>操作记录</a>
+                    </li>
+                </ul>
+                </li>
                 {% if '/sysconfig/' in request.path %}
                     <li class="active treeview">
                         {% else %}

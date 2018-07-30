@@ -21,8 +21,80 @@ from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm, \
     SuperLoanForm, LoanForm, SuperLoanFeeForm, CardTransForm, BestMixForm
 from ticket.models import Card, Fee, Ticket, Order, StoreFee, Pool, InpoolPercent, TicketsImport, \
-    StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee, CardTrans
+    StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee, CardTrans, OperLog
 
+def getPool():
+    p = Pool.objects.last()
+    if not p:
+        p = Pool()
+        p.save()
+    return p
+def getPoolPercent():
+    item = InpoolPercent.objects.last()
+    if not item:
+        item = InpoolPercent()
+        item.inpoolPer = 100
+        item.save()
+    return item
+
+def logcont_addticket_gouruzijinchi(log,ticket):
+    dict = {}
+    dict['cont'] = u'保证金'
+    dict['money'] = -1 * ticket.gourujiage
+    return dict
+    pass
+def logcont_ticket_tostore(log,ticket):
+    dict = {}
+    dict['cont'] = u'库存'
+    dict['money'] = ticket.gourujiage
+    return dict
+    pass
+def logcont_ticket_outstore(log,ticket):
+    dict = {}
+    dict['cont'] = u'库存'
+    dict['money'] = -1 * ticket.gourujiage
+    return dict
+    pass
+def logcont_ticket_topool(log,ticket):
+    dict = {}
+    dict['cont'] = u'可用额度'
+    dict['money'] = ticket.piaomianjiage * getPoolPercent().inpoolPer /100
+    return dict
+    pass
+def logcont_ticket_outpool(log,ticket):
+    dict = {}
+    dict['cont'] = u'可用额度'
+    dict['money'] = -1 * ticket.piaomianjiage * getPoolPercent().inpoolPer /100
+    return dict
+    pass
+def log_addticket(ticket):
+    log = OperLog()
+    list1 = []
+    listcontdetail = []
+    dict = {}
+    dict['pktype'] = 1
+    dict['pk'] = ticket.pk
+    list1.append(dict)
+    log.detail = json.dumps(list1)
+    if ticket.gouruzijinchi:
+        log.oper_type = 102
+        pass
+    else:
+        log.oper_type = 101
+        pass
+    if ticket.t_status == 1:
+        listcontdetail.append(logcont_ticket_tostore(log, ticket))
+        pass
+    elif ticket.t_status == 5:
+        listcontdetail.append(logcont_ticket_topool(log, ticket))
+        pass
+
+    if ticket.gouruzijinchi:
+        listcontdetail.append(logcont_addticket_gouruzijinchi(log, ticket))
+    log.contdetail = json.dumps(listcontdetail)
+    log.save()
+
+    pass
 
 @login_required
 def dashboard(request):
@@ -236,6 +308,8 @@ def ticket_add(request):
                 instance.save()
                 ticket_poolpay(instance.pk)
                 pass
+            log_addticket(instance)
+
         # return render(request, 'ticket/ticket_add.html',locals())
         return redirect('ticket_list')
     else:
@@ -1370,6 +1444,47 @@ def pool_pro(request):
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/pool_dash.html', context)
+
+#日志
+def log_list(request):
+    raw_data = OperLog.objects.all().order_by('-pub_date')
+    kwargs = {}
+    query = ''
+    for key in request.GET.keys():
+        value = request.GET[(key)]
+        print(key, value)
+        # 刨去其中的token和page选项
+        if key != 'csrfmiddlewaretoken' and key != 'page' and (len(value) > 0):
+            kwargs[key] = value
+            # 该query用于页面分页跳转时，能附带现有的搜索条件
+            query += '&' + key + '=' + value
+    # 通过元始数据进行过滤，过滤条件为健对值的字典
+    data = raw_data.filter(**kwargs)
+    # 如果没有从GET提交中获取信息，那么data则为元始数据
+
+    for t in data:
+        try:
+            t.detail = json.loads(t.detail)
+            t.contdetail = json.loads(t.contdetail)
+        except:
+            pass
+    # 将分页的信息传递到展示页面中去
+    data_list, page_range, count, page_nums = pagination(request, data)
+    # 建立context字典，将值传递到相应页面
+    context = {
+        'data': data_list,
+        'gongyingshang': get_ticketlists('gongyingshang'),
+        'maipiaoren': get_ticketlists('maipiaoren'),
+        'query': query,
+        'page_range': page_range,
+        'count': count,
+        'page_nums': page_nums,
+        'filter': filter,
+    }
+    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
+    return render(request, 'ticket/log_list.html', context)
+
+
 #配置
 def inpoolPercent(request):
     item = InpoolPercent.objects.last()

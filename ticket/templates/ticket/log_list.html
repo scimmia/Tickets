@@ -1,0 +1,156 @@
+{% extends "ticket/res_list.html" %}
+{% load staticfiles %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
+
+{% endblock %}
+{% block content-header %}
+    <h1>
+        操作记录
+    </h1>
+{% endblock %}
+{% block search_header %}
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">搜索</h3>
+
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body" style="">
+                <form class="navbar-for navbar-container" role="search" method="get" action="">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="input-daterange input-group">
+                                <span class="input-group-addon" id="date-picker">添加时间</span>
+                                <input type="text" class="form-control dateinput" name="pub_date__gt"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.pub_date__gt %} value=
+                                            {{ request.GET.pub_date__gt }}{% endif %}>
+                                <span class="input-group-addon">
+                                <i class="fa fa-exchange"></i>
+                            </span>
+                                <input type="text" class="form-control dateinput" name="pub_date__lt"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.pub_date__lt %} value=
+                                            {{ request.GET.pub_date__lt }}{% endif %}>
+
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+								<span class="input-group-btn">
+									<button type="submit" class="btn btn-purple btn-sm">
+										查询
+										<i class="ace-icon fa fa-search icon-on-right bigger-110"></i>
+									</button>
+								</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block table_tr %}
+    <th>添加时间</th>
+    <th>操作类型</th>
+    <th>相关票据卡</th>
+    <th>详情</th>
+{% endblock %}
+{% block table_td %}
+    <td>{{ item.pub_date }} </td>
+    <td>{{ item.get_oper_type_display }}</td>
+    <td>{% for i in item.detail %}
+        <a class="green" href="
+            {% if i.pktype == 1 %}
+                {% url 'ticket_index' i.pk %}
+            {% elif item.card_type == 2 %}
+                                公户
+            {% endif %}" title="查看"> {{ i.pk }} </a>
+    {% endfor %}</td>
+    <td>
+        {% for i in item.contdetail %}
+            <span>
+                {{ i.cont }}{{ i.money }}
+            </span>
+        {% endfor %}
+    </td>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/datepicker/bootstrap-datepicker.js' %}"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            //Date picker
+            $.fn.datepicker.dates['cn'] = {   //切换为中文显示
+                days: ["周日", "周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+                daysShort: ["日", "一", "二", "三", "四", "五", "六", "七"],
+                daysMin: ["日", "一", "二", "三", "四", "五", "六", "七"],
+                months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+                monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+                today: "今天",
+                clear: "清除"
+            };
+            $('.dateinput').datepicker({
+                autoclose: true, //自动关闭
+                clearBtn: true,          //显示清除按钮
+                format: 'yyyy-mm-dd',
+                language: 'cn',           //语言
+            });
+            var t = $('#table_id').DataTable({
+                'paging': false,
+                'lengthChange': true,
+                'searching': false,
+                'ordering': true,
+                'info': true,
+                'autoWidth': true,
+                "language": {
+                    "processing": "处理中...",
+                    "lengthMenu": "显示 _MENU_ 项结果",
+                    "zeroRecords": "没有匹配结果",
+                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "infoPostFix": "",
+                    "search": "搜索:",
+                    "searchPlaceholder": "搜索...",
+                    "url": "",
+                    "emptyTable": "表中数据为空",
+                    "loadingRecords": "载入中...",
+                    "infoThousands": ",",
+                    "paginate": {
+                        "first": "首页",
+                        "previous": "上页",
+                        "next": "下页",
+                        "last": "末页"
+                    },
+                    "aria": {
+                        "paginate": {
+                            'first': '首页',
+                            'previous': '上页',
+                            'next': '下页',
+                            'last': '末页'
+                        },
+                        "sortAscending": ": 以升序排列此列",
+                        "sortDescending": ": 以降序排列此列"
+                    },
+                    "decimal": "-",
+                    "thousands": "."
+                },
+            });
+
+        });
+
+    </script>
+
+{% endblock %}
