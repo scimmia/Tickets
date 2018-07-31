@@ -347,6 +347,26 @@ class OperLog(models.Model):
         (104,u'票据入池'),
         (105,u'票据在池到期'),
         (106,u'票据导入'),
+        (201,u'新建付款'),
+        (202,u'新建收款'),
+        (203,u'付款'),
+        (204,u'收款'),
+        (301,u'新建借款'),
+        (302,u'新建贷款'),
+        (303,u'借款收本'),
+        (304,u'借款收息'),
+        (305,u'贷款还本'),
+        (306,u'贷款还息'),
+        (401,u'新建银行卡'),
+        (402,u'银行卡存入'),
+        (403,u'银行卡取出'),
+        (404,u'银行卡转账'),
+        (501,u'保证金存入'),
+        (502,u'保证金取出'),
+        (503,u'新增超短贷'),
+        (504,u'超短贷还本'),
+        (505,u'超短贷还息'),
+        (506,u'池开票还款'),
     )
     oper_type = models.IntegerField(
         u'操作类型',
@@ -355,7 +375,6 @@ class OperLog(models.Model):
     )
     detail = models.CharField(u'相关票据卡', max_length=255, blank=False,null=False)
     contdetail = models.TextField(u'详情', blank=False,null=False)
-
     pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
     class Meta:
         verbose_name = '操作记录'

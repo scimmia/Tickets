@@ -23,6 +23,82 @@ from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketF
 from ticket.models import Card, Fee, Ticket, Order, StoreFee, Pool, InpoolPercent, TicketsImport, \
     StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee, CardTrans, OperLog
 
+
+class LogTemp:
+    oper_type = 0
+    detail = []
+    contdetail = []
+    m_store = 0#库存
+    m_card = 0#银行卡
+    m_pro = 0#保证金
+    m_unuse = 0#可用额度
+    m_used = 0#已用额度
+    m_superloan = 0#超短贷
+
+    def __init__(self):
+        self.oper_type = 0
+        self.detail = []
+        self.contdetail = []
+        self.m_store = 0#库存 101
+        self.m_card = 0#银行卡 102
+        self.m_pro = 0#保证金 103
+        self.m_unuse = 0#可用额度 104
+        self.m_used = 0#已用额度 105
+        self.m_superloan = 0#超短贷 106
+        pass
+
+
+    def adddetail(self,pktype,pk):
+        self.detail.append({'pktype':pktype,'pk': pk})
+        pass
+    def addstore(self,money):
+        self.m_store = self.m_store + money
+    def addcard(self,money):
+        self.m_card = self.m_card + money
+    def addpro(self,money):
+        self.m_pro = self.m_pro + money
+    def addunuse(self,money):
+        self.m_unuse = self.m_unuse + money
+    def addused(self,money):
+        self.m_used = self.m_used + money
+    def addsuperloan(self,money):
+        self.m_superloan = self.m_superloan + money
+
+    def addcontdetail(self,conttype,money):
+        if conttype == 101:
+            self.m_store = self.m_store + money
+        elif conttype == 102:
+            self.m_card = self.m_card + money
+        elif conttype == 103:
+            self.m_pro = self.m_pro + money
+        elif conttype == 104:
+            self.m_unuse = self.m_unuse + money
+        elif conttype == 105:
+            self.m_used = self.m_used + money
+        elif conttype == 106:
+            self.m_superloan = self.m_superloan + money
+        pass
+    def save(self):
+        if len(self.detail)>0:
+            if self.m_store!= 0:
+                self.contdetail.append({'cont':u'库存','money':self.m_store})
+            if self.m_card!= 0:
+                self.contdetail.append({'cont':u'银行卡','money':self.m_card})
+            if self.m_pro!= 0:
+                self.contdetail.append({'cont':u'保证金','money':self.m_pro})
+            if self.m_unuse!= 0:
+                self.contdetail.append({'cont':u'可用额度','money':self.m_unuse})
+            if self.m_used!= 0:
+                self.contdetail.append({'cont':u'已用额度','money':self.m_used})
+            if self.m_superloan!= 0:
+                self.contdetail.append({'cont':u'超短贷','money':self.m_superloan})
+            log = OperLog()
+            log.oper_type = self.oper_type
+            log.detail = json.dumps(self.detail)
+            log.contdetail = json.dumps(self.contdetail)
+            log.save()
+
+
 def getPool():
     p = Pool.objects.last()
     if not p:
@@ -37,63 +113,30 @@ def getPoolPercent():
         item.save()
     return item
 
-def logcont_addticket_gouruzijinchi(log,ticket):
-    dict = {}
-    dict['cont'] = u'保证金'
-    dict['money'] = -1 * ticket.gourujiage
-    return dict
-    pass
-def logcont_ticket_tostore(log,ticket):
-    dict = {}
-    dict['cont'] = u'库存'
-    dict['money'] = ticket.gourujiage
-    return dict
-    pass
-def logcont_ticket_outstore(log,ticket):
-    dict = {}
-    dict['cont'] = u'库存'
-    dict['money'] = -1 * ticket.gourujiage
-    return dict
-    pass
-def logcont_ticket_topool(log,ticket):
-    dict = {}
-    dict['cont'] = u'可用额度'
-    dict['money'] = ticket.piaomianjiage * getPoolPercent().inpoolPer /100
-    return dict
-    pass
-def logcont_ticket_outpool(log,ticket):
-    dict = {}
-    dict['cont'] = u'可用额度'
-    dict['money'] = -1 * ticket.piaomianjiage * getPoolPercent().inpoolPer /100
-    return dict
-    pass
+def logcont_addticket_gouruzijinchi(ticket):
+    return {'cont':u'保证金','money':-1 * ticket.gourujiage}
+def logcont_ticket_tostore(ticket):
+    return {'cont':u'库存','money': ticket.gourujiage}
+def logcont_ticket_outstore(ticket):
+    return {'cont':u'库存','money': -1 * ticket.gourujiage}
+def logcont_ticket_topool(ticket):
+    return {'cont':u'可用额度','money': ticket.piaomianjiage * getPoolPercent().inpoolPer /100}
+def logcont_ticket_outpool(ticket):
+    return {'cont':u'可用额度','money': -1 * ticket.piaomianjiage * getPoolPercent().inpoolPer /100}
 def log_addticket(ticket):
-    log = OperLog()
-    list1 = []
-    listcontdetail = []
-    dict = {}
-    dict['pktype'] = 1
-    dict['pk'] = ticket.pk
-    list1.append(dict)
-    log.detail = json.dumps(list1)
+    log = LogTemp()
+    log.adddetail(1,ticket.pk)
     if ticket.gouruzijinchi:
         log.oper_type = 102
-        pass
     else:
         log.oper_type = 101
-        pass
     if ticket.t_status == 1:
-        listcontdetail.append(logcont_ticket_tostore(log, ticket))
-        pass
+        log.addstore(ticket.gourujiage)
     elif ticket.t_status == 5:
-        listcontdetail.append(logcont_ticket_topool(log, ticket))
-        pass
-
+        log.addunuse(ticket.piaomianjiage * getPoolPercent().inpoolPer /100)
     if ticket.gouruzijinchi:
-        listcontdetail.append(logcont_addticket_gouruzijinchi(log, ticket))
-    log.contdetail = json.dumps(listcontdetail)
+        log.addpro(-1 * ticket.gourujiage)
     log.save()
-
     pass
 
 @login_required
@@ -343,10 +386,12 @@ def get_ticketlists(col):
 def ticket_list(request):
     #从根据不同的请求，来获取相应的数据,并跳转至相应页面
     if request.method == 'POST':
+        log = LogTemp()
         if 'all_tostore' in request.POST.keys():
             print('all_tostore')
             ids = request.POST['ids']
             if len(ids) > 0:
+                log.oper_type = 103
                 tickets = Ticket.objects.filter(id__in=ids.split(','))
                 for t in tickets:
                     if t.t_status == 5:
@@ -354,11 +399,16 @@ def ticket_list(request):
                         t.save()
                         ticket_outpool(t.pk)
                         ticket_instore(t.pk)
+                        log.adddetail(1,t.pk)
+                        log.addunuse(-1*t.piaomianjiage * getPoolPercent().inpoolPer /100)
+                        log.addstore(t.gourujiage)
+                log.save()
             pass
         elif 'all_topool' in request.POST.keys():
             print('all_topool')
             ids = request.POST['ids']
             if len(ids) > 0:
+                log.oper_type = 104
                 tickets = Ticket.objects.filter(id__in=ids.split(','))
                 for t in tickets:
                     if t.t_status == 1:
@@ -366,6 +416,10 @@ def ticket_list(request):
                         t.save()
                         ticket_outstore(t.pk)
                         ticket_inpool(t.pk)
+                        log.adddetail(1,t.pk)
+                        log.addstore(-1*t.gourujiage)
+                        log.addunuse(t.piaomianjiage * getPoolPercent().inpoolPer /100)
+                log.save()
             pass
     # 将原先的data更名为raw_data
     raw_data = Ticket.objects.all().order_by('-goumairiqi')
@@ -924,6 +978,10 @@ def card_add(request):
         instance = form.save(commit=False)
         instance.money = 0
         instance.save()
+        log = LogTemp()
+        log.oper_type = 401
+        log.adddetail(2,instance.pk)
+        log.save()
         return redirect('card_list',)
 
 
@@ -953,15 +1011,21 @@ def card_edit(request,  pk):
 
         card = Card.objects.get(id = card_ins.id)
         if request.POST['fee'].strip(' ') != '':
+            log = LogTemp()
+            log.oper_type = 402
+            log.adddetail(2,card.pk)
             fee_ins = Fee()
             fee_ins.yinhangka = card
             fee_ins.money = float(request.POST['fee'])
             fee_ins.fee_type = 11
             if request.POST['p_status'] == '4':#银行卡取出
+                log.oper_type = 403
                 fee_ins.money = -1 * fee_ins.money
                 fee_ins.fee_type = 12
             fee_ins.name = request.POST['feebeizhu'].strip(' ')
             fee_ins.save()
+            log.addcard(fee_ins.money)
+            log.save()
             card_ins.money = card_ins.money + fee_ins.money
         card_ins.save()
 
@@ -995,7 +1059,12 @@ def card_trans(request):
             else:
                 instance.save()
                 card_fee(instance.fromCard.pk, 0 - instance.money, '银行卡转出', 14)
-                card_fee(instance.toCard.pk, instance.money, '银行卡转入', 13)
+                card_fee(instance.fromCard.pk, instance.money, '银行卡转入', 13)
+                log = LogTemp()
+                log.oper_type = 404
+                log.adddetail(2,instance.fromCard.pk)
+                log.adddetail(2,instance.fromCard.pk)
+                log.save()
                 return redirect('card_trans', )
     return render(request, 'ticket/card_trans.html', locals())
 
@@ -1016,15 +1085,23 @@ def loan_liststatus(request,index):
                 instance.monet_lilv = loanform.cleaned_data.get('money_lilv')*12
             instance.needpay_sum = loanform.cleaned_data.get('money_benjin')
             instance.save()
+            log = LogTemp()
+            log.adddetail(3,instance.pk)
             if index == 3:
                 fee = card_fee(instance.yinhangka.pk, 0 - loanform.cleaned_data.get('money_benjin'), '借款给他人',41)
                 fee.loanorder = instance
                 fee.save()
+                log.oper_type = 301
+                log.addcard(fee.money)
+                log.save()
                 return redirect('borrow_status')
             else:
                 fee = card_fee(instance.yinhangka.pk, loanform.cleaned_data.get('money_benjin'), '从他人处贷款',42)
                 fee.loanorder = instance
                 fee.save()
+                log.oper_type = 302
+                log.addcard(fee.money)
+                log.save()
                 return redirect('loan_status')
             pass
     raw_data =  Loan_Order.objects.filter(order_type=index).values('jiedairen').annotate(sum_money=Sum('needpay_sum')).values('jiedairen','sum_money')
@@ -1058,16 +1135,24 @@ def loan_orderlist(request,index):
                 instance.monet_lilv = loanform.cleaned_data.get('money_lilv')*12
             instance.needpay_sum = loanform.cleaned_data.get('money_benjin')
             instance.save()
+            log = LogTemp()
+            log.adddetail(3, instance.pk)
             if index == 3:
                 fee = card_fee(instance.yinhangka.pk, 0 - loanform.cleaned_data.get('money_benjin'), '借款给他人',41)
                 fee.loanorder = instance
                 fee.save()
+                log.oper_type = 301
+                log.addcard(fee.money)
+                log.save()
                 return redirect('%s?jiedairen=%s' % (reverse('borrow_list'), jiedairen))
                 # return redirect('borrow_list',pk)
             else:
                 fee = card_fee(instance.yinhangka.pk, loanform.cleaned_data.get('money_benjin'), '从他人处贷款',42)
                 fee.loanorder = instance
                 fee.save()
+                log.oper_type = 302
+                log.addcard(fee.money)
+                log.save()
                 return redirect('%s?jiedairen=%s' % (reverse('loan_list'), jiedairen))
 
                 # return redirect('loan_list',pk)
@@ -1102,7 +1187,8 @@ def loanorder(request,  pk):
         if feeform.is_valid():
             instance = feeform.save(commit=False)
             instance.loanorder = order
-
+            log = LogTemp()
+            log.adddetail(3,pk)
             if 'benjin' in request.POST.keys():
                 if feeform.cleaned_data.get('money') > order.needpay_sum:
                     message = u'金额不能大于待收付本金'
@@ -1113,12 +1199,15 @@ def loanorder(request,  pk):
                     order.money_lixi = order.money_lixi + round(instance.money * order.money_lilv * (datetime.date.today() - order.order_date).days / 360 + order.money_lixi,
                         2)
                     order.save()
+                    log.oper_type = 303
                     if order.order_type == 4:  # 还贷款
+                        log.oper_type = 305
                         instance.money = -1 * instance.money
                     instance.save()
                     instance.yinhangka.money = instance.yinhangka.money + instance.money
                     instance.yinhangka.save()
-
+                    log.addcard(instance.money)
+                    log.save()
                     return redirect('loanorder', pk=pk)
                 pass
             elif 'lixi' in request.POST.keys():
@@ -1128,12 +1217,15 @@ def loanorder(request,  pk):
                     instance.fee_type = 46+order.order_type
                     order.payed_lixi = order.payed_lixi + instance.money
                     order.save()
+                    log.oper_type = 304
                     if order.order_type == 4:  # 还贷款
                         instance.money = -1 * instance.money
+                        log.oper_type = 306
                     instance.save()
                     instance.yinhangka.money = instance.yinhangka.money + instance.money
                     instance.yinhangka.save()
-
+                    log.addcard(instance.money)
+                    log.save()
                     return redirect('loanorder', pk=pk)
                 pass
             elif 'fee' in request.POST.keys():
@@ -1176,20 +1268,27 @@ def pool_dash(request):
             if not p:
                 p = Pool()
             money = pool.money
+            log = LogTemp()
+            log.adddetail(4,u'保证金')
+            log.adddetail(2,pool.card.pk)
             if form.cleaned_data.get('p_status') == '4':
                 card_fee(pool.card.pk, money, '从保证金提取',21)
                 money = 0 - money
                 pool.pool_status = 4
+                log.oper_type = 502
             else:
                 card_fee(pool.card.pk, 0-money,'充值到保证金',22)
                 pool.pool_status = 3
-
+                log.oper_type = 501
             pool.totalmoney = p.totalmoney + money
             pool.promoney = p.promoney + money
             pool.unusemoney = p.unusemoney + money
             pool.usedmoney = p.usedmoney
             pool.money = money
             pool.save()
+            log.addcard(0-money)
+            log.addpro(money)
+            log.save()
             return redirect('pool_dash')
         pass
 
@@ -1285,6 +1384,13 @@ def pool_loans(request):
             loan.needpay_lixi = form.cleaned_data.get('lixi')
             loan.save()
             loan_create(loan)
+            log = LogTemp()
+            log.oper_type = 503
+            log.adddetail(5,loan.pk)
+            log.addunuse(0-loan.money_benjin)
+            log.addused(loan.money_benjin)
+            log.addsuperloan(loan.money_benjin)
+            log.save()
             return redirect('pool_dash')
     loan_data = SuperLoan.objects.all().order_by('pub_date')
     card_data = Card.objects.all()
@@ -1305,7 +1411,10 @@ def pool_loan(request,  pk):
     if request.method == 'POST':
         if poolfeeform.is_valid():
             money = poolfeeform.cleaned_data.get('money')
+            log = LogTemp()
+            log.adddetail(5,pk)
             if 'benjin' in request.POST.keys():
+                log.oper_type = 504
                 if poolfeeform.cleaned_data.get('money') > order.needpay_sum:
                     message = u'金额不能大于待还本金'
                 else:
@@ -1313,6 +1422,9 @@ def pool_loan(request,  pk):
                     order.needpay_sum = order.needpay_sum - money
                     order.save()
                     loan_repay(order,money)
+                    log.addunuse(money)
+                    log.addused(0-money)
+                    log.addsuperloan(0-money)
                     if 'zijinchipay' in request.POST.keys():
                         # 资金池还款
                         instance = SuperLoanFee()
@@ -1321,15 +1433,21 @@ def pool_loan(request,  pk):
                         instance.name = '保证金还超短贷本金'
                         instance.save()
                         loan_promoneypay(order,money)
+                        log.addpro(0-money)
+                        log.addunuse(0-money)
                         pass
                     else:
                         # 银行卡还款
                         fee = card_fee(Card.objects.get(id = int(request.POST['yinhangka'])).pk, 0 - money, '银行卡还超短贷本金', 51)
                         fee.superloan = order
                         fee.save()
+                        log.adddetail(2,fee.yinhangka.pk)
+                        log.addcard(0-money)
+                    log.save()
                     return redirect('pool_loan', pk=pk)
                 pass
             elif 'lixi' in request.POST.keys():
+                log.oper_type = 505
                 if poolfeeform.cleaned_data.get('money') > order.needpay_lixi:
                     message = u'金额不能大于待还利息'
                 else:
@@ -1344,13 +1462,17 @@ def pool_loan(request,  pk):
                         instance.name = '保证金还超短贷利息'
                         instance.save()
                         loan_promoneypay(order,money)
+                        log.addpro(0-money)
+                        log.addunuse(0-money)
                         pass
                     else:
                         # 银行卡还款
                         fee = card_fee(Card.objects.get(id=int(request.POST['yinhangka'])).pk, 0 - money, '银行卡还超短贷利息', 52)
                         fee.superloan = order
                         fee.save()
-
+                        log.adddetail(2,fee.yinhangka.pk)
+                        log.addcard(0-money)
+                    log.save()
                     return redirect('pool_loan', pk=pk)
                 pass
 
@@ -1385,6 +1507,8 @@ def pool_tickets(request):
     if request.method == 'POST':
         if 'ids' in request.POST.keys():
             ids = request.POST['ids']
+            log = LogTemp()
+            log.oper_type = 506
             if len(ids) > 0:
                 tickets = Ticket.objects.filter(id__in=ids.split(','))
                 for t in tickets:
@@ -1392,6 +1516,10 @@ def pool_tickets(request):
                         t.payedzijinchi = True
                         t.save()
                         ticket_promoneypay(t)
+                        log.adddetail(1,t.pk)
+                        log.addpro(0-t.gourujiage)
+                        log.addunuse(0-t.gourujiage)
+            log.save()
             pass
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")

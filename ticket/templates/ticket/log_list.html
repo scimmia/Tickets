@@ -72,15 +72,30 @@
         <a class="green" href="
             {% if i.pktype == 1 %}
                 {% url 'ticket_index' i.pk %}
-            {% elif item.card_type == 2 %}
-                                公户
-            {% endif %}" title="查看"> {{ i.pk }} </a>
+            {% elif i.pktype == 2 %}
+                {% url 'card_index' i.pk %}
+            {% elif i.pktype == 3 %}
+                {% url 'loanorder' i.pk %}
+            {% elif i.pktype == 4 %}
+                {% url 'pool_dash' %}
+            {% elif i.pktype == 5 %}
+                {% url 'pool_loan' i.pk %}
+            {% endif %}" title="查看"> {{ i.pk }}
+            {% if not forloop.last %},{% endif %}
+            {% if forloop.counter|divisibleby:4 %}<br/>{% endif %}
+        </a>
     {% endfor %}</td>
     <td>
         {% for i in item.contdetail %}
-            <span>
-                {{ i.cont }}{{ i.money }}
-            </span>
+            <span>{{ i.cont }}</span>
+            {% if i.money > 0 %}
+                <span style="color: red">+
+            {% elif i.money < 0 %}
+                <span class="color: text-green">
+            {% endif %}
+                {{ i.money }}</span>
+            {% if not forloop.last %},{% endif %}
+            {% if forloop.counter|divisibleby:3 %}<br/>{% endif %}
         {% endfor %}
     </td>
 {% endblock %}
@@ -147,6 +162,7 @@
                     "decimal": "-",
                     "thousands": "."
                 },
+                "order": [[0, 'desc']]
             });
 
         });
