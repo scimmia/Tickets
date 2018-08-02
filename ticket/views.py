@@ -685,6 +685,8 @@ def ticket_import(request):
                 for chunk in request.FILES['file'].chunks():
                     destination.write(chunk)
             csv_reader = csv.reader(open(path + 'tmp.csv', 'r', newline=''))
+            print(datetime.datetime.now())
+            ticketsImports = []
             for row in csv_reader:
                 a = len(row)
                 if len(row) == 14:
@@ -705,8 +707,9 @@ def ticket_import(request):
                         m.chengduiren = row[11]
                         m.shoupiaoren = row[12]
                         m.shoupiaohang = row[13]
-                        m.save()
-                        print(row)
+                        ticketsImports.append(m)
+            TicketsImport.objects.bulk_create(ticketsImports)
+            print(datetime.datetime.now())
 
             return redirect('%s?stamp=%s' % (reverse('ticket_import'),stamp))
         elif 'savefile' in request.POST.keys():
@@ -714,6 +717,8 @@ def ticket_import(request):
             print(stamp)
             TicketsImport.objects.filter(stamp=stamp).update(saved=True)
             items = TicketsImport.objects.filter(stamp=stamp)
+            print(datetime.datetime.now())
+            tickets = []
             for item in items:
                 m = Ticket()
                 m.piaohao = item.piaohao
@@ -723,8 +728,10 @@ def ticket_import(request):
                 m.piaomianjiage = item.piaomianjiage
                 m.gourujiage = item.piaomianjiage
                 m.gongyingshang = item.chupiaoren
-                m.save()
+                tickets.append(m)
                 pass
+            Ticket.objects.bulk_create(tickets)
+            print(datetime.datetime.now())
 
             return redirect('ticket_list')
             pass
