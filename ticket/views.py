@@ -47,7 +47,6 @@ class LogTemp:
         self.m_superloan = 0#超短贷 106
         pass
 
-
     def adddetail(self,pktype,pk):
         self.detail.append({'pktype':pktype,'pk': pk})
         pass
@@ -64,20 +63,6 @@ class LogTemp:
     def addsuperloan(self,money):
         self.m_superloan = self.m_superloan + money
 
-    def addcontdetail(self,conttype,money):
-        if conttype == 101:
-            self.m_store = self.m_store + money
-        elif conttype == 102:
-            self.m_card = self.m_card + money
-        elif conttype == 103:
-            self.m_pro = self.m_pro + money
-        elif conttype == 104:
-            self.m_unuse = self.m_unuse + money
-        elif conttype == 105:
-            self.m_used = self.m_used + money
-        elif conttype == 106:
-            self.m_superloan = self.m_superloan + money
-        pass
     def save(self):
         if len(self.detail)>0:
             if self.m_store!= 0:
@@ -112,32 +97,6 @@ def getPoolPercent():
         item.inpoolPer = 100
         item.save()
     return item
-
-def logcont_addticket_gouruzijinchi(ticket):
-    return {'cont':u'保证金','money':-1 * ticket.gourujiage}
-def logcont_ticket_tostore(ticket):
-    return {'cont':u'库存','money': ticket.gourujiage}
-def logcont_ticket_outstore(ticket):
-    return {'cont':u'库存','money': -1 * ticket.gourujiage}
-def logcont_ticket_topool(ticket):
-    return {'cont':u'可用额度','money': ticket.piaomianjiage * getPoolPercent().inpoolPer /100}
-def logcont_ticket_outpool(ticket):
-    return {'cont':u'可用额度','money': -1 * ticket.piaomianjiage * getPoolPercent().inpoolPer /100}
-def log_addticket(ticket):
-    log = LogTemp()
-    log.adddetail(1,ticket.pk)
-    if ticket.gouruzijinchi:
-        log.oper_type = 102
-    else:
-        log.oper_type = 101
-    if ticket.t_status == 1:
-        log.addstore(ticket.gourujiage)
-    elif ticket.t_status == 5:
-        log.addunuse(ticket.piaomianjiage * getPoolPercent().inpoolPer /100)
-    if ticket.gouruzijinchi:
-        log.addpro(-1 * ticket.gourujiage)
-    log.save()
-    pass
 
 @login_required
 def dashboard(request):
@@ -336,22 +295,28 @@ def ticket_add(request):
             times = form.cleaned_data.get('fenshu')
         instance = form.save(commit=False)
         counter = 1
+        log = LogTemp()
         while counter <= times:
             counter += 1
             instance.pk = None
             instance.save()
+            log.adddetail(1, instance.pk)
             if instance.t_status == 1:
                 ticket_instore(instance.pk)
+                log.addstore(instance.gourujiage)
             elif instance.t_status == 5:
                 ticket_inpool(instance.pk)
-
+                log.addunuse(instance.piaomianjiage * getPoolPercent().inpoolPer / 100)
+            log.oper_type = 101
             if instance.gouruzijinchi:
                 instance.pay_status = 2
                 instance.gourujiage = instance.piaomianjiage
                 instance.save()
                 ticket_poolpay(instance.pk)
+                log.oper_type = 102
+                log.addpro(-1 * instance.gourujiage)
                 pass
-            log_addticket(instance)
+            log.save()
 
         # return render(request, 'ticket/ticket_add.html',locals())
         return redirect('ticket_list')
@@ -481,17 +446,15 @@ def tickets_needfix(request):
     return render(request,list_template,context)
 
 def ticket_needselect(request,index):
-
-    if index == 1:
-        title = '付款'
-        raw_data = Ticket.objects.filter(pay_status=1,payorder=None,gourujiage__gt=0).order_by('-goumairiqi')
-    else:
-        title = '收款'
-        raw_data = Ticket.objects.filter(sell_status=3,sellorder=None).order_by('-goumairiqi')
-    list_template = 'ticket/ticket_toselect.html'
-
-    #通过GET方法从提交的URL来获取相应参数
     if request.method == 'GET':
+        if index == 1:
+            title = '付款'
+            raw_data = Ticket.objects.filter(pay_status=1,payorder=None,gourujiage__gt=0).order_by('-goumairiqi')
+        else:
+            title = '收款'
+            raw_data = Ticket.objects.filter(sell_status=3,sellorder=None).order_by('-goumairiqi')
+        list_template = 'ticket/ticket_toselect.html'
+
         #建立一个空的参数的字典
         kwargs = {}
         #建立一个空的查询语句
@@ -501,24 +464,112 @@ def ticket_needselect(request,index):
                 kwargs[key] = value
         #通过元始数据进行过滤，过滤条件为健对值的字典
         data = raw_data.filter(**kwargs)
-    #如果没有从GET提交中获取信息，那么data则为元始数据
-    else:
-        data = raw_data
+        # 建立context字典，将值传递到相应页面
+        context = {
+            'data': data,
+            'index': index,
+            'title': title,
+        }
+        print(context)
+        # 跳转到相应页面，并将值传递过去
+        return render(request, list_template, context)
+    elif request.method == 'POST':
+        feeform = TicketFeeForm()
+        index = request.POST['index']
+        ids = request.POST['ids']
+        selected_num = request.POST['selected_num']
+        selected_piaomian = request.POST['selected_piaomian']
+        selected_real = request.POST['selected_real']
+        raw_data = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
+        prices = set([])
+        maipiaoren = []
+        if index == '1':
+            title = '付款'
+            list_template = 'ticket/ticket_topay.html'
+        else:
+            title = '收款'
+            list_template = 'ticket/ticket_tocollect.html'
+            maipiaoren = get_ticketlists('maipiaoren')
+            for t in raw_data:
+                prices.add(str(t.piaomianjiage))
+        # 建立context字典，将值传递到相应页面
+        context = {
+            'data': raw_data,
+            'maipiaoren': maipiaoren,
+            'prices': prices,
+            'index': index,
+            'ids': ids,
+            'title': title,
+            'feeform': feeform,
+            'selected_num': selected_num,
+            'selected_piaomian': selected_piaomian,
+            'selected_real': selected_real,
+        }
+        print(context)
+        # 跳转到相应页面，并将值传递过去
+        return render(request, list_template, context)
 
-    #建立context字典，将值传递到相应页面
-    context = {
-        'data': data,
-        'index': index,
-        'title': title,
-    }
-    print(context)
-    #跳转到相应页面，并将值传递过去
-    return render(request,list_template,context)
+
 
 def ticket_needpay(request):
     return ticket_needselect(request,1)
 def ticket_needcollect(request):
     return ticket_needselect(request,3)
+
+def ticket_createorder(request):
+    if request.method == 'POST':
+        order = Order()
+        order.order_type = int(request.POST['ordertype'])
+        order.save()
+        log = LogTemp()
+        fees = json.loads(request.POST['fees'])
+        for fee in fees:
+            f = Fee()
+            f.order = order
+            f.fee_type = order.order_type
+            f.name = fee['name']
+            f.money = float(fee['money'])
+            f.yinhangka = Card.objects.get(pk=(fee['cardid']))
+            f.save()
+            order.fee_sum = order.fee_sum+f.money
+            order.fee_count = order.fee_count + 1
+
+        ids = request.POST['ids']
+        if order.order_type == 1:
+            Ticket.objects.filter(id__in=ids.split(',')).update(pay_status =2,payorder=order,paytime=order.pub_date)
+            log.oper_type = 201
+            log.adddetail(6,order.pk)
+        elif order.order_type == 2:
+            Ticket.objects.filter(id__in=ids.split(',')).update(t_status = 3 ,sell_status = 4,sellorder=order,selltime=order.pub_date,maipiaoren = request.POST['maipiaoren'])
+            log.oper_type = 202
+            log.adddetail(7,order.pk)
+
+        tickets = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
+        for t in tickets:
+            log.adddetail(1,t.pk)
+            order.ticket_count = order.ticket_count + 1
+            order.ticket_sum = order.ticket_sum + t.piaomianjiage
+            if order.order_type == 1:
+                order.money = order.money + t.gourujiage
+            elif order.order_type == 2:
+                t.maichujiage = float(request.POST['maichujiage'+str(t.piaomianjiage)])
+                t.save()
+                order.money = order.money + int(request.POST['maichujiage'+str(t.piaomianjiage)])
+            if t.gourujiage > 0 and t.maichujiage > 0:
+                t.lirun = t.maichujiage - t.gourujiage
+                t.save()
+        order.total_sum = order.money + order.fee_sum
+        order.payfee_sum = 0
+        order.needpay_sum = order.total_sum - order.payfee_sum
+        order.save()
+        log.save()
+        if order.order_type == 1:
+            return redirect('ticket_payorder', pk=order.id)
+        elif order.order_type == 2:
+            return redirect('ticket_sellorder', pk=order.id)
+
+        #todo
+    return redirect('ticket_payorder', pk=order.id)
 
 def ticket_orderlist(request,index):
     #从根据不同的请求，来获取相应的数据,并跳转至相应页面
@@ -536,119 +587,6 @@ def ticket_payorders(request):
 def ticket_sellorders(request):
     return ticket_orderlist(request,2)
 
-def ticket_topay(request):
-    context = {}
-    list_template = 'ticket/ticket_topay.html'
-    if request.method == 'POST':
-        feeform = TicketFeeForm()
-        index = request.POST['index']
-        ids = request.POST['ids']
-        selected_num = request.POST['selected_num']
-        selected_piaomian = request.POST['selected_piaomian']
-        selected_real = request.POST['selected_real']
-        if index == '1':
-            title = '付款'
-        else:
-            title = '收款'
-        raw_data = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
-        #建立context字典，将值传递到相应页面
-        context = {
-            'data': raw_data,
-            'index': index,
-            'ids': ids,
-            'title': title,
-            'feeform': feeform,
-            'selected_num': selected_num,
-            'selected_piaomian': selected_piaomian,
-            'selected_real': selected_real,
-        }
-    print(context)
-    #跳转到相应页面，并将值传递过去
-    return render(request,list_template,context)
-def ticket_tocollect(request):
-    context = {}
-    list_template = 'ticket/ticket_tocollect.html'
-    if request.method == 'POST':
-        feeform = TicketFeeForm()
-        index = request.POST['index']
-        ids = request.POST['ids']
-        selected_num = request.POST['selected_num']
-        selected_piaomian = request.POST['selected_piaomian']
-        selected_real = request.POST['selected_real']
-        title = '收款'
-        raw_data = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
-        prices = set([])
-        for t in raw_data:
-            prices.add(str(t.piaomianjiage))
-            # if str(t.piaomianjiage) in items:
-            #     items[str(t.piaomianjiage)].append(t.pk)
-            # else:
-            #     items[str(t.piaomianjiage)] = [t.pk]
-        #建立context字典，将值传递到相应页面
-        context = {
-            'data': raw_data,
-            'maipiaoren': get_ticketlists('maipiaoren'),
-            'prices': prices,
-            'index': index,
-            'ids': ids,
-            'title': title,
-            'feeform': feeform,
-            'selected_num': selected_num,
-            'selected_piaomian': selected_piaomian,
-            'selected_real': selected_real,
-        }
-    print(context)
-    #跳转到相应页面，并将值传递过去
-    return render(request,list_template,context)
-
-def ticket_createorder(request):
-    if request.method == 'POST':
-        order = Order()
-        order.order_type = int(request.POST['ordertype'])
-        order.save()
-        fees = json.loads(request.POST['fees'])
-        for fee in fees:
-            f = Fee()
-            f.order = order
-            f.fee_type = order.order_type
-            f.name = fee['name']
-            f.money = float(fee['money'])
-            f.yinhangka = Card.objects.get(pk=(fee['cardid']))
-            f.save()
-            order.fee_sum = order.fee_sum+f.money
-            order.fee_count = order.fee_count + 1
-
-        ids = request.POST['ids']
-        if order.order_type == 1:
-            Ticket.objects.filter(id__in=ids.split(',')).update(pay_status =2,payorder=order,paytime=order.pub_date)
-        elif order.order_type == 2:
-            Ticket.objects.filter(id__in=ids.split(',')).update(t_status = 3 ,sell_status = 4,sellorder=order,selltime=order.pub_date,maipiaoren = request.POST['maipiaoren'])
-
-        tickets = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
-        for t in tickets:
-            order.ticket_count = order.ticket_count + 1
-            order.ticket_sum = order.ticket_sum + t.piaomianjiage
-            if order.order_type == 1:
-                order.money = order.money + t.gourujiage
-            elif order.order_type == 2:
-                t.maichujiage = float(request.POST['maichujiage'+str(t.piaomianjiage)])
-                t.save()
-                order.money = order.money + int(request.POST['maichujiage'+str(t.piaomianjiage)])
-            if t.gourujiage > 0 and t.maichujiage > 0:
-                t.lirun = t.maichujiage - t.gourujiage
-                t.save()
-        order.total_sum = order.money + order.fee_sum
-        order.payfee_sum = 0
-        order.needpay_sum = order.total_sum - order.payfee_sum
-        order.save()
-        if order.order_type == 1:
-            return redirect('ticket_payorder', pk=order.id)
-        elif order.order_type == 2:
-            return redirect('ticket_sellorder', pk=order.id)
-
-        #建立context字典，将值传递到相应页面
-    return redirect('ticket_payorder', pk=order.id)
-
 
 def ticket_payorder(request,  pk):
     order_ins = get_object_or_404(Order, pk=pk)
@@ -664,6 +602,8 @@ def ticket_payorder(request,  pk):
             if feeform.cleaned_data.get('money')>order.needpay_sum:
                 message = u'付款金额不能大于待支付金额'
             else:
+                log = LogTemp()
+                log.oper_type= 203
                 cardmoneyadd = False
                 instance = feeform.save(commit=False)
                 instance.order = order
@@ -683,6 +623,10 @@ def ticket_payorder(request,  pk):
                 instance.save()
                 instance.yinhangka.money = instance.yinhangka.money + instance.money
                 instance.yinhangka.save()
+                log.adddetail(6,pk)
+                log.adddetail(2,instance.yinhangka.pk)
+                log.addcard(instance.money)
+                log.save()
 
                 redirect('ticket_payorder',pk=pk)
     return render(request,list_template,locals())
@@ -699,6 +643,8 @@ def ticket_sellorder(request,  pk):
             if feeform.cleaned_data.get('money')>order.needpay_sum:
                 message = u'收款金额不能大于待收取金额'
             else:
+                log = LogTemp()
+                log.oper_type= 204
                 instance = feeform.save(commit=False)
                 instance.order = order
                 if feeform.cleaned_data.get('isOrderFee'):
@@ -716,6 +662,10 @@ def ticket_sellorder(request,  pk):
                 instance.save()
                 instance.yinhangka.money = instance.yinhangka.money + instance.money
                 instance.yinhangka.save()
+                log.adddetail(7,pk)
+                log.adddetail(2,instance.yinhangka.pk)
+                log.addcard(instance.money)
+                log.save()
 
                 redirect('ticket_sellorder',pk=pk)
     return render(request,list_template,locals())
