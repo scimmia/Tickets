@@ -12,7 +12,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import views
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.template import loader
 # Create your views here.
 from django.urls import reverse
@@ -1569,6 +1569,36 @@ def log_list(request):
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/log_list.html', context)
 
+def dailyreport(request):
+    if request.method == "POST":
+        if 'day' in request.POST.keys():
+            day = request.POST['day']
+            print(day)
+            filename = day + '.xlsx'
+            fullpath = 'static/dailyreport/' + filename
+            if os.path.exists(fullpath):
+                file = open(fullpath, 'rb')
+                response = FileResponse(file)
+                response['Content-Type'] = 'application/octet-stream'
+                response['Content-Disposition'] = 'attachment;filename="%s"' % (filename)
+                return response
+            else:
+                message = u'文件不存在'
+    if request.method == 'GET':
+        if 'day' in request.GET.keys():
+            filename = request.GET['day']
+            fullpath = 'static/dailyreport/' + filename
+            if os.path.exists(fullpath):
+                file = open(fullpath, 'rb')
+                response = FileResponse(file)
+                response['Content-Type'] = 'application/octet-stream'
+                response['Content-Disposition'] = 'attachment;filename="%s"' % (filename)
+                return response
+            else:
+                message = u'文件不存在'
+        pass
+    files = os.listdir('static/dailyreport')
+    return render(request, 'ticket/dailyreport.html',  locals())
 
 #配置
 def inpoolPercent(request):

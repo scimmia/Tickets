@@ -331,6 +331,25 @@
                     </li>
                 </ul>
                 </li>
+                {% if '/download/' in request.path %}
+                    <li class="active treeview">
+                        {% else %}
+                    <li class="treeview">
+                {% endif %}
+                <a href="#">
+                    <i class="fa fa-newspaper-o"></i> <span>日报记录</span>
+                    <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+                </a>
+                <ul class="treeview-menu">
+                    <li
+                            {% if '/dailyreport' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'dailyreport' %}"><i class="fa fa-file"></i>日报</a>
+                    </li>
+                </ul>
+                </li>
                 {% if '/sysconfig/' in request.path %}
                     <li class="active treeview">
                         {% else %}
