@@ -50,7 +50,7 @@ class Order(models.Model):
         verbose_name_plural = '订单'
 
     def __str__(self):
-        return self.order_type
+        return (u'%d' % (self.order_type))
 class Loan_Order(models.Model):
     ORDER_TYPE= (
         (3,u'借款订单'),
@@ -77,7 +77,7 @@ class Loan_Order(models.Model):
         verbose_name_plural = '订单'
 
     def __str__(self):
-        return self.order_type
+        return (u'%d' % (self.order_type))
 
 class Ticket(models.Model):
     PAY_STATUS= (
@@ -282,7 +282,7 @@ class StoreFee(models.Model):
         default=1,
     )
     def __str__(self):
-        return self.storefee_status
+        return (u'%d' % (self.storefee_status))
     class Meta:
         verbose_name = '库存费用'
         verbose_name_plural = '库存费用'
@@ -317,7 +317,7 @@ class Pool(models.Model):
         default=1,
     )
     def __str__(self):
-        return self.pool_status
+        return (u'%d' % (self.pool_status))
     class Meta:
         verbose_name = '资金池'
         verbose_name_plural = '资金池'
@@ -331,7 +331,7 @@ class InpoolPercent(models.Model):
         verbose_name_plural = '入池额度比例'
 
     def __str__(self):
-        return self.inpoolPer
+        return (u'%f' % (self.inpoolPer))
 
 class CardTrans(models.Model):
     fromCard = models.ForeignKey( Card, related_name='tran_from_card', verbose_name=u'转出账户' , blank=False,null=False)
