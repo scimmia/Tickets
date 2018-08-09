@@ -1153,7 +1153,7 @@ def loanorder(request,  pk):
                     instance.fee_type = 40+order.order_type
                     order.payed_benjin = order.payed_benjin + instance.money
                     order.needpay_sum = order.needpay_sum - instance.money
-                    order.money_lixi = order.money_lixi + round(instance.money * order.money_lilv * (datetime.date.today() - order.order_date).days / 360 + order.money_lixi,
+                    order.money_lixi = round(instance.money * order.money_lilv * (datetime.date.today() - order.order_date).days / 360 + order.money_lixi,
                         2)
                     order.save()
                     log.oper_type = 303
