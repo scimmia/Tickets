@@ -27,7 +27,7 @@
                 <div class="box box-success">
                     <div class="box-header with-border">
                         <h3 class="box-title">{% if order.order_type == 4 %}贷款{% else %}借款{% endif %}信息：</h3>
-                        {% if order.needpay_sum == 0 %}<span class="label label-danger pull-right">已完成</span>{% endif %}
+                        {% if order.needpay_sum == 0 and order.needpay_lixi == 0 %}<span class="label label-danger pull-right">已完成</span>{% endif %}
                     </div>
                     <div class="box-body">
                         <table class="table">
