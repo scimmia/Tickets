@@ -24,7 +24,16 @@
                         <h3 class="box-title">贴现计算器</h3>
                     </div>
                     <div class="box-body">
-
+                        <div class="col-md-12">
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-default active">
+                                    <input type="radio" name="options" id="piaozhi" autocomplete="off" checked>纸票
+                                </label>
+                                <label class="btn btn-default">
+                                    <input type="radio" name="options" id="piaodian" autocomplete="off">电票
+                                </label>
+                            </div>
+                        </div>
                         <div class="col-md-12">
                             <span class="destit">票面金额 (万元)</span>
                             <div class="inp-box">
@@ -146,8 +155,7 @@
             });
         });
 
-        function getlilv() {
-            var lixi = $("#everytenprice").val();
+        function getDays() {
             var pjenddate = $("input[name='pjenddate']").val();
             var outpjdate = $("input[name='outpjdate']").val();
             var dqr = new Date((pjenddate.replace(/-/g, '/')));
@@ -155,25 +163,40 @@
             var tzts = parseInt($("input[name='tzts']").val());
             if (isNaN(tzts))
                 tzts = 0;
+            var ts = Math.floor(dqr.getTime() / (24 * 60 * 60 * 1000)) - Math.floor(txr.getTime() / (24 * 60 * 60 * 1000)) + tzts;
+            var week = dqr.getDay();
+            if (week == 0) {
+                ts = ts + 1;
+            } else if (week == 6) {
+                ts = ts + 2;
+            }
+            if($("#piaozhi").is(":checked")){
+				ts = ts + 3;
+			}
+            if (isNaN(ts))
+                ts = 0;
+            return ts;
+        }
+
+        function getlilv() {
+            var lixi = $("#everytenprice").val();
             var je = 100000;
             if (isNaN(lixi))
                 lixi = 0;
-
-            //alert(tzts);
-            var ts = Math.floor(dqr.getTime() / (24 * 60 * 60 * 1000)) - Math.floor(txr.getTime() / (24 * 60 * 60 * 1000)) + tzts;
-
+            var ts = getDays();
             $("#tje").val(10);
             $("#jxtsd").text(ts);
             $("#txlxd").text(lixi);
             $("#jined").text(je - lixi);
-            var lilv = lixi/je/ts*30*1000;
+            var lilv = lixi / je / ts * 30 * 1000;
             if (isNaN(lilv))
                 lilv = 0;
             $("#txlvi").val(lilv);
-            $("#yxlvi").val(lilv*1.2);
+            $("#yxlvi").val(lilv * 1.2);
             console.log(lilv);
         }
 
+        //按贴现计算
         function calctxlxoneb() {
             var je = $("input[name='je']").val();
             var everyten = $("input[name='everyten']").val();
@@ -187,23 +210,17 @@
             $("#jxtsd").text(ts);
             $("#txlxd").text(txlx);
             $("#jined").text(jine);
-            console.log(jine*10/je);
-            $("#everytenprice").val(Math.round(txlx*10/je));
+            console.log(jine * 10 / je);
+            $("#everytenprice").val(Math.round(txlx * 10 / je));
         }
 
+        //按利率计算
         function calctxlxone() {
             var je = $("input[name='je']").val();
             var txlv = $("input[name='txlv']").val();
-            var pjenddate = $("input[name='pjenddate']").val();
-            var outpjdate = $("input[name='outpjdate']").val();
-            var dqr = new Date((pjenddate.replace(/-/g, '/')));
-            var txr = new Date((outpjdate.replace(/-/g, '/')));
-            var tzts = parseInt($("input[name='tzts']").val());
             var sxf = parseInt($("input[name='sxf']").val());
-            if (isNaN(tzts))
-                tzts = 0;
             //alert(tzts);
-            var ts = Math.floor(dqr.getTime() / (24 * 60 * 60 * 1000)) - Math.floor(txr.getTime() / (24 * 60 * 60 * 1000)) + tzts;
+            var ts = getDays();
             var txlx = Math.round(je * txlv * ts / 3 * 100) / 100 + je * sxf / 10;
             var jine = Math.round(je * 1000000 - je * txlv * ts / 3 * 100) / 100 - je * sxf / 10;
             if (isNaN(ts))
@@ -215,8 +232,8 @@
             $("#jxtsd").text(ts);
             $("#txlxd").text(txlx);
             $("#jined").text(jine);
-            $("#everytenprice").val(txlx*10/je);
-            console.log(jine*10/je);
+            $("#everytenprice").val(txlx * 10 / je);
+            console.log(jine * 10 / je);
         }
 
         function numDiv(num1, num2) {
