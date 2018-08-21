@@ -1704,6 +1704,8 @@ def avgday(request):
     return render(request, 'ticket/tool_avgday.html')
 def counter(request):
     return render(request, 'ticket/tool_counter.html')
+def tiexian(request):
+    return render(request, 'ticket/tool_tiexian.html')
 #分页函数
 def pagination(request, queryset, display_amount=10, after_range_num = 5,before_range_num = 4):
     #按参数分页

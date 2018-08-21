@@ -66,5 +66,6 @@ urlpatterns = [
     url(r'^tool/bestmix/', views.bestmix, name='bestmix'),
     url(r'^tool/avgday/', views.avgday, name='avgday'),
     url(r'^tool/counter/', views.counter, name='counter'),
+    url(r'^tool/tiexian/', views.tiexian, name='tiexian'),
 
 ]

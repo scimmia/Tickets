@@ -310,6 +310,11 @@
                                 class="active"
                             {% endif %}><a href="{% url 'counter' %}"><i class="fa fa-circle-o"></i>利率</a>
                     </li>
+                    <li
+                            {% if '/tiexian' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'tiexian' %}"><i class="fa fa-circle-o"></i>贴现</a>
+                    </li>
                 </ul>
                 </li>
                 {% if '/log/' in request.path %}
