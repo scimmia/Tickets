@@ -147,7 +147,7 @@
         });
 
         function getlilv() {
-            var everytenprice = $("#everytenprice").val();
+            var lixi = $("#everytenprice").val();
             var pjenddate = $("input[name='pjenddate']").val();
             var outpjdate = $("input[name='outpjdate']").val();
             var dqr = new Date((pjenddate.replace(/-/g, '/')));
@@ -156,7 +156,6 @@
             if (isNaN(tzts))
                 tzts = 0;
             var je = 100000;
-            var lixi = je - everytenprice;
             if (isNaN(lixi))
                 lixi = 0;
 
@@ -166,15 +165,13 @@
             $("#tje").val(10);
             $("#jxtsd").text(ts);
             $("#txlxd").text(lixi);
-            $("#jined").text(everytenprice);
+            $("#jined").text(je - lixi);
             var lilv = lixi/je/ts*30*1000;
             if (isNaN(lilv))
                 lilv = 0;
             $("#txlvi").val(lilv);
             $("#yxlvi").val(lilv*1.2);
             console.log(lilv);
-            var txlx = Math.round(je * txlv * ts / 3 * 100) / 100 ;
-            var jine = Math.round(je * 1000000 - je * txlv * ts / 3 * 100) / 100 - je * sxf / 10;
         }
 
         function calctxlxoneb() {
@@ -191,7 +188,7 @@
             $("#txlxd").text(txlx);
             $("#jined").text(jine);
             console.log(jine*10/je);
-            $("#everytenprice").val(Math.round(jine*10/je));
+            $("#everytenprice").val(Math.round(txlx*10/je));
         }
 
         function calctxlxone() {
@@ -218,7 +215,7 @@
             $("#jxtsd").text(ts);
             $("#txlxd").text(txlx);
             $("#jined").text(jine);
-            $("#everytenprice").val(jine*10/je);
+            $("#everytenprice").val(txlx*10/je);
             console.log(jine*10/je);
         }
 
