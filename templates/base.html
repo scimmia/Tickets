@@ -226,12 +226,12 @@
                     <li
                             {% if '/borrow_status/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'borrow_status' %}"><i class="fa fa-circle-o"></i>借款订单</a>
+                            {% endif %}><a href="{% url 'borrow_status' %}"><i class="fa fa-circle-o"></i>借出订单(应收)</a>
                     </li>
                     <li
                             {% if '/loan_status/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'loan_status' %}"><i class="fa fa-circle-o"></i>贷款订单</a>
+                            {% endif %}><a href="{% url 'loan_status' %}"><i class="fa fa-circle-o"></i>贷入订单(应付)</a>
                     </li>
                 </ul>
                 </li>
@@ -309,11 +309,11 @@
                                 class="active"
                             {% endif %}><a href="{% url 'avgday' %}"><i class="fa fa-circle-o"></i>平均天数</a>
                     </li>
-                    <li
-                            {% if '/counter' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'counter' %}"><i class="fa fa-circle-o"></i>利率</a>
-                    </li>
+{#                    <li#}
+{#                            {% if '/counter' in request.path %}#}
+{#                                class="active"#}
+{#                            {% endif %}><a href="{% url 'counter' %}"><i class="fa fa-circle-o"></i>利率</a>#}
+{#                    </li>#}
                     <li
                             {% if '/tiexian' in request.path %}
                                 class="active"
