@@ -1,13 +1,6 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
 
-{% block css %}
-    <link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
-{% endblock %}
-
-{% load crispy_forms_tags %}
-{#{% load material_form %}#}
-
 {% block content %}
     <!-- Content Header (Page header) -->
     <section class="content-header">
@@ -25,9 +18,9 @@
 {% endblock %}
 
 {% block script %}
-
-    <!-- bootstrap datepicker -->
-    <script src="{% static 'plugins/datepicker/bootstrap-datepicker.js' %}"></script>
+    <script src="{% static 'plugins/initItems.js' %}"></script>
     <script src="{% static 'plugins/tiexian.js' %}"></script>
-
+    <script >
+        initDatePicker($('.input-daterange'));
+    </script>
 {% endblock %}

@@ -4,7 +4,6 @@
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
-    <link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
 {% endblock %}
@@ -201,10 +200,11 @@
     <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
     <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
-    <script src="{% static 'plugins/datepicker/bootstrap-datepicker.js' %}"></script>
+    <script src="{% static 'plugins/initItems.js' %}"></script>
     <script src="{% static 'plugins/tiexian.js' %}"></script>
 
     <script type="text/javascript">
+        initDatePicker($('.input-daterange'));
         function delItem(that) {
             console.log('delItem');
             console.log($(that).html());
