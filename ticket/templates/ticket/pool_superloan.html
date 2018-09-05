@@ -23,26 +23,26 @@
                 <div class="box box-success">
                     <div class="box-header with-border">
                         <h3 class="box-title">贷款信息：</h3>
-                        {% if order.needpay_sum == 0 %}<span class="label label-danger pull-right">已完成</span>{% endif %}
+                        {% if order.is_payed %}<span class="label label-danger pull-right">已完成</span>{% endif %}
                     </div>
                     <div class="box-body">
                         <table class="table">
                             <tbody>
                             <tr>
                                 <th>本金:</th>
-                                <td style="text-align:right;"><a>{{ order.money_benjin|floatformat:2|intcomma }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.benjin|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>已还本金:</th>
-                                <td style="text-align:right;"><a>{{ order.payed_benjin|floatformat:2|intcomma }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.benjin_payed|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>利息:</th>
-                                <td style="text-align:right;"><a>{{ order.money_lixi|floatformat:2|intcomma }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.lixi|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>已还利息:</th>
-                                <td style="text-align:right;"><a>{{ order.payed_lixi|floatformat:2|intcomma }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.lixi_payed|floatformat:2|intcomma }}</a></td>
                             </tr>
                             </tbody>
                         </table>
@@ -52,11 +52,11 @@
                             <tbody>
                             <tr>
                                 <th>待还本金:</th>
-                                <td style="text-align:right;{% if order.needpay_sum > 0 %}color: red{% endif %}">{{ order.needpay_sum|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;{% if not order.is_payed  %}color: red{% endif %}">{{ order.benjin_needpay|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>待还利息:</th>
-                                <td style="text-align:right;{% if order.needpay_lixi > 0 %}color: red{% endif %}">{{ order.needpay_lixi|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;{% if not order.is_payed  %}color: red{% endif %}">{{ order.lixi_needpay|floatformat:2|intcomma }}</td>
                             </tr>
                             </tbody>
                         </table>

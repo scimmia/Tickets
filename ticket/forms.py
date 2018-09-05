@@ -2,7 +2,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from ticket.models import Ticket, Card, Pool, Fee, Loan_Order, CardTrans
+from ticket.models import Ticket, Card, Pool, Fee, Loan_Order, CardTrans, SuperLoan
 
 
 class TicketForm(ModelForm):
@@ -76,9 +76,11 @@ class PoolForm(ModelForm):
         #在Form中不显示node_signer这个字段
         fields = ['p_status','money','card',]
 
-class SuperLoanForm(forms.Form):
-    benjin = forms.FloatField(label="本金",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
-    lixi = forms.FloatField(label="利息",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+class SuperLoanForm(ModelForm):
+    isMonthlilv = forms.BooleanField(label="是否月利率",required=False,)
+    class Meta:
+        model = SuperLoan
+        fields = ['benjin','isMonthlilv','lilv','lixi_begin_date',]
 
 class SuperLoanFeeForm(forms.Form):
     money = forms.FloatField(label="金额",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))

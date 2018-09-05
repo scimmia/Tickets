@@ -191,7 +191,27 @@ def buildDailyReport():
     workbook.close()
     pass
 
-schedule.every().day.at("01:30").do(buildDailyReport)
+def countLoanLixi():
+    today = datetime.date.today()
+    raw_data = models.SuperLoan.objects.filter(is_payed=False).order_by('-lixi_sum_date')
+    for order in raw_data:
+        days = (today - order.lixi_sum_date).days
+        if days > 0:
+            addLixi = order.benjin_needpay * order.lilv * days / 360
+            order.lixi = round(addLixi + order.lixi, 2)
+            order.lixi_needpay = round(addLixi + order.lixi_needpay, 2)
+            order.lixi_sum_date = today
+            order.save()
+        pass
+    pass
+
+def dailyJob():
+    buildDailyReport()
+    countLoanLixi()
+    pass
+
+schedule.every().day.at("00:30").do(dailyJob)
 while True:
     schedule.run_pending()
     time.sleep(1)
+# countLoanLixi()

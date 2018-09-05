@@ -83,7 +83,31 @@ class LogTemp:
             log.contdetail = json.dumps(self.contdetail)
             log.save()
 
+def countLoanLixi(order):
+    today = datetime.date.today()
+    days = (today - order.lixi_sum_date).days
+    if days > 0:
+        addLixi = order.benjin_needpay * order.lilv * days / 360
+        order.lixi = round(addLixi + order.lixi,2)
+        order.lixi_needpay = round(addLixi + order.lixi_needpay,2)
+        order.lixi_sum_date = today
+        order.save()
+    pass
+def payLoanBenjin(order,money):
+    countLoanLixi(order)
+    order.benjin_payed = order.benjin_payed + money
+    order.benjin_needpay = order.benjin_needpay - money
+    order.is_payed = order.benjin_needpay==0 and order.lixi_needpay ==0
+    order.save()
+    pass
 
+def payLoanLixi(order,money):
+    countLoanLixi(order)
+    order.lixi_payed = order.lixi_payed + money
+    order.lixi_needpay = order.lixi_needpay - money
+    order.is_payed = order.benjin_needpay==0 and order.lixi_needpay ==0
+    order.save()
+    pass
 def getPool():
     p = Pool.objects.last()
     if not p:
@@ -1274,11 +1298,11 @@ def loan_create(loan):
     pool = Pool()
     pool.totalmoney = p.totalmoney
     pool.promoney = p.promoney
-    pool.unusemoney = p.unusemoney - loan.money_benjin
-    pool.usedmoney = p.usedmoney + loan.money_benjin
-    pool.loanmoney = p.loanmoney + loan.money_benjin
+    pool.unusemoney = p.unusemoney - loan.benjin
+    pool.usedmoney = p.usedmoney + loan.benjin
+    pool.loanmoney = p.loanmoney + loan.benjin
     pool.loan = loan
-    pool.money = 0 - loan.money_benjin
+    pool.money = 0 - loan.benjin
     pool.pool_status = 6
     pool.save()
     pass
@@ -1331,22 +1355,22 @@ def ticket_promoneypay(ticket):
     pool.save()
     pass
 def pool_loans(request):
-    form = SuperLoanForm(request.POST or None)
+    loanform = SuperLoanForm(request.POST or None)
     if request.method == 'POST':
-        if form.is_valid():
-            loan = SuperLoan()
-            loan.money_benjin = form.cleaned_data.get('benjin')
-            loan.money_lixi = form.cleaned_data.get('lixi')
-            loan.needpay_sum = form.cleaned_data.get('benjin')
-            loan.needpay_lixi = form.cleaned_data.get('lixi')
-            loan.save()
-            loan_create(loan)
+        if loanform.is_valid():
+            instance = loanform.save(commit=False)
+            if loanform.cleaned_data.get('isMonthlilv'):
+                instance.lilv = loanform.cleaned_data.get('lilv')*12
+            instance.benjin_needpay = loanform.cleaned_data.get('benjin')
+            instance.lixi_sum_date = instance.lixi_begin_date
+            instance.save()
+            loan_create(instance)
             log = LogTemp()
             log.oper_type = 503
-            log.adddetail(5,loan.pk)
-            log.addunuse(0-loan.money_benjin)
-            log.addused(loan.money_benjin)
-            log.addsuperloan(loan.money_benjin)
+            log.adddetail(5,instance.pk)
+            log.addunuse(0-instance.benjin)
+            log.addused(instance.benjin)
+            log.addsuperloan(instance.benjin)
             log.save()
             return redirect('pool_dash')
     loan_data = SuperLoan.objects.all().order_by('pub_date')
@@ -1372,12 +1396,10 @@ def pool_loan(request,  pk):
             log.adddetail(5,pk)
             if 'benjin' in request.POST.keys():
                 log.oper_type = 504
-                if poolfeeform.cleaned_data.get('money') > order.needpay_sum:
+                if poolfeeform.cleaned_data.get('money') > order.benjin_needpay:
                     message = u'金额不能大于待还本金'
                 else:
-                    order.payed_benjin = order.payed_benjin + money
-                    order.needpay_sum = order.needpay_sum - money
-                    order.save()
+                    payLoanBenjin(order,money)
                     loan_repay(order,money)
                     log.addunuse(money)
                     log.addused(0-money)
@@ -1405,12 +1427,10 @@ def pool_loan(request,  pk):
                 pass
             elif 'lixi' in request.POST.keys():
                 log.oper_type = 505
-                if poolfeeform.cleaned_data.get('money') > order.needpay_lixi:
+                if poolfeeform.cleaned_data.get('money') > order.lixi_needpay:
                     message = u'金额不能大于待还利息'
                 else:
-                    order.payed_lixi = order.payed_lixi + money
-                    order.needpay_lixi = order.needpay_lixi - money
-                    order.save()
+                    payLoanLixi(order,money)
                     if 'zijinchipay' in request.POST.keys():
                         # 资金池还款
                         instance = SuperLoanFee()

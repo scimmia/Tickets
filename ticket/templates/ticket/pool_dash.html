@@ -74,25 +74,19 @@
                 <form method='POST' action=''>{% csrf_token %}
                     <!-- left column -->
                     <div class="box box-danger">
-                        <div class="box-body">
-                            <div id="div_id_task_title" class="form-group">
-                                <label for="id_task_title" class="control-label"><h3>保证金：</h3></label>
-                            </div>
-                            {{ form|crispy }}
-
+                        <div class="box-header with-border">
+                            <h3 class="box-title">保证金：</h3>
                         </div>
-
-
+                        <div class="box-body">
+                            {{ form|crispy }}
+                        </div>
                         <div class="box-footer">
                             <input class="btn btn-primary" value="提交" type="submit">
                             <a><input class="btn btn-default" value="取消" type="button"></a>
                         </div>
                         <!-- /.box-body -->
                     </div>
-
-
                 </form>
-
             </div>
                 <form method='POST' id="signupForm" action="{% url 'pool_loans' %}" onsubmit="return check();">{% csrf_token %}
                 <div class="col-md-3">
@@ -183,3 +177,9 @@
 
 {% endblock %}
 
+{% block script %}
+    <script src="{% static 'plugins/initItems.js' %}"></script>
+    <script >
+        initDatePicker($('.dateinput'));
+    </script>
+{% endblock %}

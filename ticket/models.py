@@ -1,6 +1,21 @@
 from django.db import models
 
 # Create your models here.
+class BaseLoan(models.Model):
+    benjin = models.FloatField(u'本金', default=0)
+    lilv = models.FloatField(u'利率', default=0)
+    lixi_begin_date = models.DateField(u'计息日期', auto_now_add=False)
+    benjin_payed = models.FloatField(u'已还本金', default=0)
+    benjin_needpay = models.FloatField(u'待还本金', default=0)
+    lixi = models.FloatField(u'利息', default=0)
+    lixi_payed = models.FloatField(u'已还利息', default=0)
+    lixi_needpay = models.FloatField(u'待还利息', default=0)
+    lixi_sum_date = models.DateField(u'结息日期', auto_now_add=False)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+    is_payed = models.BooleanField(u'是否还清', default=False)
+
+    class Meta:
+        abstract = True
 
 class Card(models.Model):
     CARD_TYPE= (
@@ -192,15 +207,7 @@ class StoreTicketsImport(models.Model):
         verbose_name_plural = '导入票据'
     def __str__(self):
         return self.piaohao
-class SuperLoan(models.Model):
-    money_benjin = models.FloatField(u'本金', default=0)
-    needpay_sum = models.FloatField(u'待还本金', default=0)
-    payed_benjin = models.FloatField(u'已还本金', default=0)
-    money_lixi = models.FloatField(u'利息', default=0)
-    payed_lixi = models.FloatField(u'已还利息', default=0)
-    needpay_lixi = models.FloatField(u'待还利息', default=0)
-    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
-
+class SuperLoan(BaseLoan):
     class Meta:
         verbose_name = '超短贷'
         verbose_name_plural = '超短贷'
