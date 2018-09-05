@@ -1643,6 +1643,7 @@ def bestmix(request):
         if form.is_valid():
             money_sum = form.cleaned_data.get('money')
             count = form.cleaned_data.get('count')
+            changecount = form.cleaned_data.get('changecount')
             valuea = form.cleaned_data.get('valuea')
             valueta = form.cleaned_data.get('valueta')
             valueb = form.cleaned_data.get('valueb')
@@ -1653,52 +1654,62 @@ def bestmix(request):
             valuetd = form.cleaned_data.get('valuetd')
             valuee = form.cleaned_data.get('valuee')
             valuete = form.cleaned_data.get('valuete')
-            # if
-            maxa = min(count,money_sum/valuea)
-            maxb = min(count,money_sum/valueb)
-            maxc = min(count,money_sum/valuec)
-            maxd = 0
-            maxe = 0
+            keys.append('总张数')
             keys.append(valuea)
             keys.append(valueb)
             keys.append(valuec)
             keys.append(valued)
             keys.append(valuee)
             keys.append('总和')
-            if valued is None:
-                valued = 0
-            if valuetd is None:
-                valuetd = 0
-            if valuee is None:
-                valuee = 0
-            if valuete is None:
-                valuete = 0
+            if changecount is None:
+                changecount = 0
+            step = 1
+            if changecount < 0:
+                step = -1
+            start = 0
+            while start != changecount:
+                count = count + step
+                start = start + step
+                maxa = min(count,money_sum/valuea)
+                maxb = min(count,money_sum/valueb)
+                maxc = min(count,money_sum/valuec)
+                maxd = 0
+                maxe = 0
+                if valued is None:
+                    valued = 0
+                if valuetd is None:
+                    valuetd = 0
+                if valuee is None:
+                    valuee = 0
+                if valuete is None:
+                    valuete = 0
 
-            if valued > 0:
-                maxd = min(count, money_sum / valued)
-            if valuee > 0:
-                maxe = min(count, money_sum / valuee)
-            a = 0
-            while a <= maxa:
-                b = 0
-                while b <= min(maxb,maxc):
-                    d = 0
-                    while d <= min(maxd,count-a-b-b):
-                        e = count-a-b-b-d
-                        if (not(valued == 0 and d>0)) and ((not(valuee == 0 and e>0))) and a * valuea + b * valueb + b * valuec + d * valued + e * valuee == money_sum:
-                            value = []
-                            value.append(a)
-                            value.append(b)
-                            value.append(b)
-                            value.append(d)
-                            value.append(e)
-                            value.append(
-                                a * valuea * valueta + b * valueb * valuetb + b * valuec * valuetc + d * valued * valuetd + e * valuee * valuete)
-                            values.append(value)
-                        d = d + 1
-                    b = b + 1
-                a = a + 1
-            pass
+                if valued > 0:
+                    maxd = min(count, money_sum / valued)
+                if valuee > 0:
+                    maxe = min(count, money_sum / valuee)
+                a = 0
+                while a <= maxa:
+                    b = 0
+                    while b <= min(maxb,maxc):
+                        d = 0
+                        while d <= min(maxd,count-a-b-b):
+                            e = count-a-b-b-d
+                            if (not(valued == 0 and d>0)) and ((not(valuee == 0 and e>0))) and a * valuea + b * valueb + b * valuec + d * valued + e * valuee == money_sum:
+                                value = []
+                                value.append(count)
+                                value.append(a)
+                                value.append(b)
+                                value.append(b)
+                                value.append(d)
+                                value.append(e)
+                                value.append(
+                                    a * valuea * valueta + b * valueb * valuetb + b * valuec * valuetc + d * valued * valuetd + e * valuee * valuete)
+                                values.append(value)
+                            d = d + 1
+                        b = b + 1
+                    a = a + 1
+                pass
     return render(request, 'ticket/tool_bestmix.html', locals())
 def avgday(request):
     return render(request, 'ticket/tool_avgday.html')

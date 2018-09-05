@@ -94,6 +94,7 @@ class LoanForm(ModelForm):
 class BestMixForm(forms.Form):
     money = forms.IntegerField(label="总金额",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
     count = forms.IntegerField(label="总张数",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    changecount = forms.IntegerField(label="浮动张数",required=False,widget=forms.NumberInput(attrs={'class': 'form-control'}))
     valuea = forms.IntegerField(label="票面价格1",required=True, min_value=1,widget=forms.NumberInput(attrs={'class': 'form-control'}))
     valueta = forms.IntegerField(label="每十万贴息1",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
     valueb = forms.IntegerField(label="票面价格2",required=True, min_value=1,widget=forms.NumberInput(attrs={'class': 'form-control'}))
