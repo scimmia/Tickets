@@ -1,6 +1,7 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
@@ -29,19 +30,19 @@
                             <tbody>
                             <tr>
                                 <th>本金:</th>
-                                <td style="text-align:right;"><a>{{ order.money_benjin }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.money_benjin|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>已还本金:</th>
-                                <td style="text-align:right;"><a>{{ order.payed_benjin }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.payed_benjin|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>利息:</th>
-                                <td style="text-align:right;"><a>{{ order.money_lixi }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.money_lixi|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>已还利息:</th>
-                                <td style="text-align:right;"><a>{{ order.payed_lixi }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.payed_lixi|floatformat:2|intcomma }}</a></td>
                             </tr>
                             </tbody>
                         </table>
@@ -51,11 +52,11 @@
                             <tbody>
                             <tr>
                                 <th>待还本金:</th>
-                                <td style="text-align:right;{% if order.needpay_sum > 0 %}color: red{% endif %}">{{ order.needpay_sum }}</td>
+                                <td style="text-align:right;{% if order.needpay_sum > 0 %}color: red{% endif %}">{{ order.needpay_sum|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>待还利息:</th>
-                                <td style="text-align:right;{% if order.needpay_lixi > 0 %}color: red{% endif %}">{{ order.needpay_lixi }}</td>
+                                <td style="text-align:right;{% if order.needpay_lixi > 0 %}color: red{% endif %}">{{ order.needpay_lixi|floatformat:2|intcomma }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -111,7 +112,7 @@
                         {% for i in payfee_data %}
                             <tr>
                                 <td>{{ i.name }}</td>
-                                <td><span>{{ i.money }}</span></td>
+                                <td><span>{{ i.money|floatformat:2|intcomma }}</span></td>
                                 <td>
                                     {% if i.yinhangka %}
                                         <span>{{ i.yinhangka }}

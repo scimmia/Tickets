@@ -1,6 +1,7 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
@@ -61,7 +62,7 @@
                             <td><a class="green" href="{% if isloan %}{% url 'loan_list'%}{% else %}{% url 'borrow_list' %}{% endif %}?jiedairen={{   item.jiedairen  }}" title="查看信息">
                                 {{ item.jiedairen }}
                             </a></td>
-                            <td>{{ item.sum_money }}</td>
+                            <td>{{ item.sum_money|floatformat:2|intcomma }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

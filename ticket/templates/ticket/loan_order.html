@@ -1,6 +1,7 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
@@ -42,19 +43,19 @@
                             </tr>
                             <tr>
                                 <th>本金:</th>
-                                <td style="text-align:right;"><a>{{ order.money_benjin }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.money_benjin|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>已{% if order.order_type == 4  %}还{% else %}收{% endif %}本金:</th>
-                                <td style="text-align:right;"><a>{{ order.payed_benjin }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.payed_benjin|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>累计利息:</th>
-                                <td style="text-align:right;"><a>{{ order.totallixi }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.totallixi|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>已{% if order.order_type == 4  %}还{% else %}收{% endif %}利息:</th>
-                                <td style="text-align:right;"><a>{{ order.payed_lixi }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.payed_lixi|floatformat:2|intcomma }}</a></td>
                             </tr>
                             </tbody>
                         </table>
@@ -64,11 +65,11 @@
                             <tbody>
                             <tr>
                                 <th>待{% if order.order_type == 4  %}还{% else %}收{% endif %}本金:</th>
-                                <td style="text-align:right;{% if order.needpay_sum > 0 %}color: red{% endif %}">{{ order.needpay_sum }}</td>
+                                <td style="text-align:right;{% if order.needpay_sum > 0 %}color: red{% endif %}">{{ order.needpay_sum|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>待{% if order.order_type == 4  %}还{% else %}收{% endif %}利息:</th>
-                                <td style="text-align:right;{% if order.needpay_lixi > 0 %}color: red{% endif %}">{{ order.needpay_lixi }}</td>
+                                <td style="text-align:right;{% if order.needpay_lixi > 0 %}color: red{% endif %}">{{ order.needpay_lixi|floatformat:2|intcomma }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -115,7 +116,7 @@
                         {% for i in payfee_data %}
                             <tr>
                                 <td>{{ i.name }}</td>
-                                <td><span>{{ i.money }}</span></td>
+                                <td><span>{{ i.money|floatformat:2|intcomma }}</span></td>
                                 <td style="display:none;" >        {% if i.fee_type == 3 %}
                                     <span class="label label-danger">否
                                 {% elif i.fee_type == 5 %}

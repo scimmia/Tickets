@@ -1,5 +1,6 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% load crispy_forms_tags %}
 {#{% load material_form %}#}
@@ -55,7 +56,7 @@
                                     <td>{{ item.chupiaoren }}</td>
                                     <td>{{ item.chupiaoriqi }}</td>
                                     <td>{{ item.daoqiriqi }}</td>
-                                    <td>{{ item.piaomianjiage }}</td>
+                                    <td>{{ item.piaomianjiage|floatformat:2|intcomma }}</td>
                                 </tr>
                             {% endfor %}
 

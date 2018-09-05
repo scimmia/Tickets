@@ -1,5 +1,6 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% load crispy_forms_tags %}
 {#{% load material_form %}#}
@@ -53,7 +54,7 @@
                             <div id="div_id_task_title" class="form-group">
                                 <label for="id_task_title" class="control-label"><strong>余额</strong></label>
                                 <div class="controls">
-                                    <label for="id_task_title" class="control-label">{{ item.money }} 元</label>
+                                    <label for="id_task_title" class="control-label">{{ item.money|floatformat:2|intcomma }} 元</label>
                                 </div>
                             </div>
                             <div id="div_id_task_title" class="form-group">
@@ -176,7 +177,7 @@
                                             {% else %}
                                                 <span class="label label-danger">
                                             {% endif %}
-                                            {{ i.money }}</span></td>
+                                            {{ i.money|floatformat:2|intcomma }}</span></td>
                                         <td>{{ i.pub_date }}</td>
                                         <td>
                                             {% if i.ticket %}

@@ -1,5 +1,6 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% load crispy_forms_tags %}
 {% load static %}
@@ -37,27 +38,27 @@
                             <tbody>
                             <tr>
                                 <th>总额度 :</th>
-                                <td style="text-align:right;">{{ item.totalmoney }}</td>
+                                <td style="text-align:right;">{{ item.totalmoney|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>可用额度 :</th>
-                                <td style="text-align:right;">{{ item.unusemoney }}</td>
+                                <td style="text-align:right;">{{ item.unusemoney|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>已用额度:</th>
-                                <td style="text-align:right;">{{ item.usedmoney }}</td>
+                                <td style="text-align:right;">{{ item.usedmoney|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>入池票:{{ count_t }}张</th>
-                                <td style="text-align:right;"><a href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__gt={{ today }}" >{{ sum_money }}</a></td>
+                                <td style="text-align:right;"><a href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__gt={{ today }}" >{{ sum_money|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>保证金:</th>
-                                <td style="text-align:right;">{{ item.promoney }}</td>
+                                <td style="text-align:right;">{{ item.promoney|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>超短贷:</th>
-                                <td style="text-align:right;"><a href="{% url 'pool_loans' %}">{{ item.loanmoney }}</a></td>
+                                <td style="text-align:right;"><a href="{% url 'pool_loans' %}">{{ item.loanmoney|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>池开票:{{ count_chikai }}张</th>
@@ -154,7 +155,7 @@
                                         {% else %}
                                             <span class="label label-danger">
                                         {% endif %}
-                                        {{ i.money }}</span></td>
+                                        {{ i.money|floatformat:2|intcomma }}</span></td>
                                     <td>{{ i.pub_date }}</td>
                                     <td>
                                         {% if i.ticket %}

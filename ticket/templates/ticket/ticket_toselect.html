@@ -1,5 +1,6 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
@@ -166,8 +167,8 @@
                             </a></td>
                             <td>{{ item.chupiaohang }}</td>
                             <td>{{ item.gongyingshang }}</td>
-                            <td>{{ item.piaomianjiage }}</td>
-                            <td>{{ item.gourujiage }}</td>
+                            <td>{{ item.piaomianjiage|floatformat:2|intcomma }}</td>
+                            <td>{{ item.gourujiage|floatformat:2|intcomma }}</td>
                             <td>{{ item.chupiaoriqi }}</td>
                             <td>{{ item.daoqiriqi }}</td>
                             <td>

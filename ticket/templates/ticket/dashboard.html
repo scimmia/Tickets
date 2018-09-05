@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load humanize %}
 {% block title %}仪表盘{% endblock %}
 
 {% block css %}
@@ -63,33 +64,33 @@
                                 <th class="btbg font-center titfont">电票</th>
                                 <td><a href="{% url 'ticket_list' %}?t_status=1&t_type=2">
                                     <span class="pull-left">{{ kudianc }}张</span>
-                                    <span class="pull-right">{{ kudians }}元</span></a></td>
+                                    <span class="pull-right">{{ kudians |floatformat:2|intcomma}}元</span></a></td>
                                 <td><a href="{% url 'ticket_list' %}?t_status=5&t_type=2">
                                     <span class="pull-left">{{ chidianc }}张</span>
-                                    <span class="pull-right">{{ chidians }}元</span></a></td>
+                                    <span class="pull-right">{{ chidians|floatformat:2|intcomma }}元</span></a></td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">纸票</th>
                                 <td><a href="{% url 'ticket_list' %}?t_status=1&t_type=1">
                                     <span class="pull-left">{{ kuzhic }}张</span>
-                                    <span class="pull-right">{{ kuzhis }}元</span></a></td>
+                                    <span class="pull-right">{{ kuzhis|floatformat:2|intcomma }}元</span></a></td>
                                 <td><a href="{% url 'ticket_list' %}?t_status=5&t_type=1">
                                     <span class="pull-left">{{ chizhic }}张</span>
-                                    <span class="pull-right">{{ chizhis }}元</span></a></td>
+                                    <span class="pull-right">{{ chizhis|floatformat:2|intcomma }}元</span></a></td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">合计</th>
                                 <td><span class="pull-left">{{ kuc }}张</span>
-                                    <span class="pull-right">{{ kus }}元</span></td>
+                                    <span class="pull-right">{{ kus|floatformat:2|intcomma }}元</span></td>
                                 <td><span class="pull-left">{{ chic }}张</span>
-                                    <span class="pull-right">{{ chis }}元</span>
+                                    <span class="pull-right">{{ chis|floatformat:2|intcomma }}元</span>
                                 </td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont" rowspan="2">总计</th>
                                 <td colspan="2" align="center">
                                     <span>{{ allc }}张</span>
-                                    <span>{{ alls }}元</span></td>
+                                    <span>{{ alls|floatformat:2|intcomma }}元</span></td>
                             </tr>
                             </tbody>
                         </table>
@@ -110,31 +111,31 @@
                                 <th class="btbg font-center titfont">三日内到期<br>池开库存票</th>
                                 <td><a href="{% url 'ticket_list' %}?t_status=1&daoqiriqi__lte={{ threeday }}">
                                     <span class="pull-left">{{ daoqikucun_count }}张</span>
-                                    <span class="pull-right">{{ daoqikucun_sum }}元</span></a></td>
+                                    <span class="pull-right">{{ daoqikucun_sum|floatformat:2|intcomma }}元</span></a></td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">本日到期<br>在池票</th>
                                 <td><a href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__lte={{ today }}">
                                     <span class="pull-left">{{ daoqizaichi_count }}张</span>
-                                    <span class="pull-right">{{ daoqizaichi_sum }}元</span></a></td>
+                                    <span class="pull-right">{{ daoqizaichi_sum|floatformat:2|intcomma }}元</span></a></td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">月底到期<br>未还超短贷</th>
                                 <td><a href="{% url 'pool_loans' %}">
                                     <span class="pull-left">{{ loan_count }}条</span>
-                                    <span class="pull-right">{{ loan_sum }}元</span></a></td>
+                                    <span class="pull-right">{{ loan_sum|floatformat:2|intcomma }}元</span></a></td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">待收借款</th>
                                 <td><a href="{% url 'borrow_status' %}">
                                     <span class="pull-left">{{ daishou_count }}条</span>
-                                    <span class="pull-right">{{ daishou_sum }}元</span></a></td>
+                                    <span class="pull-right">{{ daishou_sum|floatformat:2|intcomma }}元</span></a></td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">待还贷款</th>
                                 <td><a href="{% url 'loan_status' %}">
                                     <span class="pull-left">{{ daifu_count }}条</span>
-                                    <span class="pull-right">{{ daifu_sum }}元</span></a></td>
+                                    <span class="pull-right">{{ daifu_sum|floatformat:2|intcomma }}元</span></a></td>
                             </tr>
                             </tbody>
                         </table>

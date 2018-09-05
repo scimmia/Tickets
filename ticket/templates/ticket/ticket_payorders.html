@@ -1,5 +1,6 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
@@ -47,11 +48,11 @@
                             <td><a class="green" href="{% url 'ticket_payorder' item.id %}" title="查看信息">
                                 {{ item.pub_date }}
                             </a></td>
-                            <td>{{ item.ticket_sum }}</td>
-                            <td>{{ item.money }}</td>
+                            <td>{{ item.ticket_sum|floatformat:2|intcomma }}</td>
+                            <td>{{ item.money|floatformat:2|intcomma }}</td>
                             {#                            <td>{{ item.total_sum }}</td>#}
-                            <td>{{ item.payfee_sum }}</td>
-                            <td>{{ item.needpay_sum }}</td>
+                            <td>{{ item.payfee_sum|floatformat:2|intcomma }}</td>
+                            <td>{{ item.needpay_sum|floatformat:2|intcomma }}</td>
                             <td>
                                 {% if item.needpay_sum == 0 %}
                                     <span class="label label-success">已完成

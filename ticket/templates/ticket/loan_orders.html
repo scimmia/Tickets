@@ -1,6 +1,7 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
@@ -68,14 +69,14 @@
                             <td><a class="green" href="{% url 'loanorder' item.id %}" title="查看信息">
                                 {{ item.pub_date }}
                             </a></td>
-                            <td>{{ item.money_benjin }}</td>
-                            <td>{{ item.payed_benjin }}</td>
-                            <td {% if item.needpay_sum > 0 %}style="color: red"{% endif %}>{{ item.needpay_sum }}</td>
+                            <td>{{ item.money_benjin|floatformat:2|intcomma }}</td>
+                            <td>{{ item.payed_benjin|floatformat:2|intcomma }}</td>
+                            <td {% if item.needpay_sum > 0 %}style="color: red"{% endif %}>{{ item.needpay_sum|floatformat:2|intcomma }}</td>
                             <td>{{ item.money_lilv }}</td>
                             <td>{{ item.order_date }}</td>
-                            <td>{{ item.totallixi }}</td>
-                            <td>{{ item.payed_lixi }}</td>
-                            <td {% if item.needpay_lixi > 0 %}style="color: red"{% endif %}>{{ item.needpay_lixi }}</td>
+                            <td>{{ item.totallixi|floatformat:2|intcomma }}</td>
+                            <td>{{ item.payed_lixi|floatformat:2|intcomma }}</td>
+                            <td {% if item.needpay_lixi > 0 %}style="color: red"{% endif %}>{{ item.needpay_lixi|floatformat:2|intcomma }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
