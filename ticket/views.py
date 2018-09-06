@@ -187,20 +187,18 @@ def dashboard(request):
         loan_sum = loan_sum + superLoan.benjin_needpay + superLoan.lixi_needpay
     # payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=3)|Q(fee_type=5)|Q(fee_type=7))).order_by('-pub_date')
 
-    ts =  Loan_Order.objects.filter(Q(needpay_sum__gt=0)).values('order_type').annotate(t_count = Count('id'),sum_money=Sum('needpay_sum'))
+    loanOrders = Loan_Order.objects.filter(is_payed = False)
     daishou_count = 0
     daishou_sum = 0
     daifu_count = 0
     daifu_sum = 0
-    for t in ts:
-        if t['order_type'] == 4:
-            daifu_count = t['t_count']
-            daifu_sum = round(t['sum_money'],2)
-        if t['order_type'] == 3:
-            daishou_count = t['t_count']
-            daishou_sum = round(t['sum_money'],2)
-    print(ts)
-
+    for loanOrder in loanOrders:
+        if loanOrder.order_type == 4:
+            daifu_count += 1
+            daifu_sum += loanOrder.benjin_needpay + loanOrder.lixi_needpay
+        if loanOrder.order_type == 3:
+            daishou_count += 1
+            daishou_sum += loanOrder.benjin_needpay + loanOrder.lixi_needpay
     return render(request, 'ticket/dashboard.html', locals())
 
 #用户登陆选项，所有的函数将会返回一个template_response的实例，用来描绘页面，同时你也可以在return之前增加一些特定的功能
