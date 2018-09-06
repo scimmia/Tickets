@@ -445,7 +445,7 @@ def ticket_list(request):
     #如果没有从GET提交中获取信息，那么data则为元始数据
 
     #将分页的信息传递到展示页面中去
-    data_list, page_range, count, page_nums = pagination(request, data)
+    data_list, page_range, count, page_nums = pagination(request, data,30)
     #建立context字典，将值传递到相应页面
     context = {
         'data': data_list,

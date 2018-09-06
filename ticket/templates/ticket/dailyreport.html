@@ -1,4 +1,5 @@
 {% extends "ticket/dashboard.html" %}
+{% load staticfiles %}
 {% block content %}
     <section class="content-header">
         <h1>
@@ -38,19 +39,10 @@
 {% endblock %}
 
 {% block script %}
-
+    <script src="{% static 'plugins/initItems.js' %}"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.input-group.date').datepicker({
-                clearBtn: true,
-                language: "zh-CN",
-                format: 'yyyy-mm-dd',
-                forceParse: false,
-                daysOfWeekHighlighted: "0,6",
-                autoclose: true,
-                todayHighlight: true,
-                toggleActive: true
-            });
+            initDatePicker($('.input-group.date'));
         });
     </script>
 

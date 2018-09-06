@@ -21,6 +21,7 @@
                 <table id="table_id" class="table table-striped table-bordered table-hover">
                     <thead>
                     <!--表格头部-->
+                    <td></td>
                     {% block table_tr %}
                     {% endblock %}
                     </thead>
@@ -29,6 +30,7 @@
                     {% for item in data %}
                         <tr>
                             <!--通过for循环从data取出的具体表格内容-->
+                            <td>{{ forloop.counter }}</td>
                             {% block table_td %}
                             {% endblock %}
                         </tr>
@@ -48,6 +50,7 @@
 {% block script %}
     <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
     <script src="{% static 'plugins/initItems.js' %}"></script>
 
     {% block othersScript %}
@@ -55,7 +58,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             {% block initTables %}
-                initSortTable($('#table_id'));
+                var t = initSortTable($('#table_id'));
             {% endblock %}
             {% block initDatePicker %}
             {% endblock %}

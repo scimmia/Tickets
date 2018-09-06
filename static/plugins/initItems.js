@@ -4,8 +4,10 @@ function initDatePicker(val) {
         autoclose: true,
         todayHighlight: true, //自动关闭
         clearBtn: true,          //显示清除按钮
-        format: 'yyyy/mm/dd',
+        format: 'yyyy-mm-dd',
     });
+    val.attr("autocomplete","off")
+    val.find("input").attr("autocomplete","off")
 }
 function initSortTable(val) {
     return val.DataTable({
@@ -15,11 +17,12 @@ function initSortTable(val) {
                 'ordering': true,
                 'info': true,
                 'autoWidth': false,
+                'scrollY': 410,
                 "language": {
                     "processing": "处理中...",
                     "lengthMenu": "显示 _MENU_ 项结果",
                     "zeroRecords": "没有匹配结果",
-                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    "info": "",
                     "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
                     "infoFiltered": "(由 _MAX_ 项结果过滤)",
                     "infoPostFix": "",
@@ -45,8 +48,6 @@ function initSortTable(val) {
                         "sortAscending": ": 以升序排列此列",
                         "sortDescending": ": 以降序排列此列"
                     },
-                    "decimal": "-",
-                    "thousands": "."
                 }
             });
 }
