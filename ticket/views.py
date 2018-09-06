@@ -179,8 +179,8 @@ def dashboard(request):
             daoqikucun_sum = round(t['sum_money'],2)
     # ts = SuperLoan.objects.filter(Q(needpay_sum__gt=0)|Q(needpay_lixi__gt=0)).annotate(t_count = Count('id'),sum_money=Sum('needpay_sum'),sum_lixi=Sum('needpay_lixi'))
 
-    loan_count = SuperLoan.objects.filter(Q(needpay_sum__gt=0)|Q(needpay_lixi__gt=0)).count()
-    loan_sum = SuperLoan.objects.filter(Q(needpay_sum__gt=0)|Q(needpay_lixi__gt=0)).aggregate(Sum('needpay_sum')).get('needpay_sum__sum')
+    loan_count = SuperLoan.objects.filter(is_payed = False).count()
+    loan_sum = SuperLoan.objects.filter(Q(benjin_needpay__gt=0)|Q(lixi_needpay__gt=0)).aggregate(Sum('benjin_needpay')).get('benjin_needpay')
     # payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=3)|Q(fee_type=5)|Q(fee_type=7))).order_by('-pub_date')
 
     ts =  Loan_Order.objects.filter(Q(needpay_sum__gt=0)).values('order_type').annotate(t_count = Count('id'),sum_money=Sum('needpay_sum'))
@@ -1373,11 +1373,18 @@ def pool_loans(request):
             log.addsuperloan(instance.benjin)
             log.save()
             return redirect('pool_dash')
-    loan_data = SuperLoan.objects.all().order_by('pub_date')
-    card_data = Card.objects.all()
+    loan_data = SuperLoan.objects.all().order_by('-pub_date')
+    # 将分页的信息传递到展示页面中去
+    data_list, page_range, count, page_nums = pagination(request, loan_data)
+    # 建立context字典，将值传递到相应页面
     context = {
-        'data': loan_data,
-        'card_data': card_data,
+        'data': data_list,
+        'gongyingshang': get_ticketlists('gongyingshang'),
+        'maipiaoren': get_ticketlists('maipiaoren'),
+        'page_range': page_range,
+        'count': count,
+        'page_nums': page_nums,
+        'filter': filter,
     }
     #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
     return render(request, 'ticket/pool_loans.html', context)

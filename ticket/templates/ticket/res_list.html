@@ -1,7 +1,10 @@
 {% extends "ticket/dashboard.html" %}
 {% load staticfiles %}
 
-{#{% load material_form %}#}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
+{% endblock %}
 
 {% block content %}
     <!-- Content Header (Page header) -->
@@ -43,25 +46,23 @@
 {% endblock %}
 
 {% block script %}
-    <!-- page script -->
+    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/initItems.js' %}"></script>
 
+    {% block othersScript %}
+    {% endblock %}
     <script type="text/javascript">
-
         $(document).ready(function () {
-            $('#table_id').DataTable({
-                //分页配置
-                "paging": false,
-                //搜索配置
-                "searching": false,
-                "bInfo": false,
-                //列配置
-                "columnDefs": [{
-                    //只有最后一行不需要排序
-                    "orderable": false, "targets": -1
-                }]
-            });
+            {% block initTables %}
+                initSortTable($('#table_id'));
+            {% endblock %}
+            {% block initDatePicker %}
+            {% endblock %}
+            {% block initSelect %}
+            {% endblock %}
+            {% block initOthers %}
+            {% endblock %}
         });
     </script>
-
-
 {% endblock %}

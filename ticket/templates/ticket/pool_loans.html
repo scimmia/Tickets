@@ -1,127 +1,43 @@
-{% extends "ticket/dashboard.html" %}
+{% extends "ticket/res_list.html" %}
 {% load staticfiles %}
 {% load crispy_forms_tags %}
 {% load humanize %}
-
-{% block css %}
-    <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
+{% block content-header %}
+    <h1>
+        超短贷
+    </h1>
 {% endblock %}
-
-{% block content %}
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h1>
-            超短贷
-        </h1>
-    </section>
-
-    <section class="content">
-        <div class="row">
-
-            <div class="col-xs-12">
-                <table id="table_id" class="table table-bordered table-hover">
-                    <thead>
-                    <!--表格头部-->
-                    <th style="display: none"></th>
-                    <th style="display: none">ID</th>
-                    <th>添加日期</th>
-                    <th>本金</th>
-                    <th>已还本金</th>
-                    <th>待还本金</th>
-                    <th>利息</th>
-                    <th>已还利息</th>
-                    <th>待还利息</th>
-                    <th>结息日期</th>
-                    </thead>
-                    <!--表格内容-->
-                    <tbody>
-                    {% for item in data %}
-                        <tr>
-                            <!--通过for循环从data取出的具体表格内容-->
-                            <td style="display: none"></td>
-                            <th style="display: none">{{ item.id }}</th>
-                            <td><a class="green" href="{% url 'pool_loan' item.id %}" title="查看信息">
-                                {{ item.pub_date }}
-                            </a></td>
-                            <td>{{ item.benjin|floatformat:2|intcomma }}</td>
-                            <td>{{ item.benjin_payed|floatformat:2|intcomma }}</td>
-                            <td {% if item.benjin_needpay > 0 %}style="color: red"{% endif %}>{{ item.benjin_needpay|floatformat:2|intcomma }}</td>
-                            <td>{{ item.lixi|floatformat:2|intcomma }}</td>
-                            <td>{{ item.lixi_payed|floatformat:2|intcomma }}</td>
-                            <td {% if item.lixi_needpay > 0 %}style="color: red"{% endif %}>{{ item.lixi_needpay|floatformat:2|intcomma }}</td>
-                            <td>{{ item.lixi_sum_date|naturalday }}</td>
-                       </tr>
-
-                    {% endfor %}
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+{% block table_tr %}
+    <th>状态</th>
+    <th>添加日期</th>
+    <th>本金</th>
+    <th>已还本金</th>
+    <th>待还本金</th>
+    <th>计息日期</th>
+    <th>利息</th>
+    <th>已还利息</th>
+    <th>待还利息</th>
+    <th>结息日期</th>
+{% endblock %}
+{% block table_td %}
+    <!--通过for循环从data取出的具体表格内容-->
+    <td>{% if item.is_payed %}
+        <span class="label label-success">已还清
+    {% else %}
+        <span class="label label-danger">待还
+    {% endif %}
+        </span></td>
+    <td><a class="green" href="{% url 'pool_loan' item.id %}" title="查看信息">
+        {{ item.pub_date }}
+    </a></td>
+    <td>{{ item.benjin|floatformat:2|intcomma }}</td>
+    <td>{{ item.benjin_payed|floatformat:2|intcomma }}</td>
+    <td {% if item.benjin_needpay > 0 %}style="color: red"{% endif %}>{{ item.benjin_needpay|floatformat:2|intcomma }}</td>
+    <td>{{ item.lixi_begin_date }}</td>
+    <td>{{ item.lixi|floatformat:2|intcomma }}</td>
+    <td>{{ item.lixi_payed|floatformat:2|intcomma }}</td>
+    <td {% if item.lixi_needpay > 0 %}style="color: red"{% endif %}>{{ item.lixi_needpay|floatformat:2|intcomma }}</td>
+    <td>{{ item.lixi_sum_date|naturalday }}</td>
 
 {% endblock %}
 
-{% block script %}
-    <!-- page script -->
-    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
-    <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
-
-    <script type="text/javascript">
-
-
-        $(document).ready(function () {
-            var t = $('#table_id').DataTable({
-                'paging': false,
-                'lengthChange': false,
-                'searching': false,
-                'ordering': true,
-                'info': true,
-                'autoWidth': false,
-                "language": {
-                    "processing": "处理中...",
-                    "lengthMenu": "显示 _MENU_ 项结果",
-                    "zeroRecords": "没有匹配结果",
-                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
-                    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
-                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
-                    "infoPostFix": "",
-                    "search": "搜索:",
-                    "searchPlaceholder": "搜索...",
-                    "url": "",
-                    "emptyTable": "表中数据为空",
-                    "loadingRecords": "载入中...",
-                    "infoThousands": ",",
-                    "paginate": {
-                        "first": "首页",
-                        "previous": "上页",
-                        "next": "下页",
-                        "last": "末页"
-                    },
-                    "aria": {
-                        "paginate": {
-                            'first': '首页',
-                            'previous': '上页',
-                            'next': '下页',
-                            'last': '末页'
-                        },
-                        "sortAscending": ": 以升序排列此列",
-                        "sortDescending": ": 以降序排列此列"
-                    },
-                    "decimal": "-",
-                    "thousands": "."
-                },
-                "columnDefs": [{
-                    'data': null,
-                    "orderable": false,
-                    "targets": 0,
-                    'defaultContent': "<input type ='checkbox' name='test' class='icheckbox_minimal' value=''>",
-                }, {
-                    "orderable": false, "targets": [0],  //设置第一列和最后一列不可排序
-                }],
-                "order": [[1, 'desc']]
-            });
-        });
-    </script>
-
-{% endblock %}
