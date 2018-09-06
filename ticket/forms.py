@@ -91,7 +91,7 @@ class LoanForm(ModelForm):
     class Meta:
         #该ModelForm参照Model: Node
         model = Loan_Order
-        fields = ['jiedairen','money_benjin','isMonthlilv','money_lilv','order_date','yinhangka',]
+        fields = ['jiedairen','benjin','isMonthlilv','lilv','lixi_begin_date','yinhangka',]
 
 class BestMixForm(forms.Form):
     money = forms.IntegerField(label="总金额",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))

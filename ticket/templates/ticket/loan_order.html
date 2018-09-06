@@ -4,8 +4,6 @@
 {% load humanize %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
-    <link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
 {% endblock %}
 
@@ -16,10 +14,6 @@
             借贷
             <small>{% if order.order_type == 4 %}贷款{% else %}借款{% endif %}订单</small>
         </h1>
-        <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
-            <li class="active">借贷</li>
-        </ol>
     </section>
 
     <section class="content">
@@ -28,7 +22,7 @@
                 <div class="box box-success">
                     <div class="box-header with-border">
                         <h3 class="box-title">{% if order.order_type == 4 %}贷款{% else %}借款{% endif %}信息：</h3>
-                        {% if order.needpay_sum == 0 and order.needpay_lixi == 0 %}<span class="label label-danger pull-right">已完成</span>{% endif %}
+                        {% if order.is_payed %}<span class="label label-danger pull-right">已完成</span>{% endif %}
                     </div>
                     <div class="box-body">
                         <table class="table">
@@ -43,19 +37,19 @@
                             </tr>
                             <tr>
                                 <th>本金:</th>
-                                <td style="text-align:right;"><a>{{ order.money_benjin|floatformat:2|intcomma }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.benjin|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>已{% if order.order_type == 4  %}还{% else %}收{% endif %}本金:</th>
-                                <td style="text-align:right;"><a>{{ order.payed_benjin|floatformat:2|intcomma }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.benjin_payed|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>累计利息:</th>
-                                <td style="text-align:right;"><a>{{ order.totallixi|floatformat:2|intcomma }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.lixi|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>已{% if order.order_type == 4  %}还{% else %}收{% endif %}利息:</th>
-                                <td style="text-align:right;"><a>{{ order.payed_lixi|floatformat:2|intcomma }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.lixi_payed|floatformat:2|intcomma }}</a></td>
                             </tr>
                             </tbody>
                         </table>
@@ -65,11 +59,11 @@
                             <tbody>
                             <tr>
                                 <th>待{% if order.order_type == 4  %}还{% else %}收{% endif %}本金:</th>
-                                <td style="text-align:right;{% if order.needpay_sum > 0 %}color: red{% endif %}">{{ order.needpay_sum|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;{% if order.needpay_sum > 0 %}color: red{% endif %}">{{ order.benjin_needpay|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>待{% if order.order_type == 4  %}还{% else %}收{% endif %}利息:</th>
-                                <td style="text-align:right;{% if order.needpay_lixi > 0 %}color: red{% endif %}">{{ order.needpay_lixi|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;{% if order.needpay_lixi > 0 %}color: red{% endif %}">{{ order.lixi_needpay|floatformat:2|intcomma }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -151,53 +145,11 @@
     <!-- page script -->
     <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/initItems.js' %}"></script>
 
     <script type="text/javascript">
-
-
         $(document).ready(function () {
-            var t = $('#table_id').DataTable({
-                'paging': false,
-                'lengthChange': false,
-                'searching': false,
-                'ordering': true,
-                'info': true,
-                'autoWidth': false,
-                "language": {
-                    "processing": "处理中...",
-                    "lengthMenu": "显示 _MENU_ 项结果",
-                    "zeroRecords": "没有匹配结果",
-                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
-                    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
-                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
-                    "infoPostFix": "",
-                    "search": "搜索:",
-                    "searchPlaceholder": "搜索...",
-                    "url": "",
-                    "emptyTable": "表中数据为空",
-                    "loadingRecords": "载入中...",
-                    "infoThousands": ",",
-                    "paginate": {
-                        "first": "首页",
-                        "previous": "上页",
-                        "next": "下页",
-                        "last": "末页"
-                    },
-                    "aria": {
-                        "paginate": {
-                            'first': '首页',
-                            'previous': '上页',
-                            'next': '下页',
-                            'last': '末页'
-                        },
-                        "sortAscending": ": 以升序排列此列",
-                        "sortDescending": ": 以降序排列此列"
-                    },
-                    "decimal": "-",
-                    "thousands": "."
-                },
-                "order": [[1, 'asc']]
-            });
+            initSortTable($('#table_id'));
             $('#div_id_fee_status').hide();
         });
     </script>

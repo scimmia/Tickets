@@ -66,7 +66,7 @@ class Order(models.Model):
 
     def __str__(self):
         return (u'%d' % (self.order_type))
-class Loan_Order(models.Model):
+class Loan_Order(BaseLoan):
     ORDER_TYPE= (
         (3,u'借款订单'),
         (4,u'贷款订单'),
@@ -78,14 +78,6 @@ class Loan_Order(models.Model):
     )
     jiedairen = models.CharField(u'借贷人', max_length=100)
     yinhangka = models.ForeignKey( Card, related_name='loanorder_card', verbose_name=u'借贷卡' , blank=False,null=False)
-    money_benjin = models.FloatField(u'本金', default=0)
-    money_lixi = models.FloatField(u'利息', default=0)#还本金时，该本金累计应还利息之和
-    needpay_sum = models.FloatField(u'待还本金', default=0)
-    payed_benjin = models.FloatField(u'已还本金', default=0)
-    payed_lixi = models.FloatField(u'已还利息', default=0)
-    money_lilv = models.FloatField(u'利率', default=0)
-    order_date = models.DateField(u'计息日期', auto_now_add=False)
-    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
     class Meta:
         verbose_name = '订单'

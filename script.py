@@ -191,9 +191,18 @@ def buildDailyReport():
     workbook.close()
     pass
 
-def countLoanLixi():
-    today = datetime.date.today()
+def countSuperLoanLixi():
     raw_data = models.SuperLoan.objects.filter(is_payed=False).order_by('-lixi_sum_date')
+    countLoanLixi(raw_data)
+    pass
+
+def countLoanOrderLixi():
+    raw_data = models.Loan_Order.objects.filter(is_payed=False).order_by('-lixi_sum_date')
+    countLoanLixi(raw_data)
+    pass
+
+def countLoanLixi(raw_data):
+    today = datetime.date.today()
     for order in raw_data:
         days = (today - order.lixi_sum_date).days
         if days > 0:
@@ -207,11 +216,12 @@ def countLoanLixi():
 
 def dailyJob():
     buildDailyReport()
-    countLoanLixi()
+    countLoanOrderLixi()
+    countSuperLoanLixi()
     pass
 
 schedule.every().day.at("00:30").do(dailyJob)
 while True:
     schedule.run_pending()
     time.sleep(1)
-# countLoanLixi()
+# countLoanOrderLixi()
