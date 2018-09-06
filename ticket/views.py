@@ -550,15 +550,12 @@ def ticket_createorder(request):
 
 def ticket_orderlist(request,index):
     #从根据不同的请求，来获取相应的数据,并跳转至相应页面
-    if index == 1:
-        list_template = 'ticket/ticket_payorders.html'
-    else:
-        list_template = 'ticket/ticket_sellorders.html'
+    list_template = 'ticket/ticket_orders.html'
     raw_data = Order.objects.filter(order_type=index).order_by('-pub_date')
     context = {
-        'data': raw_data,
+        'index': index,
     }
-    return render(request,list_template,context)
+    return getPagedPage(request,raw_data,list_template,context)
 def ticket_payorders(request):
     return ticket_orderlist(request,1)
 def ticket_sellorders(request):

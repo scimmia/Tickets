@@ -123,19 +123,19 @@
                             <tbody>
                             <tr>
                                 <th>票面价格:</th>
-                                <td style="text-align:right;"><a>{{ order.ticket_sum }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.ticket_sum|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>应{% if order.order_type == 1 %}支付{% elif order.order_type == 2 %}收取{% endif %}:</th>
-                                <td style="text-align:right;"><a>{{ order.total_sum }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.total_sum|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>已{% if order.order_type == 1 %}支付{% elif order.order_type == 2 %}收取{% endif %}:</th>
-                                <td style="text-align:right;"><a>{{ order.payfee_sum }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.payfee_sum|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
                                 <th>待{% if order.order_type == 1 %}支付{% elif order.order_type == 2 %}收取{% endif %}:</th>
-                                <td style="text-align:right;"><a>{{ order.needpay_sum }}</a></td>
+                                <td style="text-align:right;"><a>{{ order.needpay_sum|floatformat:2|intcomma }}</a></td>
                             </tr>
                             </tbody>
                         </table>
@@ -178,7 +178,7 @@
                         {% for i in payfee_data %}
                             <tr>
                                 <td>{{ i.name }}</td>
-                                <td><span>{{ i.money }}</span></td>
+                                <td><span>{{ i.money|floatformat:2|intcomma }}</span></td>
                                 <td>        {% if i.fee_type == 4 %}
                                     <span class="label label-danger">否
                                 {% elif i.fee_type == 6 %}
