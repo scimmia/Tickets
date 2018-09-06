@@ -179,8 +179,12 @@ def dashboard(request):
             daoqikucun_sum = round(t['sum_money'],2)
     # ts = SuperLoan.objects.filter(Q(needpay_sum__gt=0)|Q(needpay_lixi__gt=0)).annotate(t_count = Count('id'),sum_money=Sum('needpay_sum'),sum_lixi=Sum('needpay_lixi'))
 
-    loan_count = SuperLoan.objects.filter(is_payed = False).count()
-    loan_sum = SuperLoan.objects.filter(Q(benjin_needpay__gt=0)|Q(lixi_needpay__gt=0)).aggregate(Sum('benjin_needpay')).get('benjin_needpay')
+    superLoans = SuperLoan.objects.filter(is_payed = False)
+    loan_count = 0
+    loan_sum = 0
+    for superLoan in superLoans:
+        loan_count += 1
+        loan_sum = loan_sum + superLoan.benjin_needpay + superLoan.lixi_needpay
     # payfee_data = Fee.objects.filter(Q(order=pk)&(Q(fee_type=3)|Q(fee_type=5)|Q(fee_type=7))).order_by('-pub_date')
 
     ts =  Loan_Order.objects.filter(Q(needpay_sum__gt=0)).values('order_type').annotate(t_count = Count('id'),sum_money=Sum('needpay_sum'))
