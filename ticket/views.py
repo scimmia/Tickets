@@ -442,25 +442,14 @@ def ticket_needselect(request,index):
             title = '收款'
             raw_data = Ticket.objects.filter(sell_status=3,sellorder=None).order_by('-goumairiqi')
         list_template = 'ticket/ticket_toselect.html'
-
-        #建立一个空的参数的字典
-        kwargs = {}
-        #建立一个空的查询语句
-        for key in request.GET.keys():
-            value = request.GET[(key)]
-            if key != 'csrfmiddlewaretoken' and key != 'page' and (len(value)>0):
-                kwargs[key] = value
-        #通过元始数据进行过滤，过滤条件为健对值的字典
-        data = raw_data.filter(**kwargs)
-        # 建立context字典，将值传递到相应页面
         context = {
-            'data': data,
             'index': index,
             'title': title,
+            'gongyingshang': get_ticketlists('gongyingshang'),
         }
         print(context)
         # 跳转到相应页面，并将值传递过去
-        return render(request, list_template, context)
+        return getPagedPage(request,raw_data, list_template, context)
     elif request.method == 'POST':
         feeform = TicketFeeForm()
         index = request.POST['index']

@@ -1,376 +1,249 @@
-{% extends "ticket/dashboard.html" %}
+{% extends "ticket/res_list.html" %}
 {% load staticfiles %}
 {% load humanize %}
 
-{% block css %}
-    <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
-    <link rel="stylesheet" href="{% static 'plugins/iCheck/flat/blue.css' %}">
-    <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
+{% block content-header %}
+    <h1>
+        票据
+        <small>待{{ title }}</small>
+    </h1>
 {% endblock %}
+{% block search_header %}
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">搜索</h3>
 
-{% block content %}
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h1>
-            票据
-            <small>待{{ title }}</small>
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
-            <li class="active">票据</li>
-        </ol>
-    </section>
-
-    <section class="content">
-        <div class="row">
-            <div class="col-xs-12">
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body" style="display: none;">
                 <form class="navbar-for navbar-container" role="search" method="get" action="">{% csrf_token %}
+                    <div class="row">
 
-                    <div class="col-sm-3">
-                        <div class="input-group">
-                            <span class="input-group-addon" id="chupiaohang__contains">出票行</span>
-                            <input type="text" class="form-control" placeholder=""
-                                   aria-describedby="chupiaohang__contains"
-                                   name="chupiaohang__contains"
-                                   {% if request.GET.chupiaohang__contains %}value =
-                                       {{ request.GET.chupiaohang__contains }}{% endif %}>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon" id="chupiaohang__contains">出票行</span>
+                                <input type="text" class="form-control" placeholder=""
+                                       aria-describedby="chupiaohang__contains"
+                                       name="chupiaohang__contains"
+                                       {% if request.GET.chupiaohang__contains %}value =
+                                           {{ request.GET.chupiaohang__contains }}{% endif %}>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="col-sm-4">
-                        <div class="input-daterange input-group">
-                            <span class="input-group-addon" id="date-picker">票面价格</span>
-                            <input type="number" class="form-control" name="piaomianjiage__gt"
-                                    {% if request.GET.piaomianjiage__gt %} value=
-                                        {{ request.GET.piaomianjiage__gt }}{% endif %}>
-                            <span class="input-group-addon">
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon">供应商</span>
+                                <select class="js-single form-control" name="gongyingshang">
+                                    <option value="">所有</option>
+                                    {% for v in gongyingshang %}
+                                        <option value="{{ v }}"
+                                                {% if request.GET.gongyingshang and request.GET.gongyingshang == v %}
+                                                selected{% endif %}>{{ v }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon" id="date-picker">票面价格</span>
+                                <input type="number" class="form-control" name="piaomianjiage__gt"
+                                        {% if request.GET.piaomianjiage__gt %} value=
+                                            {{ request.GET.piaomianjiage__gt }}{% endif %}>
+                                <span class="input-group-addon">
                                 <i class="fa fa-exchange"></i>
                             </span>
-                            <input type="number" class="form-control" name="piaomianjiage__lt"
-                                    {% if request.GET.piaomianjiage__lt %} value=
-                                        {{ request.GET.piaomianjiage__lt }}{% endif %}>
+                                <input type="number" class="form-control" name="piaomianjiage__lt"
+                                        {% if request.GET.piaomianjiage__lt %} value=
+                                            {{ request.GET.piaomianjiage__lt }}{% endif %}>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon" id="date-picker">购入价格</span>
+                                <input type="number" class="form-control" name="gourujiage__gt"
+                                        {% if request.GET.gourujiage__gt %} value=
+                                            {{ request.GET.gourujiage__gt }}{% endif %}>
+                                <span class="input-group-addon">
+                                    <i class="fa fa-exchange"></i>
+                                </span>
+                                <input type="number" class="form-control" name="gourujiage__lt"
+                                        {% if request.GET.gourujiage__lt %} value=
+                                            {{ request.GET.gourujiage__lt }}{% endif %}>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-sm-4">
-                        <div class="input-daterange input-group">
-                            <span class="input-group-addon" id="date-picker">购入价格</span>
-                            <input type="number" class="form-control" name="gourujiage__gt"
-                                    {% if request.GET.gourujiage__gt %} value=
-                                        {{ request.GET.gourujiage__gt }}{% endif %}>
-                            <span class="input-group-addon">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="input-daterange input-group">
+                                <span class="input-group-addon" id="date-picker">购买日期</span>
+                                <input type="text" class="form-control dateinput" name="goumairiqi__gte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.goumairiqi__gte %} value=
+                                            {{ request.GET.goumairiqi__gte }}{% endif %}>
+                                <span class="input-group-addon">
                                 <i class="fa fa-exchange"></i>
                             </span>
-                            <input type="number" class="form-control" name="gourujiage__lt"
-                                    {% if request.GET.gourujiage__lt %} value=
-                                        {{ request.GET.gourujiage__lt }}{% endif %}>
+                                <input type="text" class="form-control dateinput" name="goumairiqi__lte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.goumairiqi__lte %} value=
+                                            {{ request.GET.goumairiqi__lte }}{% endif %}>
+
+                            </div>
                         </div>
-                    </div>
-
-
-                    <!-- /section:plugins/date-time.datepicker -->
-                    <div class="col-sm-4">
-
-
-                        <div class="input-daterange input-group">
-                            <span class="input-group-addon" id="date-picker">购买日期</span>
-                            <input type="text" class="form-control dateinput" name="goumairiqi__gt"
-                                   data-date-format="yyyy-mm-dd"
-                                    {% if request.GET.goumairiqi__gt %} value=
-                                        {{ request.GET.goumairiqi__gt }}{% endif %}>
-                            <span class="input-group-addon">
+                        <div class="col-sm-4">
+                            <div class="input-daterange input-group">
+                                <span class="input-group-addon" id="date-picker">出票日期</span>
+                                <input type="text" class="form-control dateinput" name="chupiaoriqi__gte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.chupiaoriqi__gte %} value=
+                                            {{ request.GET.chupiaoriqi__gte }}{% endif %}>
+                                <span class="input-group-addon">
                                 <i class="fa fa-exchange"></i>
                             </span>
-                            <input type="text" class="form-control dateinput" name="goumairiqi__lt"
-                                   data-date-format="yyyy-mm-dd"
-                                    {% if request.GET.goumairiqi__lt %} value=
-                                        {{ request.GET.goumairiqi__lt }}{% endif %}>
+                                <input type="text" class="form-control dateinput" name="chupiaoriqi__lte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.chupiaoriqi__lte %} value=
+                                            {{ request.GET.chupiaoriqi__lte }}{% endif %}>
 
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-sm-4">
+                        <div class="col-sm-4">
 
 
-                        <div class="input-daterange input-group">
-                            <span class="input-group-addon" id="date-picker">出票日期</span>
-                            <input type="text" class="form-control dateinput" name="chupiaoriqi__gt"
-                                   data-date-format="yyyy-mm-dd"
-                                    {% if request.GET.chupiaoriqi__gt %} value=
-                                        {{ request.GET.chupiaoriqi__gt }}{% endif %}>
-                            <span class="input-group-addon">
+                            <div class="input-daterange input-group">
+                                <span class="input-group-addon" id="date-picker">到期日期</span>
+                                <input type="text" class="form-control dateinput" name="daoqiriqi__gte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.daoqiriqi__gte %} value=
+                                            {{ request.GET.daoqiriqi__gte }}{% endif %}>
+                                <span class="input-group-addon">
                                 <i class="fa fa-exchange"></i>
                             </span>
-                            <input type="text" class="form-control dateinput" name="chupiaoriqi__lt"
-                                   data-date-format="yyyy-mm-dd"
-                                    {% if request.GET.chupiaoriqi__lt %} value=
-                                        {{ request.GET.chupiaoriqi__lt }}{% endif %}>
+                                <input type="text" class="form-control dateinput" name="daoqiriqi__lte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.daoqiriqi__lte %} value=
+                                            {{ request.GET.daoqiriqi__lte }}{% endif %}>
 
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-sm-4">
-
-
-                        <div class="input-daterange input-group">
-                            <span class="input-group-addon" id="date-picker">到期日期</span>
-                            <input type="text" class="form-control dateinput" name="daoqiriqi__gt"
-                                   data-date-format="yyyy-mm-dd"
-                                    {% if request.GET.daoqiriqi__gt %} value=
-                                        {{ request.GET.daoqiriqi__gt }}{% endif %}>
-                            <span class="input-group-addon">
-                                <i class="fa fa-exchange"></i>
-                            </span>
-                            <input type="text" class="form-control dateinput" name="daoqiriqi__lt"
-                                   data-date-format="yyyy-mm-dd"
-                                    {% if request.GET.daoqiriqi__lt %} value=
-                                        {{ request.GET.daoqiriqi__lt }}{% endif %}>
-
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
+                        <div class="col-sm-3">
 								<span class="input-group-btn">
 									<button type="submit" class="btn btn-purple btn-sm">
 										查询
 										<i class="ace-icon fa fa-search icon-on-right bigger-110"></i>
 									</button>
-
-
 								</span>
+                        </div>
                     </div>
-
-
                 </form>
-            </div>
-
-            <div class="col-xs-12">
-                <table id="table_id" class="table table-bordered table-hover">
-                    <thead>
-                    <!--表格头部-->
-                    <th></th>
-                    <th style="display: none">ID</th>
-                    <th>购买日期</th>
-                    <th>出票行</th>
-                    <th>供应商</th>
-                    <th>票面价格</th>
-                    <th>购入价格</th>
-                    <th>出票日期</th>
-                    <th>到期日期</th>
-                    <th>状态</th>
-                    </thead>
-                    <!--表格内容-->
-                    <tbody>
-                    {% for item in data %}
-                        <tr>
-                            <!--通过for循环从data取出的具体表格内容-->
-                            <td></td>
-                            <th style="display: none">{{ item.id }}</th>
-                            <td><a class="green" href="{% url 'ticket_index' item.id %}" title="查看信息">
-                                {{ item.goumairiqi }}
-                            </a></td>
-                            <td>{{ item.chupiaohang }}</td>
-                            <td>{{ item.gongyingshang }}</td>
-                            <td>{{ item.piaomianjiage|floatformat:2|intcomma }}</td>
-                            <td>{{ item.gourujiage|floatformat:2|intcomma }}</td>
-                            <td>{{ item.chupiaoriqi }}</td>
-                            <td>{{ item.daoqiriqi }}</td>
-                            <td>
-                                {% if item.t_status == 1 %}
-                                    <span class="label label-success">在库
-                                {% elif item.t_status == 3 %}
-                                    <span class="label label-danger">卖出
-                                {% elif item.t_status == 5 %}
-                                    <span class="label label-info">入池
-                                {% endif %}
-                                </span></td>
-                        </tr>
-
-                    {% endfor %}
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="col-xs-6">
-                <h3><b>已选择</b> <a id="selected_num">0</a><b>张</b></h3>
-                <h3><b>合计票面价格</b> <a id="selected_piaomian">0</a><b>元</b></h3>
-                <h3><b>合计购入价格</b> <a id="selected_gouru">0</a><b>元</b></h3>
-            </div>
-            <div class="col-xs-2 pull-right">
-                <form method='POST' id="signupForm"
-                      onsubmit="return check();">{% csrf_token %}
-                    <input name="index" value="{{ index }}" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_index" type="text">
-                    <input name="selected_num" value="" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_selected_num" type="text">
-                    <input name="selected_piaomian" value="" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_selected_piaomian" type="text">
-                    <input name="selected_real" value="" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_selected_real" type="text">
-                    <input name="ids" value="" style="display: none"
-                           class="textinput textInput form-control"
-                           id="id_ids" type="text">
-                    <button type="submit" class="btn btn-warning center-block" id="all_checked">
-                        去{{ title }}
-                        <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
-                    </button>
-
-                </form>
+                <!-- /.row -->
             </div>
         </div>
-    </section>
 
+    </div>
+
+    <div class="col-xs-6">
+        <h3><b>已选择</b> <a id="selected_num">0</a><b>张</b></h3>
+        <h3><b>合计票面价格</b> <a id="selected_piaomian">0</a><b>元</b></h3>
+        <h3><b>合计购入价格</b> <a id="selected_gouru">0</a><b>元</b></h3>
+    </div>
+    <div class="col-xs-2 pull-right">
+        <form method='POST' id="signupForm"
+              onsubmit="return check();">{% csrf_token %}
+            <input name="index" value="{{ index }}" style="display: none"
+                   class="textinput textInput form-control"
+                   id="id_index" type="text">
+            <input name="selected_num" value="" style="display: none"
+                   class="textinput textInput form-control"
+                   id="id_selected_num" type="text">
+            <input name="selected_piaomian" value="" style="display: none"
+                   class="textinput textInput form-control"
+                   id="id_selected_piaomian" type="text">
+            <input name="selected_real" value="" style="display: none"
+                   class="textinput textInput form-control"
+                   id="id_selected_real" type="text">
+            <input name="ids" value="" style="display: none"
+                   class="textinput textInput form-control"
+                   id="id_ids" type="text">
+            <button type="submit" class="btn btn-warning center-block" id="all_checked">
+                去{{ title }}
+                <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+            </button>
+
+        </form>
+    </div>
 {% endblock %}
+{% block table_tr %}
+    <th style="display: none">ID</th>
+    <th>购买日期</th>
+    <th>出票行</th>
+    <th>供应商</th>
+    <th>票面价格</th>
+    <th>购入价格</th>
+    <th>出票日期</th>
+    <th>到期日期</th>
+    <th>状态</th>
+{% endblock %}
+{% block table_td %}
+    <th style="display: none">{{ item.id }}</th>
+    <td><a class="green" href="{% url 'ticket_index' item.id %}" title="查看信息">
+        {{ item.goumairiqi }}
+    </a></td>
+    <td>{{ item.chupiaohang }}</td>
+    <td>{{ item.gongyingshang }}</td>
+    <td>{{ item.piaomianjiage|floatformat:2 }}</td>
+    <td>{{ item.gourujiage|floatformat:2 }}</td>
+    <td>{{ item.chupiaoriqi }}</td>
+    <td>{{ item.daoqiriqi }}</td>
+    <td>
+        {% if item.t_status == 1 %}
+            <span class="label label-success">在库
+        {% elif item.t_status == 3 %}
+            <span class="label label-danger">卖出
+        {% elif item.t_status == 5 %}
+            <span class="label label-info">入池
+        {% endif %}
+        </span></td>
+{% endblock %}
+{% block initDatePicker %}
+    initDatePicker($('.input-daterange'));
+{% endblock %}
+{% block initSelect %}
+    $('.js-single').select2({
+        height: '40px',
+    });
+{% endblock %}
+{% block initOthers %}
+    $('#table_id tbody').on('click', 'tr', function () {
+        $(this).toggleClass('selected');
+        var a = t.rows('.selected').data();
+        console.log(a.length);
+        $("#selected_num").text(a.length);
+        var total = 0;
+        var totalgouru = 0;
+        var ids = '';
+        for (var i = 0; i < a.length; i++) {
+            console.log(a[i][1]);
+            total = total + parseFloat(a[i][5]);
+            totalgouru = totalgouru + parseFloat(a[i][6]);
+            ids = ids + parseFloat(a[i][1]) + ',';
 
-{% block script %}
-    <!-- page script -->
-    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
-    <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+        }
+         ids=(ids.substring(ids.length-1)==',')?ids.substring(0,ids.length-1):ids;
 
-    <script type="text/javascript">
+        $("#selected_piaomian").text(total);
+        $("#id_selected_piaomian").val(total);
+        $("#selected_gouru").text(totalgouru);
+        $("#id_selected_real").val(totalgouru);
+        $("#id_selected_num").val(a.length);
+        $("#id_ids").val(ids);
 
-        $(document).ready(function () {
-            $("#all_checked").click(function () {
-                var a = t.rows('.selected').data();
-                console.log(a.length);
-
-                for (var i = 0; i < a.length; i++) {
-                    console.log(a[i][1]);
-                }
-
-            });
-            var t = $('#table_id').DataTable({
-                'paging': false,
-                'lengthChange': false,
-                'searching': true,
-                'ordering': true,
-                'info': true,
-                'autoWidth': false,
-                'scrollY': 450,
-                "language": {
-                    "processing": "处理中...",
-                    "lengthMenu": "显示 _MENU_ 项结果",
-                    "zeroRecords": "没有匹配结果",
-                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
-                    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
-                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
-                    "infoPostFix": "",
-                    "search": "搜索:",
-                    "searchPlaceholder": "搜索...",
-                    "url": "",
-                    "emptyTable": "表中数据为空",
-                    "loadingRecords": "载入中...",
-                    "infoThousands": ",",
-                    "paginate": {
-                        "first": "首页",
-                        "previous": "上页",
-                        "next": "下页",
-                        "last": "末页"
-                    },
-                    "aria": {
-                        "paginate": {
-                            'first': '首页',
-                            'previous': '上页',
-                            'next': '下页',
-                            'last': '末页'
-                        },
-                        "sortAscending": ": 以升序排列此列",
-                        "sortDescending": ": 以降序排列此列"
-                    },
-                    "decimal": "-",
-                    "thousands": "."
-                },
-                "columnDefs": [ {
-                    "orderable": false, "targets": [0],  //设置第一列和最后一列不可排序
-                }],
-                "order": [[1, 'asc']]
-            });
-            $('#table_id tbody').on('click', 'tr', function () {
-                $(this).toggleClass('selected');
-                var a = t.rows('.selected').data();
-                console.log(a.length);
-                $("#selected_num").text(a.length);
-                var total = 0;
-                var totalgouru = 0;
-                var ids = '';
-                for (var i = 0; i < a.length; i++) {
-                    console.log(a[i][1]);
-                    total = total + parseFloat(a[i][5]);
-                    totalgouru = totalgouru + parseFloat(a[i][6]);
-                    ids = ids + parseFloat(a[i][1]) + ',';
-
-                }
-                 ids=(ids.substring(ids.length-1)==',')?ids.substring(0,ids.length-1):ids;
-
-                $("#selected_piaomian").text(total);
-                $("#id_selected_piaomian").val(total);
-                $("#selected_gouru").text(totalgouru);
-                $("#id_selected_real").val(totalgouru);
-                $("#id_selected_num").val(a.length);
-                $("#id_ids").val(ids);
-
-            });
-            t.on('order.dt search.dt',
-                function () {
-                    t.column(0, {
-                        search: 'applied',
-                        order: 'applied'
-                    }).nodes().each(function (cell, i) {
-                        cell.innerHTML = i + 1;
-                    });
-                }).draw();
-
-        })
-        ;
-    </script>
-
-
-    <script src="{% static 'plugins/iCheck/icheck.min.js' %}"></script>
-    <script src="{% static 'plugins/daterangepicker/moment.min.js' %}"></script>
-    <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
-    <!-- bootstrap datepicker -->
-    <script src="{% static 'plugins/datepicker/bootstrap-datepicker.js' %}"></script>
-    <script type="text/javascript">
-        $(function () {
-
-            $('input[type="checkbox"]').iCheck({
-                checkboxClass: 'icheckbox_flat-blue',
-                radioClass: 'iradio_flat-blue'
-            });
-
-            //Enable check and uncheck all functionality
-            $(".checkbox-toggle").click(function () {
-                var clicks = $(this).data('clicks');
-                if (clicks) {
-                    //Uncheck all checkboxes
-                    $("input[type='checkbox']").iCheck("uncheck");
-                    $(".fa", this).removeClass("fa-check-square-o").addClass('fa-square-o');
-                } else {
-                    //Check all checkboxes
-                    $("input[type='checkbox']").iCheck("check");
-                    $(".fa", this).removeClass("fa-square-o").addClass('fa-check-square-o');
-                }
-                $(this).data("clicks", !clicks);
-            });
-            //Date picker
-            $.fn.datepicker.dates['cn'] = {   //切换为中文显示
-                days: ["周日", "周一", "周二", "周三", "周四", "周五", "周六", "周日"],
-                daysShort: ["日", "一", "二", "三", "四", "五", "六", "七"],
-                daysMin: ["日", "一", "二", "三", "四", "五", "六", "七"],
-                months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
-                monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
-                today: "今天",
-                clear: "清除"
-            };
-            $('.dateinput').datepicker({
-                autoclose: true, //自动关闭
-                clearBtn: true,          //显示清除按钮
-                format: 'yyyy-mm-dd',
-                language: 'cn',           //语言
-            });
-            $('#reservation').daterangepicker()
-        });
-
-    </script>
-
+    });
 {% endblock %}
