@@ -1141,7 +1141,6 @@ def loanorder(request,  pk):
 def pool_dash(request):
     pool = Pool.objects.last()
     pool_data = Pool.objects.all().order_by('-pub_date')
-    data_list, page_range, count, page_nums = pagination(request, pool_data)
     form = PoolForm(request.POST or None)
     form.fields['card'].required = True
     loanform = SuperLoanForm(request.POST or None)
@@ -1186,23 +1185,23 @@ def pool_dash(request):
             log.save()
             return redirect('pool_dash')
         pass
+    superLoans = SuperLoan.objects.filter(is_payed=False).order_by('-lixi_sum_date')
+    superLoan = 0
+    for sl in superLoans:
+        superLoan += sl.benjin
 
     context = {
-        'data': data_list,
         'sum_money': sum_money,
         'today': today,
         'count_t': count_t,
         'sum_chikai': sum_chikai,
         'count_chikai': count_chikai,
         'item': pool,
-        'page_range': page_range,
-        'count': count,
-        'page_nums': page_nums,
+        'superLoan': superLoan,
         'form':form,
         'loanform':loanform,
     }
-    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
-    return render(request, 'ticket/pool_dash.html', context)
+    return getPagedPage(request, pool_data,'ticket/pool_dash.html', context)
 
 #新建超短贷，资金池变化
 def loan_create(loan):
@@ -1288,20 +1287,7 @@ def pool_loans(request):
             log.save()
             return redirect('pool_dash')
     loan_data = SuperLoan.objects.all().order_by('-pub_date')
-    # 将分页的信息传递到展示页面中去
-    data_list, page_range, count, page_nums = pagination(request, loan_data)
-    # 建立context字典，将值传递到相应页面
-    context = {
-        'data': data_list,
-        'gongyingshang': get_ticketlists('gongyingshang'),
-        'maipiaoren': get_ticketlists('maipiaoren'),
-        'page_range': page_range,
-        'count': count,
-        'page_nums': page_nums,
-        'filter': filter,
-    }
-    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
-    return render(request, 'ticket/pool_loans.html', context)
+    return getPagedPage(request,loan_data, 'ticket/pool_loans.html')
 
 def pool_loan(request,  pk):
     order = SuperLoan.objects.get(pk=pk)
@@ -1373,7 +1359,11 @@ def pool_loan(request,  pk):
                     log.save()
                     return redirect('pool_loan', pk=pk)
                 pass
-
+    context = {
+        'card_data': card_data,
+        'order': order,
+        'form':poolfeeform,
+    }
     return render(request, 'ticket/pool_superloan.html', locals())
 
 def pool_loan_repay(request):
