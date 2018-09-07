@@ -895,12 +895,7 @@ def handle_upload_file(file):
 def card_list(request):
     raw_data = Card.objects.all()
     list_template = 'ticket/card_list.html'
-    context = {
-        'data': raw_data,
-    }
-    print(context)
-    #跳转到相应页面，并将值传递过去
-    return render(request,list_template,context)
+    return getPagedPage(request,raw_data,list_template)
 #增加
 def card_add(request):
     #从TaskForm获取相关信息
@@ -915,27 +910,18 @@ def card_add(request):
         log.save()
         return redirect('card_list',)
 
-
     context = {
         'form': form,
-        'page_title': '银行卡处理',
     }
     return render(request, 'ticket/card_add.html',  context)
 
 #修改数据,函数中的pk代表数据的id
 def card_edit(request,  pk):
     card_ins = get_object_or_404(Card, pk=pk)
-    fee_data = Fee.objects.filter(yinhangka=pk).order_by('-pub_date')
-    data_list, page_range, count, page_nums = pagination(request, fee_data)
-
-    card_total = [card_ins.money,]
-    card_date = ['现在',]
-    for i in range(len(fee_data)):
-        list.insert(card_total, 0, card_total[0] - fee_data[i].money)
-        list.insert(card_date, 0, fee_data[i].pub_date)
-    sub_title = '修改银行卡信息'
+    context = {
+        'item': card_ins,
+    }
     if request.method == 'POST':
-        #任务联系人为可编辑选项，并填充原先的任务联系人
         card_ins.name = request.POST['name']
         card_ins.beizhu = request.POST['beizhu']
         card_ins.card_type = request.POST['card_type']
@@ -959,45 +945,37 @@ def card_edit(request,  pk):
             log.save()
             card_ins.money = card_ins.money + fee_ins.money
         card_ins.save()
+        context['message'] = u'保存成功'
 
-        return redirect('card_edit', pk=card.id)
-
-    context = {
-        'data': data_list,
-        'item': card_ins,
-        'card_total': card_total,
-        'card_date': card_date,
-        'page_range': page_range,
-        'count': count,
-        'page_nums': page_nums,
-        'page_title': '基础资料',
-        'sub_title': sub_title,
-    }
-    #与res_add.html用同一个页面，只是edit会在res_add页面做数据填充
-    return render(request, 'ticket/card_edit.html', context)
+    fee_data = Fee.objects.filter(yinhangka=pk).order_by('-pub_date')
+    return getPagedPage(request,fee_data, 'ticket/card_edit.html', context)
 
 #修改数据,函数中的pk代表数据的id
 def card_trans(request):
     form = CardTransForm(request.POST or None)
-    data = CardTrans.objects.all().order_by('-pub_date')
+    context = {
+        'form':form
+    }
     if request.method == 'POST':
         if form.is_valid():
             instance = form.save(commit=False)
             if instance.fromCard == instance.toCard:
-                message = u'请选择不同的银行卡'
+                context['message'] = u'请选择不同的银行卡'
             elif instance.money <= 0:
-                message = u'金额小于0'
+                context['message'] = u'转账金额不能小于0'
             else:
                 instance.save()
                 card_fee(instance.fromCard.pk, 0 - instance.money, '银行卡转出', 14)
-                card_fee(instance.fromCard.pk, instance.money, '银行卡转入', 13)
+                card_fee(instance.toCard.pk, instance.money, '银行卡转入', 13)
                 log = LogTemp()
                 log.oper_type = 404
                 log.adddetail(2,instance.fromCard.pk)
                 log.adddetail(2,instance.fromCard.pk)
                 log.save()
-                return redirect('card_trans', )
-    return render(request, 'ticket/card_trans.html', locals())
+                context['message'] = u'转账成功'
+
+    data = CardTrans.objects.all().order_by('-pub_date')
+    return getPagedPage(request,data, 'ticket/card_trans.html', context)
 
 def loan_liststatus(request,index):
     #从根据不同的请求，来获取相应的数据,并跳转至相应页面

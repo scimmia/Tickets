@@ -14,10 +14,6 @@
             银行卡
             <small>转账</small>
         </h1>
-        <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> 主页</a></li>
-            <li class="active">银行卡</li>
-        </ol>
     </section>
 
     <section class="content">
@@ -39,32 +35,40 @@
 
                 </div>
                 <div class="col-md-8">
-                <table id="table_id" class="table table-bordered table-hover">
-                    <thead>
-                    <!--表格头部-->
-                    <th>添加日期</th>
-                    <th>转出账户</th>
-                    <th>金额</th>
-                    <th>转入账户</th>
-                    </thead>
-                    <!--表格内容-->
-                    <tbody>
-                    {% for item in data %}
-                        <tr>
-                            <td>{{ item.pub_date }}</td>
-                            <td><a class="green" href="{% url 'card_edit' item.fromCard.id %}" title="编辑信息">
-                                {{ item.fromCard }}
-                            </a></td>
-                            <td>{{ item.money }}</td>
-                            <td><a class="green" href="{% url 'card_edit' item.toCard.id %}" title="编辑信息">
-                                {{ item.toCard }}
-                            </a></td>
-                        </tr>
+                    <div class="row">
+                        <div>
+                            <table id="table_id" class="table table-bordered table-hover">
+                                <thead>
+                                <!--表格头部-->
+                                <th></th>
+                                <th>添加日期</th>
+                                <th>转出账户</th>
+                                <th>金额</th>
+                                <th>转入账户</th>
+                                </thead>
+                                <!--表格内容-->
+                                <tbody>
+                                {% for item in data %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ item.pub_date }}</td>
+                                        <td><a class="green" href="{% url 'card_edit' item.fromCard.id %}" title="编辑信息">
+                                            {{ item.fromCard }}
+                                        </a></td>
+                                        <td>{{ item.money }}</td>
+                                        <td><a class="green" href="{% url 'card_edit' item.toCard.id %}" title="编辑信息">
+                                            {{ item.toCard }}
+                                        </a></td>
+                                    </tr>
 
-                    {% endfor %}
+                                {% endfor %}
 
-                    </tbody>
-                </table>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--引入pagination.html-->
+                        {% include 'ticket/pagination.html' %}
+                    </div>
 
                 </div>
             </form>
@@ -78,53 +82,13 @@
     <!-- page script -->
     <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/initItems.js' %}"></script>
 
     <script type="text/javascript">
 
 
         $(document).ready(function () {
-            var t = $('#table_id').DataTable({
-                'paging': false,
-                'lengthChange': false,
-                'searching': false,
-                'ordering': true,
-                'info': true,
-                'autoWidth': false,
-                "language": {
-                    "processing": "处理中...",
-                    "lengthMenu": "显示 _MENU_ 项结果",
-                    "zeroRecords": "没有匹配结果",
-                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
-                    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
-                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
-                    "infoPostFix": "",
-                    "search": "搜索:",
-                    "searchPlaceholder": "搜索...",
-                    "url": "",
-                    "emptyTable": "表中数据为空",
-                    "loadingRecords": "载入中...",
-                    "infoThousands": ",",
-                    "paginate": {
-                        "first": "首页",
-                        "previous": "上页",
-                        "next": "下页",
-                        "last": "末页"
-                    },
-                    "aria": {
-                        "paginate": {
-                            'first': '首页',
-                            'previous': '上页',
-                            'next': '下页',
-                            'last': '末页'
-                        },
-                        "sortAscending": ": 以升序排列此列",
-                        "sortDescending": ": 以降序排列此列"
-                    },
-                    "decimal": "-",
-                    "thousands": "."
-                },
-                "order": [[0, 'desc']]
-            });
+            initSortTable($('#table_id'));
         });
     </script>
 
