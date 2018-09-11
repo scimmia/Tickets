@@ -170,16 +170,14 @@ function getlilv() {
 // }
 
 //按利率计算
-function calctxlxone() {
-    var je = $("input[name='je']").val();
+function countbylilv(je) {
     var txlv = $("input[name='txlv']").val();
     var sxf = parseInt($("input[name='sxf']").val());
-    //alert(tzts);
     var days = getDays();
     console.log(days);
     var ts = days[0];
     var txlx = (je * txlv * ts / 3  + je * sxf / 10).toFixed(2);
-    var jine = (je * 1000000 - je * txlv/3 * ts- je/ 10 * sxf ).toFixed(2);//(rililv=txlv/1000/30)
+    var jine = (je * 10000 - je * txlv/3 * ts- je/ 10 * sxf ).toFixed(2);//(rililv=txlv/1000/30)
     var everytenprice = (txlx * 10 / je).toFixed(2);
     if (isNaN(ts))
         ts = 0;
@@ -187,11 +185,22 @@ function calctxlxone() {
         txlx = 0;
     if (isNaN(jine))
         jine = 0;
+    return [ts,days[1],txlx,jine,everytenprice];
     $("#jxtsd").text(ts);
     $("#tztsd").text(days[1]);
     $("#txlxd").text(txlx);
     $("#jined").text(jine);
     $("#everytenprice").val(everytenprice);
+    console.log(everytenprice);
+}
+function calctxlxone() {
+    var je = $("input[name='je']").val();
+    var results = countbylilv(je);
+    $("#jxtsd").text(results[0]);
+    $("#tztsd").text(results[1]);
+    $("#txlxd").text(results[2]);
+    $("#jined").text(results[3]);
+    $("#everytenprice").val(results[4]);
     console.log(everytenprice);
 }
 
@@ -232,7 +241,7 @@ function getVal(val, type) {
     var vals = parseFloat(val);
     if (type == 'm' && !isNaN(vals)) {
         var mlv = numMulti(val, 1.2);
-        $("#yxlvi").val(mlv.toFixed(3));
+        $("#yxlvi").val(mlv.toFixed(2));
     }
     if (type == 'y' && !isNaN(vals)) {
         var ylv = numDiv(val, 1.2);

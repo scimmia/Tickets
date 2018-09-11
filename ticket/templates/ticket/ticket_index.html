@@ -180,24 +180,12 @@
         //按利率计算
         function calctxlxone() {
             var je = $("#id_piaomianjiage").val()/10000.0;
-            var txlv = $("input[name='txlv']").val();
-            var sxf = parseInt($("input[name='sxf']").val());
-            var days = getDays();
-            console.log(days);
-            var ts = days[0];
-            var txlx = (je * txlv * ts / 3  + je * sxf / 10).toFixed(2);
-            var jine = (je * 1000000 - je * txlv/3 * ts- je/ 10 * sxf ).toFixed(2);//(rililv=txlv/1000/30)
-            if (isNaN(ts))
-                ts = 0;
-            if (isNaN(txlx))
-                txlx = 0;
-            if (isNaN(jine))
-                jine = 0;
-            $("#jxtsd").text(ts);
-            $("#tztsd").text(days[1]);
-            $("#txlxd").text(txlx);
-            $("#jined").text(jine);
-            $("#id_t_gourujiage").val(jine);
+            var results = countbylilv(je);
+            $("#jxtsd").text(results[0]);
+            $("#tztsd").text(results[1]);
+            $("#txlxd").text(results[2]);
+            $("#jined").text(results[3]);
+            $("#id_t_gourujiage").val(results[3]);
         }
 
     </script>
