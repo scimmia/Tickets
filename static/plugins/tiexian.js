@@ -198,8 +198,8 @@ function calctxlxone() {
     var results = countbylilv(je);
     $("#jxtsd").text(results[0]);
     $("#tztsd").text(results[1]);
-    $("#txlxd").text(results[2]);
-    $("#jined").text(results[3]);
+    $("#txlxd").text(numeral(results[2]).format('0,0.00'));
+    $("#jined").text(numeral(results[3]).format('0,0.00'));
     $("#everytenprice").val(results[4]);
     console.log(everytenprice);
 }
