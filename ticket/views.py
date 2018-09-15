@@ -21,7 +21,7 @@ from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm, \
     SuperLoanForm, LoanForm, SuperLoanFeeForm, CardTransForm, BestMixForm
 from ticket.models import Card, Fee, Ticket, Order, StoreFee, Pool, InpoolPercent, TicketsImport, \
-    StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee, CardTrans, OperLog
+    StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee, CardTrans, OperLog, Customer
 
 
 class LogTemp:
@@ -86,27 +86,52 @@ class LogTemp:
 def countLoanLixi(order):
     today = datetime.date.today()
     days = (today - order.lixi_sum_date).days
+    addLixi = 0
     if days > 0:
         addLixi = order.benjin_needpay * order.lilv * days / 360
         order.lixi = round(addLixi + order.lixi,2)
         order.lixi_needpay = round(addLixi + order.lixi_needpay,2)
         order.lixi_sum_date = today
         order.save()
+    return addLixi
     pass
 def payLoanBenjin(order,money):
-    countLoanLixi(order)
+    addLixi = countLoanLixi(order)
     order.benjin_payed = order.benjin_payed + money
     order.benjin_needpay = order.benjin_needpay - money
     order.is_payed = order.benjin_needpay==0 and order.lixi_needpay ==0
     order.save()
-    pass
+    try:
+        order._meta.get_field('jiedairen')
+        customer = order.jiedairen
+        if order.order_type == 3:
+            customer.borrow_benjin = customer.borrow_benjin - money
+            customer.borrow_lixi = customer.borrow_lixi + addLixi
+            customer.save()
+        elif order.order_type == 4:
+            customer.loan_benjin = customer.loan_benjin - money
+            customer.loan_lixi = customer.loan_lixi + addLixi
+            customer.save()
+    except :
+        pass
 
 def payLoanLixi(order,money):
-    countLoanLixi(order)
+    addLixi = countLoanLixi(order)
     order.lixi_payed = order.lixi_payed + money
     order.lixi_needpay = order.lixi_needpay - money
     order.is_payed = order.benjin_needpay==0 and order.lixi_needpay ==0
     order.save()
+    try:
+        order._meta.get_field('jiedairen')
+        customer = order.jiedairen
+        if order.order_type == 3:
+            customer.borrow_lixi = customer.borrow_lixi + addLixi - money
+            customer.save()
+        elif order.order_type == 4:
+            customer.loan_lixi = customer.loan_lixi + addLixi - money
+            customer.save()
+    except :
+        pass
     pass
 def getPool():
     p = Pool.objects.last()
@@ -977,18 +1002,21 @@ def card_trans(request):
     data = CardTrans.objects.all().order_by('-pub_date')
     return getPagedPage(request,data, 'ticket/card_trans.html', context)
 
-def loan_liststatus(request,index):
-    #从根据不同的请求，来获取相应的数据,并跳转至相应页面
-    if index == 3:
-        isloan = False
-    else:
-        isloan = True
-    list_template = 'ticket/loan_status.html'
+def getCustomerByName(name):
+    try:
+        customer = Customer.objects.get(name=name)
+    except :
+        customer = Customer(name = name)
+        customer.save()
+    return customer
 
+def loan_liststatus(request,index):
     loanform = LoanForm(request.POST or None)
     if request.method == 'POST':
         if loanform.is_valid():
             instance = loanform.save(commit=False)
+            customer = getCustomerByName(request.POST['jiedairen'])
+            instance.jiedairen = customer
             instance.order_type = index
             if loanform.cleaned_data.get('isMonthlilv'):
                 instance.lilv = loanform.cleaned_data.get('lilv')*12
@@ -998,6 +1026,8 @@ def loan_liststatus(request,index):
             log = LogTemp()
             log.adddetail(3,instance.pk)
             if index == 3:
+                customer.borrow_benjin = customer.borrow_benjin + instance.benjin_needpay
+                customer.save()
                 fee = card_fee(instance.yinhangka.pk, 0 - loanform.cleaned_data.get('benjin'), '借款给他人',41)
                 fee.loanorder = instance
                 fee.save()
@@ -1006,6 +1036,8 @@ def loan_liststatus(request,index):
                 log.save()
                 return redirect('borrow_status')
             else:
+                customer.loan_benjin = customer.loan_benjin + instance.benjin_needpay
+                customer.save()
                 fee = card_fee(instance.yinhangka.pk, loanform.cleaned_data.get('benjin'), '从他人处贷款',42)
                 fee.loanorder = instance
                 fee.save()
@@ -1014,11 +1046,19 @@ def loan_liststatus(request,index):
                 log.save()
                 return redirect('loan_status')
             pass
-    raw_data =  Loan_Order.objects.filter(order_type=index).values('jiedairen').annotate(sum_money=Sum('benjin_needpay')+Sum('lixi_needpay')).values('jiedairen','sum_money')
+    if index == 3:
+        isloan = False
+        raw_data = Customer.objects.filter(Q(borrow_benjin__gt=0)|Q(borrow_lixi__gt=0)).order_by('-pub_date')
+    else:
+        isloan = True
+        raw_data =  Customer.objects.filter(Q(loan_benjin__gt=0)|Q(loan_lixi__gt=0)).order_by('-pub_date')
+    list_template = 'ticket/loan_status.html'
+    customerlist = Customer.objects.all().order_by('name')
 
     context = {
         'isloan': isloan,
         'loanform': loanform,
+        'customerlist': customerlist,
     }
     return getPagedPage(request,raw_data,list_template,context)
 def borrow_status(request):
@@ -1026,9 +1066,7 @@ def borrow_status(request):
 def loan_status(request):
     return loan_liststatus(request,4)
 
-def loan_orderlist(request,index):
-    jiedairen = request.GET.get('jiedairen')
-    #从根据不同的请求，来获取相应的数据,并跳转至相应页面
+def loan_orderlist(request,index,pk):
     if index == 3:
         isloan = False
     else:
@@ -1039,6 +1077,8 @@ def loan_orderlist(request,index):
     if request.method == 'POST':
         if loanform.is_valid():
             instance = loanform.save(commit=False)
+            customer = Customer.objects.get(pk=pk)
+            instance.jiedairen = customer
             instance.order_type = index
             if loanform.cleaned_data.get('isMonthlilv'):
                 instance.lilv = loanform.cleaned_data.get('lilv')*12
@@ -1048,34 +1088,35 @@ def loan_orderlist(request,index):
             log = LogTemp()
             log.adddetail(3, instance.pk)
             if index == 3:
+                instance.jiedairen.borrow_benjin = instance.jiedairen.borrow_benjin + instance.benjin_needpay
+                instance.jiedairen.save()
                 fee = card_fee(instance.yinhangka.pk, 0 - loanform.cleaned_data.get('benjin'), '借款给他人',41)
                 fee.loanorder = instance
                 fee.save()
                 log.oper_type = 301
                 log.addcard(fee.money)
                 log.save()
-                return redirect('%s?jiedairen=%s' % (reverse('borrow_list'), jiedairen))
             else:
+                instance.jiedairen.loan_benjin = instance.jiedairen.loan_benjin + instance.benjin_needpay
+                instance.jiedairen.save()
                 fee = card_fee(instance.yinhangka.pk, loanform.cleaned_data.get('benjin'), '从他人处贷款',42)
                 fee.loanorder = instance
                 fee.save()
                 log.oper_type = 302
                 log.addcard(fee.money)
                 log.save()
-                return redirect('%s?jiedairen=%s' % (reverse('loan_list'), jiedairen))
             pass
-    raw_data = Loan_Order.objects.filter(order_type=index,jiedairen=jiedairen).order_by('-pub_date')
+    raw_data = Loan_Order.objects.filter(order_type=index,jiedairen=pk).order_by('-pub_date')
 
     context = {
         'isloan': isloan,
-        'jiedairen': jiedairen,
         'loanform': loanform,
     }
     return getPagedPage(request,raw_data,list_template,context)
-def borrow_list(request, ):
-    return loan_orderlist(request,3)
-def loan_list(request, ):
-    return loan_orderlist(request,4)
+def borrow_list(request,pk):
+    return loan_orderlist(request,3,pk)
+def loan_list(request,pk):
+    return loan_orderlist(request,4,pk)
 def loanorder(request,  pk):
     order = Loan_Order.objects.get(pk=pk)
     payfee_data = Fee.objects.filter(Q(loanorder=pk)&(Q(fee_type=40 + order.order_type)|Q(fee_type=46 + order.order_type)|Q(fee_type=42 + order.order_type)|Q(fee_type=44 + order.order_type))).order_by('-pub_date')
@@ -1359,11 +1400,6 @@ def pool_loan(request,  pk):
                     log.save()
                     return redirect('pool_loan', pk=pk)
                 pass
-    context = {
-        'card_data': card_data,
-        'order': order,
-        'form':poolfeeform,
-    }
     return render(request, 'ticket/pool_superloan.html', locals())
 
 def pool_loan_repay(request):
@@ -1644,8 +1680,6 @@ def bestmix(request):
     return render(request, 'ticket/tool_bestmix.html', locals())
 def avgday(request):
     return render(request, 'ticket/tool_avgday.html')
-def counter(request):
-    return render(request, 'ticket/tool_counter.html')
 def tiexian(request):
     return render(request, 'ticket/tool_tiexian.html')
 def getQuery(request):

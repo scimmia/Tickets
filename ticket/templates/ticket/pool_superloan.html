@@ -89,7 +89,7 @@
                                     {% endfor %}
                                 </select></div>
                             </div>
-                            {{ form | crispy }}
+                            {{ poolfeeform | crispy }}
                             <input class="btn btn-primary" name="benjin" value="还本" type="submit">
                             <input class="btn btn-success" id="lixi" name="lixi" value="还息" type="submit">
                         </form>
@@ -102,7 +102,6 @@
                 <div>
                     <table id="table_id" class="table table-striped table-bordered table-hover">
                         <thead>
-                        <th></th>
                         <th>费用内容</th>
                         <th>金额</th>
                         <th>相关银行卡</th>
@@ -111,7 +110,6 @@
                         <tbody>
                         {% for i in payfee_data %}
                             <tr>
-                                <td>{{ forloop.counter }}</td>
                                 <td>{{ i.name }}</td>
                                 <td><span>{{ i.money|floatformat:2|intcomma }}</span></td>
                                 <td>

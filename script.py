@@ -211,6 +211,17 @@ def countLoanLixi(raw_data):
             order.lixi_needpay = round(addLixi + order.lixi_needpay, 2)
             order.lixi_sum_date = today
             order.save()
+            try:
+                order._meta.get_field('jiedairen')
+                customer = order.jiedairen
+                if order.order_type == 3:
+                    customer.borrow_lixi = customer.borrow_lixi + addLixi
+                    customer.save()
+                elif order.order_type == 4:
+                    customer.loan_lixi = customer.loan_lixi + addLixi
+                    customer.save()
+            except:
+                pass
         pass
     pass
 

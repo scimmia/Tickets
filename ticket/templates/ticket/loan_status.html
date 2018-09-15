@@ -3,50 +3,85 @@
 {% load crispy_forms_tags %}
 {% load humanize %}
 
-{% block content-header %}
-    <h1>
-        借贷
-        <small>{% if isloan %}贷款{% else %}借款{% endif %}列表</small>
-    </h1>
-    <ol class="breadcrumb">
-        <button type="button" class="btn btn-warning center-block" data-toggle="modal" data-target="#myModal">
-            新建{% if isloan %}贷款{% else %}借款{% endif %}
-            <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
-        </button>
-    </ol>
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">新建{% if isloan %}贷款{% else %}借款{% endif %}</h4>
-                </div>
+
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            借贷
+            <small>{% if isloan %}贷款{% else %}借款{% endif %}列表</small>
+        </h1>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-md-8">
+                <table id="table_id" class="table table-striped table-bordered table-hover">
+                    <thead>
+                    <!--表格头部-->
+                    <td></td>
+                    <th>{% if isloan %}贷{% else %}借{% endif %}款人</th>
+                    <th>待{% if isloan %}还{% else %}收{% endif %}本金</th>
+                    <th>待{% if isloan %}还{% else %}收{% endif %}利息</th>
+                    </thead>
+                    <!--表格内容-->
+                    <tbody>
+                    {% for item in data %}
+                        <tr>
+                            <!--通过for循环从data取出的具体表格内容-->
+                            <td>{{ forloop.counter }}</td>
+                            <td><a class="green" href="
+
+                                    {% if isloan %}{% url 'loan_list' item.id %}{% else %}{% url 'borrow_list' item.id%}{% endif %}"
+                                   title="查看信息">
+                                {{ item.name }}
+                            </a></td>
+                            <td>{% if isloan %}{{ item.loan_benjin|floatformat:2|intcomma }}{% else %}{{ item.borrow_benjin|floatformat:2|intcomma }}{% endif %}</td>
+                            <td>{% if isloan %}{{ item.loan_lixi|floatformat:2|intcomma }}{% else %}{{ item.borrow_lixi|floatformat:2|intcomma }}{% endif %}</td>
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+                <!--引入pagination.html-->
+                {% include 'ticket/pagination.html' %}
+            </div>
+            <div class="col-md-4">
                 <form method='POST' id="signupForm" action="" onsubmit="return check();">{% csrf_token %}
-                    <div class="modal-body">
+                    <div class="box box-danger">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">新建{% if isloan %}贷款{% else %}借款{% endif %}</h3>
+                        </div>
+                        <div class="box-body">
+                            <div id="div_id_jiedairen" class="form-group"><label for="disabledTextInput">
+                                借贷人<span class="asteriskField">*</span> </label>
+
+                                <select name="jiedairen" class="js-single form-control" required id="id_jiedairen">
+                                    {% for v in customerlist %}
+                                        <option value="{{ v.name }}">{{ v.name }}</option>
+                                    {% endfor %}
+                                </select></div>
                         {{ loanform | crispy }}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                        <button type="submit" class="btn btn-primary">提交</button>
+
+                        </div>
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary">提交</button>
+                        </div>
                     </div>
                 </form>
             </div>
-        </div>
-    </div>
 
-{% endblock %}
-{% block table_tr %}
-    <th>{% if isloan %}贷{% else %}借{% endif %}款人</th>
-    <th>待{% if isloan %}还{% else %}收{% endif %}本息</th>
-{% endblock %}
-{% block table_td %}
-    <td><a class="green" href="{% if isloan %}{% url 'loan_list'%}{% else %}{% url 'borrow_list' %}{% endif %}?jiedairen={{   item.jiedairen  }}" title="查看信息">
-        {{ item.jiedairen }}
-    </a></td>
-    <td>{{ item.sum_money|floatformat:2|intcomma }}</td>
+        </div>
+    </section>
 
 {% endblock %}
 {% block initDatePicker %}
     initDatePicker($('.dateinput'));
+{% endblock %}
+{% block initSelect %}
+    $('#id_jiedairen').select2({
+        height: '40px',
+        tags: true
+    });
 {% endblock %}

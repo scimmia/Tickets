@@ -66,17 +66,40 @@ class Order(models.Model):
 
     def __str__(self):
         return (u'%d' % (self.order_type))
+
+class Customer(models.Model):
+    name = models.CharField(u'姓名', max_length=100)
+    borrow_benjin = models.FloatField(u'借款本金', default=0)
+    borrow_lixi = models.FloatField(u'借款利息', default=0)
+    loan_benjin = models.FloatField(u'贷款本金', default=0)
+    loan_lixi = models.FloatField(u'贷款利息', default=0)
+    yufu_benjin = models.FloatField(u'预付本金', default=0)
+    yufu_lixi = models.FloatField(u'预付利息', default=0)
+    yushou_benjin = models.FloatField(u'预收本金', default=0)
+    yushou_lixi = models.FloatField(u'预收利息', default=0)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+
+    class Meta:
+        verbose_name = '客户'
+        verbose_name_plural = '客户'
+
+    def __str__(self):
+        return self.name
+
+
 class Loan_Order(BaseLoan):
     ORDER_TYPE= (
         (3,u'借款订单'),
         (4,u'贷款订单'),
+        (5,u'预付款订单'),
+        (6,u'预收款订单'),
     )
     order_type = models.IntegerField(
         u'订单类型',
         choices=ORDER_TYPE,
         default=3,
     )
-    jiedairen = models.CharField(u'借贷人', max_length=100)
+    jiedairen = models.ForeignKey( Customer, related_name='loanorder_customer', verbose_name=u'借贷人' , blank=False,null=False)
     yinhangka = models.ForeignKey( Card, related_name='loanorder_card', verbose_name=u'借贷卡' , blank=False,null=False)
 
     class Meta:

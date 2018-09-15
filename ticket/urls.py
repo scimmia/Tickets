@@ -38,8 +38,8 @@ urlpatterns = [
     # url(r'^ticket_finish/(?P<pk>\d+)/$', views.ticket_finish, name='ticket_finish'),
     url(r'^loan/borrow_status/', views.borrow_status, name='borrow_status'),
     url(r'^loan/loan_status/', views.loan_status, name='loan_status'),
-    url(r'^loan/borrow_list/', views.borrow_list, name='borrow_list'),
-    url(r'^loan/loan_list/', views.loan_list, name='loan_list'),
+    url(r'^loan/borrow_list/(?P<pk>\d+)/$', views.borrow_list, name='borrow_list'),
+    url(r'^loan/loan_list/(?P<pk>\d+)/$', views.loan_list, name='loan_list'),
     url(r'^loan/order/(?P<pk>\d+)/$', views.loanorder, name='loanorder'),
 
     url(r'^card/card_list/', views.card_list, name='card_list'),
@@ -65,7 +65,6 @@ urlpatterns = [
 
     url(r'^tool/bestmix/', views.bestmix, name='bestmix'),
     url(r'^tool/avgday/', views.avgday, name='avgday'),
-    url(r'^tool/counter/', views.counter, name='counter'),
     url(r'^tool/tiexian/', views.tiexian, name='tiexian'),
 
 ]
