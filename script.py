@@ -223,8 +223,8 @@ def dailyJob():
     countSuperLoanLixi()
     pass
 
-# schedule.every().day.at("00:30").do(dailyJob)
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
-dailyJob()
+schedule.every().day.at("00:30").do(dailyJob)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
+# dailyJob()
