@@ -1051,7 +1051,7 @@ def loan_liststatus(request,index):
         raw_data = Customer.objects.filter(Q(borrow_benjin__gt=0)|Q(borrow_lixi__gt=0)).order_by('-pub_date')
     else:
         isloan = True
-        raw_data =  Customer.objects.filter(Q(loan_benjin__gt=0)|Q(loan_lixi__gt=0)).order_by('-pub_date')
+        raw_data = Customer.objects.filter(Q(loan_benjin__gt=0)|Q(loan_lixi__gt=0)).order_by('-pub_date')
     list_template = 'ticket/loan_status.html'
     customerlist = Customer.objects.all().order_by('name')
 

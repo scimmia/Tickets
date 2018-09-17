@@ -86,34 +86,26 @@ def buildDailyReport():
     worksheet.write(startrow-1,3,('=sum(D%d:D%d)' % (startrow+1,startrow+ticketsInStore.count())))
     worksheet.write(startrow-1,4,('%d条' % (ticketsInStore.count())))
 
-    borrowOrders = models.Loan_Order.objects.filter(Q(order_type=3)&(Q(needpay_sum__gt=0)|Q(money_lixi__gt=0))).order_by('jiedairen','-order_date')
+    borrowOrders = models.Customer.objects.filter(Q(borrow_benjin__gt=0) | Q(borrow_lixi__gt=0)).order_by('-pub_date')
     for inx, order in enumerate(borrowOrders):
-        order.needpay_sum = order.money_benjin - order.payed_benjin
-        order.totallixi = round(order.needpay_sum * order.money_lilv * (
-                    datetime.date.today() - order.order_date).days / 360 + order.money_lixi,2)
-        order.needpay_lixi = round(order.totallixi - order.payed_lixi, 2)
-        worksheet.write(inx+startrow, 5, order.jiedairen)
-        worksheet.write(inx+startrow, 6, order.needpay_sum+order.needpay_lixi)
-        worksheet.write(inx+startrow, 7, order.order_date,date_format)
+        worksheet.write(inx+startrow, 5, order.name)
+        worksheet.write(inx+startrow, 6, order.borrow_benjin+order.borrow_lixi)
+        # worksheet.write(inx+startrow, 7, order.borrow_lixi)
     sumCont = '=sum(G%d:G%d)' % (startrow+1,startrow+borrowOrders.count())
     print(sumCont)
     worksheet.write(startrow-1,6,sumCont)
     worksheet.write(startrow-1,7,('%d条' % (borrowOrders.count())))
 
     startrow = 6
-    loanOrders = models.Loan_Order.objects.filter(Q(order_type=4)&(Q(needpay_sum__gt=0)|Q(money_lixi__gt=0))).order_by('jiedairen','-order_date')
+    loanOrders = models.Customer.objects.filter(Q(loan_benjin__gt=0) | Q(loan_lixi__gt=0)).order_by('-pub_date')
     sumCont = '=sum(J%d:J%d)' % (startrow + 1, startrow + loanOrders.count())
     print(sumCont)
     worksheet.write(startrow - 1, 9, sumCont)
     worksheet.write(startrow-1,10,('%d条' % (loanOrders.count())))
     for order in loanOrders:
-        order.needpay_sum = order.money_benjin - order.payed_benjin
-        order.totallixi = round(order.needpay_sum * order.money_lilv * (
-                    datetime.date.today() - order.order_date).days / 360 + order.money_lixi,2)
-        order.needpay_lixi = round(order.totallixi - order.payed_lixi, 2)
-        worksheet.write(startrow, 8, order.jiedairen)
-        worksheet.write(startrow, 9, order.needpay_sum+order.needpay_lixi)
-        worksheet.write(startrow, 10, order.order_date,date_format)
+        worksheet.write(startrow, 8, order.name)
+        worksheet.write(startrow, 9, order.loan_benjin+order.loan_lixi)
+        # worksheet.write(startrow, 10, order.order_date,date_format)
         startrow = startrow + 1
 
 
@@ -231,8 +223,8 @@ def dailyJob():
     countSuperLoanLixi()
     pass
 
-schedule.every().day.at("00:30").do(dailyJob)
-while True:
-    schedule.run_pending()
-    time.sleep(1)
-# countLoanOrderLixi()
+# schedule.every().day.at("00:30").do(dailyJob)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
+dailyJob()
