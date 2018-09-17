@@ -2,7 +2,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from ticket.models import Ticket, Card, Pool, Fee, Loan_Order, CardTrans, SuperLoan
+from ticket.models import Ticket, Card, Pool, Fee, Loan_Order, CardTrans, SuperLoan, Per_Detail
 
 
 class TicketForm(ModelForm):
@@ -92,6 +92,12 @@ class LoanForm(ModelForm):
         #该ModelForm参照Model: Node
         model = Loan_Order
         fields = ['benjin','isMonthlilv','lilv','lixi_begin_date','yinhangka',]
+
+class LoanPreForm(ModelForm):
+    class Meta:
+        #该ModelForm参照Model: Node
+        model = Per_Detail
+        fields = ['money','yinhangka',]
 
 class BestMixForm(forms.Form):
     money = forms.IntegerField(label="总金额",required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))

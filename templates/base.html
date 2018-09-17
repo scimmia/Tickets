@@ -234,6 +234,16 @@
                                 class="active"
                             {% endif %}><a href="{% url 'loan_status' %}"><i class="fa fa-circle-o"></i>贷入订单(应付)</a>
                     </li>
+                    <li
+                            {% if '/pre_collect/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'pre_collect' %}"><i class="fa fa-circle-o"></i>预收款(已收)</a>
+                    </li>
+                    <li
+                            {% if '/pre_pay/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'pre_pay' %}"><i class="fa fa-circle-o"></i>预付款(已付)</a>
+                    </li>
                 </ul>
                 </li>
                 {% if '/card/' in request.path %}

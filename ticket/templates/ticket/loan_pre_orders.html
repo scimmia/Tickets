@@ -9,7 +9,9 @@
     <section class="content-header">
         <h1>
             借贷
-            <small>{% if index == 3 %}借款{% elif index == 4 %}贷款{% elif index == 5 %}预收款{% elif index == 6 %}预付款{% endif %}列表</small>
+            <small>{% if index == 3 %}借款{% elif index == 4 %}贷款{% elif index == 5 %}预收款{% elif index == 6 %}
+                预付款{% endif %}列表
+            </small>
         </h1>
     </section>
 
@@ -20,9 +22,15 @@
                     <thead>
                     <!--表格头部-->
                     <td></td>
-                    <th>{% if index == 3 %}借款{% elif index == 4 %}贷款{% elif index == 5 %}预收款{% elif index == 6 %}预付款{% endif %}人</th>
-                    <th>{% if index == 3 %}待收{% elif index == 4 %}待还{% elif index == 5 %}累计{% elif index == 6 %}累计{% endif %}本金</th>
-                    <th>{% if index == 3 %}待收{% elif index == 4 %}待还{% elif index == 5 %}累计{% elif index == 6 %}累计{% endif %}利息</th>
+                    <th>{% if index == 3 %}借款{% elif index == 4 %}贷款{% elif index == 5 %}预收款{% elif index == 6 %}
+                        预付款{% endif %}人
+                    </th>
+                    <th>{% if index == 3 %}待收{% elif index == 4 %}待还{% elif index == 5 %}累计{% elif index == 6 %}
+                        累计{% endif %}本金
+                    </th>
+                    <th>{% if index == 3 %}待收{% elif index == 4 %}待还{% elif index == 5 %}累计{% elif index == 6 %}
+                        累计{% endif %}利息
+                    </th>
                     </thead>
                     <!--表格内容-->
                     <tbody>
@@ -31,18 +39,18 @@
                             <!--通过for循环从data取出的具体表格内容-->
                             <td>{{ forloop.counter }}</td>
                             <td><a class="green" href="
-
-                                    {% if isloan %}{% url 'loan_list' item.id %}{% else %}{% url 'borrow_list' item.id%}{% endif %}"
+                                    {% if index == 5 %}{% url 'pre_collect_list' item.id %}
+                                    {% elif index == 6 %}{% url 'pre_pay_list' item.id %}{% endif %}"
                                    title="查看信息">
                                 {{ item.name }}
                             </a></td>
                             <td>{% if index == 3 %}{{ item.borrow_benjin|floatformat:2|intcomma }}
                                 {% elif index == 4 %}{{ item.loan_benjin|floatformat:2|intcomma }}
-                            {% elif index == 5 %}{{ item.yushou_benjin|floatformat:2|intcomma }}
+                                {% elif index == 5 %}{{ item.yushou_benjin|floatformat:2|intcomma }}
                             {% elif index == 6 %}{{ item.yufu_benjin|floatformat:2|intcomma }}{% endif %}</td>
                             <td>{% if index == 3 %}{{ item.borrow_lixi|floatformat:2|intcomma }}
                                 {% elif index == 4 %}{{ item.loan_lixi|floatformat:2|intcomma }}
-                            {% elif index == 5 %}{{ item.yushou_lixi|floatformat:2|intcomma }}
+                                {% elif index == 5 %}{{ item.yushou_lixi|floatformat:2|intcomma }}
                             {% elif index == 6 %}{{ item.yufu_lixi|floatformat:2|intcomma }}{% endif %}</td>
                         </tr>
 
@@ -57,7 +65,8 @@
                 <form method='POST' id="signupForm" action="" onsubmit="return check();">{% csrf_token %}
                     <div class="box box-danger">
                         <div class="box-header with-border">
-                            <h3 class="box-title">新建{% if index == 3 %}借款{% elif index == 4 %}贷款{% elif index == 5 %}预收款{% elif index == 6 %}预付款{% endif %}</h3>
+                            <h3 class="box-title">新建{% if index == 3 %}借款{% elif index == 4 %}贷款{% elif index == 5 %}
+                                预收款{% elif index == 6 %}预付款{% endif %}</h3>
                         </div>
                         <div class="box-body">
                             <div id="div_id_jiedairen" class="form-group"><label for="disabledTextInput">
@@ -68,7 +77,7 @@
                                         <option value="{{ v.name }}">{{ v.name }}</option>
                                     {% endfor %}
                                 </select></div>
-                        {{ loanform | crispy }}
+                            {{ loanform | crispy }}
 
                         </div>
                         <div class="box-footer">
@@ -87,7 +96,7 @@
 {% endblock %}
 {% block initSelect %}
     $('#id_jiedairen').select2({
-        height: '40px',
-        tags: true
+    height: '40px',
+    tags: true
     });
 {% endblock %}

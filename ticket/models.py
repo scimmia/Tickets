@@ -91,8 +91,6 @@ class Loan_Order(BaseLoan):
     ORDER_TYPE= (
         (3,u'借款订单'),
         (4,u'贷款订单'),
-        (5,u'预付款订单'),
-        (6,u'预收款订单'),
     )
     order_type = models.IntegerField(
         u'订单类型',
@@ -105,6 +103,27 @@ class Loan_Order(BaseLoan):
     class Meta:
         verbose_name = '订单'
         verbose_name_plural = '订单'
+
+    def __str__(self):
+        return (u'%d' % (self.order_type))
+
+
+class Per_Detail(models.Model):
+    ORDER_TYPE= (
+        (5,u'预收票款'),
+        (6,u'预付票款'),
+        (7,u'预收款付账'),
+        (8,u'预付款收票'),
+    )
+    order_type = models.IntegerField(
+        u'费用类型',
+        choices=ORDER_TYPE,
+        default=5,
+    )
+    jiedairen = models.ForeignKey( Customer, related_name='pre_order_customer', verbose_name=u'客户' , blank=False,null=False)
+    money = models.FloatField(u'金额', default=0)
+    yinhangka = models.ForeignKey( Card, related_name='pre_order_card', verbose_name=u'银行卡' , blank=False,null=False)
+    order = models.ForeignKey( Order, related_name='pre_order_pay', verbose_name=u'票据订单' ,  blank=True,null=True)
 
     def __str__(self):
         return (u'%d' % (self.order_type))
@@ -257,6 +276,8 @@ class Fee(models.Model):
         (31,u'还超短贷'),
         (41,u'借款给他人'),
         (42,u'从他人处贷款'),
+        (411,u'从他人处预收款'),
+        (422,u'预付款款给他人'),
         (43,u'收回借款本金'),
         (44,u'偿还贷款本金'),
         (45,u'收回借款费用支出'),
@@ -379,6 +400,8 @@ class OperLog(models.Model):
         (304,u'借款收息'),
         (305,u'贷款还本'),
         (306,u'贷款还息'),
+        (307,u'新建预收款'),
+        (308,u'新建预付款'),
         (401,u'新建银行卡'),
         (402,u'银行卡存入'),
         (403,u'银行卡取出'),

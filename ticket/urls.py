@@ -38,8 +38,12 @@ urlpatterns = [
     # url(r'^ticket_finish/(?P<pk>\d+)/$', views.ticket_finish, name='ticket_finish'),
     url(r'^loan/borrow_status/', views.borrow_status, name='borrow_status'),
     url(r'^loan/loan_status/', views.loan_status, name='loan_status'),
+    url(r'^loan/pre_collect/', views.pre_collect, name='pre_collect'),
+    url(r'^loan/pre_pay/', views.pre_pay, name='pre_pay'),
     url(r'^loan/borrow_list/(?P<pk>\d+)/$', views.borrow_list, name='borrow_list'),
     url(r'^loan/loan_list/(?P<pk>\d+)/$', views.loan_list, name='loan_list'),
+    url(r'^loan/pre_collect_list/(?P<pk>\d+)/$', views.pre_collect_list, name='pre_collect_list'),
+    url(r'^loan/pre_pay_list/(?P<pk>\d+)/$', views.pre_pay_list, name='pre_pay_list'),
     url(r'^loan/order/(?P<pk>\d+)/$', views.loanorder, name='loanorder'),
 
     url(r'^card/card_list/', views.card_list, name='card_list'),

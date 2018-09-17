@@ -19,7 +19,7 @@ from django.urls import reverse
 
 from ticket.filters import TicketFilter
 from ticket.forms import TicketForm, CardForm, TicketEditForm, PoolForm, TicketFeeForm, TicketOrderFeeForm, \
-    SuperLoanForm, LoanForm, SuperLoanFeeForm, CardTransForm, BestMixForm
+    SuperLoanForm, LoanForm, SuperLoanFeeForm, CardTransForm, BestMixForm, LoanPreForm
 from ticket.models import Card, Fee, Ticket, Order, StoreFee, Pool, InpoolPercent, TicketsImport, \
     StoreTicketsImport, SuperLoan, Loan_Order, SuperLoanFee, CardTrans, OperLog, Customer
 
@@ -1035,7 +1035,7 @@ def loan_liststatus(request,index):
                 log.addcard(fee.money)
                 log.save()
                 return redirect('borrow_status')
-            else:
+            elif index == 4:
                 customer.loan_benjin = customer.loan_benjin + instance.benjin_needpay
                 customer.save()
                 fee = card_fee(instance.yinhangka.pk, loanform.cleaned_data.get('benjin'), '从他人处贷款',42)
@@ -1045,18 +1045,40 @@ def loan_liststatus(request,index):
                 log.addcard(fee.money)
                 log.save()
                 return redirect('loan_status')
+            elif index == 5:
+                customer.yushou_benjin = customer.yushou_benjin + instance.benjin_needpay
+                customer.save()
+                fee = card_fee(instance.yinhangka.pk, loanform.cleaned_data.get('benjin'), '从他人处预收款',411)
+                fee.loanorder = instance
+                fee.save()
+                log.oper_type = 307
+                log.addcard(fee.money)
+                log.save()
+                return redirect('loan_status')
+            elif index == 6:
+                customer.yufu_benjin = customer.yufu_benjin + instance.benjin_needpay
+                customer.save()
+                fee = card_fee(instance.yinhangka.pk, 0 - loanform.cleaned_data.get('benjin'), '向他人处预付款',422)
+                fee.loanorder = instance
+                fee.save()
+                log.oper_type = 308
+                log.addcard(fee.money)
+                log.save()
+                return redirect('loan_status')
             pass
     if index == 3:
-        isloan = False
         raw_data = Customer.objects.filter(Q(borrow_benjin__gt=0)|Q(borrow_lixi__gt=0)).order_by('-pub_date')
-    else:
-        isloan = True
+    elif index == 4:
         raw_data = Customer.objects.filter(Q(loan_benjin__gt=0)|Q(loan_lixi__gt=0)).order_by('-pub_date')
+    elif index == 5:
+        raw_data = Customer.objects.filter(Q(yushou_benjin__gt=0)|Q(yushou_lixi__gt=0)).order_by('-pub_date')
+    elif index == 6:
+        raw_data = Customer.objects.filter(Q(yufu_benjin__gt=0)|Q(yufu_lixi__gt=0)).order_by('-pub_date')
     list_template = 'ticket/loan_status.html'
     customerlist = Customer.objects.all().order_by('name')
 
     context = {
-        'isloan': isloan,
+        'index': index,
         'loanform': loanform,
         'customerlist': customerlist,
     }
@@ -1179,6 +1201,60 @@ def loanorder(request,  pk):
 
     return render(request,list_template,locals())
 
+# 预收付款
+def pre_orders(request,index):
+    loanform = LoanPreForm(request.POST or None)
+    if request.method == 'POST':
+        if loanform.is_valid():
+            instance = loanform.save(commit=False)
+            customer = getCustomerByName(request.POST['jiedairen'])
+            instance.jiedairen = customer
+            instance.order_type = index
+            instance.save()
+            log = LogTemp()
+            log.adddetail(3,instance.pk)
+            if index == 5:
+                customer.yushou_benjin = customer.yushou_benjin + instance.money
+                customer.save()
+                fee = card_fee(instance.yinhangka.pk, instance.money, '从他人处预收款',411)
+                # fee.loanorder = instance
+                fee.save()
+                log.oper_type = 307
+                log.addcard(0 - instance.money)
+                log.save()
+                # return redirect('loan_status')
+            elif index == 6:
+                customer.yufu_benjin = customer.yufu_benjin + instance.money
+                customer.save()
+                fee = card_fee(instance.yinhangka.pk, 0 - instance.money, '向他人处预付款',422)
+                # fee.loanorder = instance
+                fee.save()
+                log.oper_type = 308
+                log.addcard(0 - instance.money)
+                log.save()
+                # return redirect('loan_status')
+            pass
+    if index == 5:
+        raw_data = Customer.objects.filter(Q(yushou_benjin__gt=0)|Q(yushou_lixi__gt=0)).order_by('-pub_date')
+    elif index == 6:
+        raw_data = Customer.objects.filter(Q(yufu_benjin__gt=0)|Q(yufu_lixi__gt=0)).order_by('-pub_date')
+    list_template = 'ticket/loan_pre_orders.html'
+    customerlist = Customer.objects.all().order_by('name')
+
+    context = {
+        'index': index,
+        'loanform': loanform,
+        'customerlist': customerlist,
+    }
+    return getPagedPage(request,raw_data,list_template,context)
+def pre_collect(request):
+    return pre_orders(request,5)
+def pre_pay(request):
+    return pre_orders(request,6)
+def pre_collect_list(request,pk):
+    return loan_orderlist(request,5,pk)
+def pre_pay_list(request,pk):
+    return loan_orderlist(request,6,pk)
 def pool_dash(request):
     pool = Pool.objects.last()
     pool_data = Pool.objects.all().order_by('-pub_date')
