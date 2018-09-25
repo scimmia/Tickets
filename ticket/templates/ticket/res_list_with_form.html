@@ -1,0 +1,54 @@
+{% extends "ticket/res_list.html" %}
+{% load staticfiles %}
+
+{% block content_body %}
+    <div class="row">
+        <div class="col-md-8">
+            <table id="table_id" class="table table-striped table-bordered table-hover">
+                <thead>
+                <!--表格头部-->
+                <td></td>
+                {% block table_tr %}
+                {% endblock %}
+                </thead>
+                <!--表格内容-->
+                <tbody>
+                {% for item in data %}
+                    <tr>
+                        <!--通过for循环从data取出的具体表格内容-->
+                        <td>{{ forloop.counter }}</td>
+                        {% block table_td %}
+                        {% endblock %}
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+            </table>
+            {% block inmport_page %}
+                {% include 'ticket/pagination.html' %}
+            {% endblock %}
+        </div>
+        <div class="col-md-4">
+            <form method='POST' id="signupForm" action="" onsubmit="return check();">{% csrf_token %}
+                <div class="box box-danger">
+                    <div class="box-header with-border">
+
+                        {% block form-header %}
+                        {% endblock %}
+                    </div>
+                    <div class="box-body">
+
+                        {% block form-body %}
+                        {% endblock %}
+
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-primary">提交</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+{% endblock %}

@@ -1,10 +1,10 @@
 from django.db import models
 
-# Create your models here.
 class BaseLoan(models.Model):
     benjin = models.FloatField(u'本金', default=0)
     lilv = models.FloatField(u'利率', default=0)
     lixi_begin_date = models.DateField(u'计息日期', auto_now_add=False)
+    lixi_end_date = models.DateField(u'到期日期', auto_now_add=False)
     benjin_payed = models.FloatField(u'已还本金', default=0)
     benjin_needpay = models.FloatField(u'待还本金', default=0)
     lixi = models.FloatField(u'利息', default=0)
@@ -13,6 +13,7 @@ class BaseLoan(models.Model):
     lixi_sum_date = models.DateField(u'结息日期', auto_now_add=False)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
     is_payed = models.BooleanField(u'是否还清', default=False)
+    is_end = models.BooleanField(u'是否到期', default=False)
 
     class Meta:
         abstract = True
@@ -69,10 +70,10 @@ class Order(models.Model):
 
 class Customer(models.Model):
     name = models.CharField(u'姓名', max_length=100)
-    borrow_benjin = models.FloatField(u'借款本金', default=0)
-    borrow_lixi = models.FloatField(u'借款利息', default=0)
-    loan_benjin = models.FloatField(u'贷款本金', default=0)
-    loan_lixi = models.FloatField(u'贷款利息', default=0)
+    need_collect_benjin = models.FloatField(u'应收本金', default=0)
+    need_collect_lixi = models.FloatField(u'应收利息', default=0)
+    need_pay_benjin = models.FloatField(u'应收本金', default=0)
+    need_pay_lixi = models.FloatField(u'应付利息', default=0)
     yufu_benjin = models.FloatField(u'预付本金', default=0)
     yufu_lixi = models.FloatField(u'预付利息', default=0)
     yushou_benjin = models.FloatField(u'预收本金', default=0)
@@ -139,6 +140,7 @@ class Ticket(models.Model):
     )
     TICKET_STATUS= (
         (1,u'在库'),
+        (2,u'待完成'),
         (5,u'在池'),
         (3,u'卖出'),
         (7,u'在池到期'),
@@ -245,6 +247,20 @@ class SuperLoan(BaseLoan):
     class Meta:
         verbose_name = '超短贷'
         verbose_name_plural = '超短贷'
+class PoolLicai(models.Model):
+    benjin = models.FloatField(u'本金', default=0)
+    lilv = models.FloatField(u'利率', default=0)
+    lixi = models.FloatField(u'利息', default=0)
+    lixi_begin_date = models.DateField(u'计息日期', auto_now_add=False)
+    lixi_end_date = models.DateField(u'到期日期', auto_now_add=False)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+    is_front = models.BooleanField(u'利息前置', default=False)
+    is_end = models.BooleanField(u'是否到期', default=False)
+    is_payed = models.BooleanField(u'是否还清', default=False)
+    yinhangka = models.ForeignKey( Card, related_name='licai_card', verbose_name=u'银行卡' , blank=False,null=False)
+    class Meta:
+        verbose_name = '理财'
+        verbose_name_plural = '理财'
 
 class SuperLoanFee(models.Model):
     superloan = models.ForeignKey( SuperLoan, related_name='superloan_fee_a', verbose_name=u'超短贷' ,  blank=True,null=True)
@@ -366,15 +382,14 @@ class Pool(models.Model):
         verbose_name_plural = '资金池'
 
 class InpoolPercent(models.Model):
+    tags = models.CharField(u'标签', max_length=50,primary_key=True)
+    inpoolPer = models.FloatField(u'入池额度比例', default=0)
+    is_active = models.BooleanField(u'状态', default=True)
+
+class InpoolPercentDetail(models.Model):
+    inpoolPercent = models.ForeignKey( InpoolPercent, related_name='pool_loan', verbose_name=u'超短贷' ,  blank=True,null=True)
     inpoolPer = models.FloatField(u'入池额度比例', default=0)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
-
-    class Meta:
-        verbose_name = '入池额度比例'
-        verbose_name_plural = '入池额度比例'
-
-    def __str__(self):
-        return (u'%f' % (self.inpoolPer))
 
 class CardTrans(models.Model):
     fromCard = models.ForeignKey( Card, related_name='tran_from_card', verbose_name=u'转出账户' , blank=False,null=False)
@@ -382,37 +397,69 @@ class CardTrans(models.Model):
     toCard = models.ForeignKey( Card, related_name='tran_to_card', verbose_name=u'转入账户' , blank=False,null=False)
     pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
 
-class OperLog(models.Model):
-    OPER_TYPE= (
-        (101,u'新建开票'),
-        (102,u'新建池开票'),
-        (103,u'票据入库'),
-        (104,u'票据入池'),
-        (105,u'票据在池到期'),
-        (106,u'票据导入'),
-        (201,u'新建付款'),
-        (202,u'新建收款'),
-        (203,u'付款'),
-        (204,u'收款'),
-        (301,u'新建借款'),
-        (302,u'新建贷款'),
-        (303,u'借款收本'),
-        (304,u'借款收息'),
-        (305,u'贷款还本'),
-        (306,u'贷款还息'),
-        (307,u'新建预收款'),
-        (308,u'新建预付款'),
-        (401,u'新建银行卡'),
-        (402,u'银行卡存入'),
-        (403,u'银行卡取出'),
-        (404,u'银行卡转账'),
-        (501,u'保证金存入'),
-        (502,u'保证金取出'),
-        (503,u'新增超短贷'),
-        (504,u'超短贷还本'),
-        (505,u'超短贷还息'),
-        (506,u'池开票还款'),
-    )
+class AllInfo(models.Model):
+    xianjin = models.DecimalField(u'现金',default=0,max_digits=10,decimal_places=2)
+    kucun = models.DecimalField(u'库存票',default=0,max_digits=10,decimal_places=2)
+    edu_keyong = models.DecimalField(u'可用额度',default=0,max_digits=10,decimal_places=2)
+    edu_yiyong = models.DecimalField(u'已用额度',default=0,max_digits=10,decimal_places=2)
+    edu_baozhengjin = models.DecimalField(u'保证金',default=0,max_digits=10,decimal_places=2)
+    edu_chineipiao = models.DecimalField(u'池内票',default=0,max_digits=10,decimal_places=2)
+    edu_licai = models.DecimalField(u'理财',default=0,max_digits=10,decimal_places=2)
+    edu_chaoduandai = models.DecimalField(u'超短贷',default=0,max_digits=10,decimal_places=2)
+    need_collect = models.DecimalField(u'应收', default=0, max_digits=10, decimal_places=2)
+    need_pay = models.DecimalField(u'应付', default=0, max_digits=10, decimal_places=2)
+    yushou = models.DecimalField(u'预收',default=0,max_digits=10,decimal_places=2)
+    yufu = models.DecimalField(u'预付',default=0,max_digits=10,decimal_places=2)
+    feiyong_yewu = models.DecimalField(u'业务费用',default=0,max_digits=10,decimal_places=2)
+    feiyong_ziben = models.DecimalField(u'资本费用',default=0,max_digits=10,decimal_places=2)
+    feiyong_za = models.DecimalField(u'管理杂费',default=0,max_digits=10,decimal_places=2)
+    lirun_yewu = models.DecimalField(u'业务利润',default=0,max_digits=10,decimal_places=2)
+    lirun_ziben = models.DecimalField(u'资本收益',default=0,max_digits=10,decimal_places=2)
+    lirun_za = models.DecimalField(u'其他利润',default=0,max_digits=10,decimal_places=2)
+
+    class Meta:
+        abstract = True
+
+class DashBoard(AllInfo):
+    day = models.DateField(u'统计日期',auto_created=False,primary_key=True)
+
+OPER_TYPE= (
+    (101,u'新建开票'),
+    (102,u'新建池开票'),
+    (103,u'票据入库'),
+    (104,u'票据入池'),
+    (105,u'票据在池到期'),
+    (106,u'票据导入'),
+    (201,u'新建付款'),
+    (202,u'新建收款'),
+    (203,u'付款'),
+    (204,u'收款'),
+    (301,u'新建应收款'),
+    (302,u'新建应付款'),
+    (303,u'应收款收本'),
+    (304,u'应收款收息'),
+    (305,u'应付款还本'),
+    (306,u'应付款还息'),
+    (307,u'新建预收款'),
+    (308,u'新建预付款'),
+    (309,u'借贷款结息'),
+    (401,u'新建银行卡'),
+    (402,u'银行卡存入'),
+    (403,u'银行卡取出'),
+    (404,u'银行卡转账'),
+    (501,u'存入保证金'),
+    (502,u'取出保证金'),
+    (503,u'新增超短贷'),
+    (504,u'超短贷还本'),
+    (505,u'超短贷还息'),
+    (506,u'池开票还款'),
+    (507,u'超短贷结息'),
+    (510,u'新增理财'),
+    (511,u'理财前置收息'),
+    (512,u'理财到期收款'),
+)
+class OperLog(AllInfo):
+
     oper_type = models.IntegerField(
         u'操作类型',
         choices=OPER_TYPE,
@@ -420,9 +467,43 @@ class OperLog(models.Model):
     )
     detail = models.CharField(u'相关票据卡', max_length=255, blank=False,null=False)
     contdetail = models.TextField(u'详情', blank=False,null=False)
+    search_date = models.DateField(u'添加日期', auto_now_add=True)
     pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
     class Meta:
         verbose_name = '操作记录'
         verbose_name_plural = '操作记录'
     def __str__(self):
         return self.get_oper_type_display()
+
+
+FeeDetail_Type= (
+    (1,u'票据'),
+    (2,u'票据订单'),
+    (3,u'借贷订单'),
+    (4,u'预收付款'),
+    (5,u'银行卡'),
+    (6,u'保证金'),
+    (7,u'超短贷'),
+    (8,u'理财'),
+)
+class FeeDetail(models.Model):
+    oper_log = models.ForeignKey( OperLog, related_name='carddetail_log', verbose_name=u'操作详情' ,  blank=False,null=False)
+    money = models.FloatField(u'金额', default=0)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+
+    fee_type = models.IntegerField(
+        u'费用类型',
+        choices=OPER_TYPE,
+        default=1,
+    )
+    fee_detail_type = models.IntegerField(
+        u'相关费用类型',
+        choices=FeeDetail_Type,
+        default=1,
+    )
+    fee_detail_pk = models.CharField(u'相关费用ID', max_length=100)
+
+
+class MoneyWithCard(models.Model):
+    money = models.FloatField(u'金额',default=0)
+    card = models.ForeignKey( Card, related_name='money_card', verbose_name=u'银行卡' ,  blank=True,null=True)

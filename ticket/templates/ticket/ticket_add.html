@@ -85,17 +85,7 @@
                                 </div>
                             </div>
                             {{ form.piaomianjiage |as_crispy_field }}
-                            <div id="div_id_gourujiage" class="form-group">
-                                <label for="id_gourujiage" class="control-label  requiredField">
-                                    购入价格<span class="asteriskField">*</span>
-                                </label>
-                                <div class="controls ">
-                                    <input type="number" name="gourujiageb" value="0" step="any"
-                                           class="numberinput form-control" required="" disabled="" id="id_gourujiageb">
-                                    <input type="number" name="gourujiage" value="0" step="any" style="display: none;"
-                                           class="numberinput form-control" required="" id="id_gourujiage">
-                                </div>
-                            </div>
+                            {{ form.gourujiage |as_crispy_field }}
                             {{ form.gouruzijinchi |as_crispy_field }}
                         </div>
 
@@ -117,7 +107,7 @@
                 <!-- right column -->
                 <!--/.col (right) -->
             </form>
-            {%  include "ticket/tool_counter.html" %}
+            {% include "ticket/tool_counter.html" %}
 
 
         </div>
@@ -148,8 +138,8 @@
 
         function exportbtn() {
             $("#id_piaomianjiage").val($("input[name='je']").val() * 10000);
-            $("#id_gourujiage").val($("#jined").text());
-            $("#id_gourujiageb").val($("#jined").text());
+            console.log($("#t_gourujiage").text())
+            $("#id_gourujiage").val($("#real_jine").text());
         }
         $("#exportbtn").val('填入');
         $("#exportbtn").show();

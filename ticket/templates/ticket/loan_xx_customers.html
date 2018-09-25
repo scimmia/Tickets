@@ -1,0 +1,82 @@
+{% extends "ticket/res_list_with_form.html" %}
+{% load staticfiles %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+{% block content-header %}
+    <h1>
+        {% if index == 3 %}应收款
+        {% elif index == 4 %}应付款
+        {% elif index == 5 %}预收款
+        {% elif index == 6 %}预付款
+        {% endif %}人列表
+    </h1>
+{% endblock %}
+{% block table_tr %}
+    <th>
+        {% if index == 3 %}应收款
+        {% elif index == 4 %}应付款
+        {% elif index == 5 %}预收款
+        {% elif index == 6 %}预付款
+        {% endif %}人
+    </th>
+    <th>{% if index == 3 %}待收
+    {% elif index == 4 %}待还
+    {% elif index == 5 %}累计
+    {% elif index == 6 %}累计{% endif %}本金
+    </th>
+    <th>{% if index == 3 %}待收
+    {% elif index == 4 %}待还
+    {% elif index == 5 %}累计
+    {% elif index == 6 %}累计{% endif %}利息
+    </th>
+
+{% endblock %}
+{% block table_td %}
+    <td><a class="green" href="
+        {% if index == 3 %}{% url 'need_collect_lists' item.id %}
+        {% elif index == 4 %}{% url 'need_pay_lists' item.id %}
+        {% elif index == 5 %}{% url 'pre_collect_list' item.id %}
+        {% elif index == 6 %}{% url 'pre_pay_list' item.id %}{% endif %}"
+           title="查看信息">
+        {{ item.name }}
+    </a></td>
+    <td>{% if index == 3 %}{{ item.need_collect_benjin|floatformat:2|intcomma }}
+        {% elif index == 4 %}{{ item.need_pay_benjin|floatformat:2|intcomma }}
+        {% elif index == 5 %}{{ item.yushou_benjin|floatformat:2|intcomma }}
+    {% elif index == 6 %}{{ item.yufu_benjin|floatformat:2|intcomma }}{% endif %}</td>
+    <td>{% if index == 3 %}{{ item.need_collect_lixi|floatformat:2|intcomma }}
+        {% elif index == 4 %}{{ item.need_pay_lixi|floatformat:2|intcomma }}
+        {% elif index == 5 %}{{ item.yushou_lixi|floatformat:2|intcomma }}
+    {% elif index == 6 %}{{ item.yufu_lixi|floatformat:2|intcomma }}{% endif %}</td>
+
+{% endblock %}
+{% block form-header %}
+    <h3 class="box-title">新建
+        {% if index == 3 %}应收款
+        {% elif index == 4 %}应付款
+        {% elif index == 5 %}预收款
+        {% elif index == 6 %}预付款
+        {% endif %}</h3>
+{% endblock %}
+
+{% block form-body %}
+    <div id="div_id_jiedairen" class="form-group"><label for="disabledTextInput">
+        客户<span class="asteriskField">*</span> </label>
+
+        <select name="jiedairen" class="js-single form-control" required id="id_jiedairen">
+            {% for v in customerlist %}
+                <option value="{{ v.name }}">{{ v.name }}</option>
+            {% endfor %}
+        </select></div>
+    {{ loanform | crispy }}
+{% endblock %}
+
+{% block initDatePicker %}
+    initDatePicker($('.dateinput'));
+{% endblock %}
+{% block initSelect %}
+    $('#id_jiedairen').select2({
+    height: '40px',
+    tags: true
+    });
+{% endblock %}

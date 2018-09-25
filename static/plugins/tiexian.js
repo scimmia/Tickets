@@ -186,12 +186,6 @@ function countbylilv(je) {
     if (isNaN(jine))
         jine = 0;
     return [ts,days[1],txlx,jine,everytenprice];
-    $("#jxtsd").text(ts);
-    $("#tztsd").text(days[1]);
-    $("#txlxd").text(txlx);
-    $("#jined").text(jine);
-    $("#everytenprice").val(everytenprice);
-    console.log(everytenprice);
 }
 function calctxlxone() {
     var je = $("input[name='je']").val();
@@ -199,9 +193,9 @@ function calctxlxone() {
     $("#jxtsd").text(results[0]);
     $("#tztsd").text(results[1]);
     $("#txlxd").text(numeral(results[2]).format('0,0.00'));
+    $("#real_jine").text(results[3]);
     $("#jined").text(numeral(results[3]).format('0,0.00'));
     $("#everytenprice").val(results[4]);
-    console.log(everytenprice);
 }
 
 function numDiv(num1, num2) {

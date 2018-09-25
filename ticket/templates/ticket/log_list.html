@@ -24,17 +24,17 @@
                         <div class="col-sm-8">
                             <div class="input-daterange input-group">
                                 <span class="input-group-addon" id="date-picker">添加时间</span>
-                                <input type="text" class="form-control dateinput" name="pub_date__gte" autocomplete="off"
+                                <input type="text" class="form-control dateinput" name="search_date__gte" autocomplete="off"
                                        data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.pub_date__gte %} value=
-                                            {{ request.GET.pub_date__gte }}{% endif %}>
+                                        {% if request.GET.search_date__gte %} value=
+                                            {{ request.GET.search_date__gte }}{% endif %}>
                                 <span class="input-group-addon">
                                 <i class="fa fa-exchange"></i>
                             </span>
-                                <input type="text" class="form-control dateinput" name="pub_date__lte" autocomplete="off"
+                                <input type="text" class="form-control dateinput" name="search_date__lte" autocomplete="off"
                                        data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.pub_date__lte %} value=
-                                            {{ request.GET.pub_date__lte }}{% endif %}>
+                                        {% if request.GET.search_date__lte %} value=
+                                            {{ request.GET.search_date__lte }}{% endif %}>
 
                             </div>
                         </div>
@@ -66,8 +66,8 @@
         <a class="green" href="
             {% if i.pktype == 1 %}
                 {% url 'ticket_index' i.pk %}
-            {% elif i.pktype == 2 %}
-                {% url 'card_index' i.pk %}
+            {% elif i.pktype == 5 %}
+                {% url 'card_edit' i.pk %}
             {% elif i.pktype == 3 %}
                 {% url 'loanorder' i.pk %}
             {% elif i.pktype == 4 %}
@@ -75,9 +75,9 @@
             {% elif i.pktype == 5 %}
                 {% url 'pool_loan' i.pk %}
             {% elif i.pktype == 6 %}
-                {% url 'ticket_payorder' i.pk%}
+                {% url 'pool_dash'%}
             {% elif i.pktype == 7 %}
-                {% url 'ticket_sellorder' i.pk%}
+                {% url 'pool_loan' i.pk%}
             {% endif %}" title="查看"> {{ i.pk }}
             {% if not forloop.last %},{% endif %}
             {% if forloop.counter|divisibleby:4 %}<br/>{% endif %}

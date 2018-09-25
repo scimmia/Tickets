@@ -8,13 +8,13 @@
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Bootstrap 3.3.6 -->
-    {#    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">#}
+{#        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">#}
     <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
-    {#    <link rel="stylesheet" href="{% static 'plugins/font-awesome-4.6.3/css/font-awesome.min.css' %}">#}
+{#        <link rel="stylesheet" href="{% static 'plugins/font-awesome-4.6.3/css/font-awesome.min.css' %}">#}
     <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
     <!-- Ionicons -->
-    {#    <link rel="stylesheet" href="{% static 'plugins/ionicons-2.0.1/css/ionicons.min.css' %}">#}
+{#        <link rel="stylesheet" href="{% static 'plugins/ionicons-2.0.1/css/ionicons.min.css' %}">#}
     <link href="https://cdn.bootcss.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -23,11 +23,11 @@
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
     <!-- Theme style -->
-    {#    <link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">#}
+{#        <link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">#}
     <link href="https://cdn.bootcss.com/admin-lte/2.3.6/css/AdminLTE.min.css" rel="stylesheet">
     <!-- AdminLTE Skins. Choose a skin from the css/skins
          folder instead of downloading all of them to reduce the load. -->
-    {#    <link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">#}
+{#        <link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">#}
     <link href="https://cdn.bootcss.com/admin-lte/2.3.6/css/skins/_all-skins.min.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
     {% block css %}{% endblock %}
@@ -211,126 +211,111 @@
                     </li>
                 </ul>
                 </li>
-                {% if '/loan/' in request.path %}
-                    <li class="active treeview">
-
-                        {% else %}
-                    <li class="treeview">
-                {% endif %}
-                <a href="#">
-                    <i class="fa fa-exchange"></i> <span>借贷</span>
-                    <span class="pull-right-container">
+                <li class="treeview {% if '/loan/' in request.path %}active{% endif %}">
+                    <a href="#">
+                        <i class="fa fa-exchange"></i> <span>借贷</span>
+                        <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
-                </a>
-                <ul class="treeview-menu">
-                    <li
-                            {% if '/borrow_status/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'borrow_status' %}"><i class="fa fa-circle-o"></i>借出订单(应收)</a>
-                    </li>
-                    <li
-                            {% if '/loan_status/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'loan_status' %}"><i class="fa fa-circle-o"></i>贷入订单(应付)</a>
-                    </li>
-                    <li
-                            {% if '/pre_collect/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'pre_collect' %}"><i class="fa fa-circle-o"></i>预收款(已收)</a>
-                    </li>
-                    <li
-                            {% if '/pre_pay/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'pre_pay' %}"><i class="fa fa-circle-o"></i>预付款(已付)</a>
-                    </li>
-                </ul>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li
+                                {% if '/need_collect_' in request.path %}
+                                    class="active"
+                                {% endif %}>
+                            <a href="{% url 'need_collect_customers' %}">
+                                <i class="fa fa-circle-o"></i>应收订单</a>
+                        </li>
+                        <li
+                                {% if '/need_pay_' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'need_pay_customers' %}"><i class="fa fa-circle-o"></i>应付订单</a>
+                        </li>
+                        <li
+                                {% if '/pre_collect_' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'pre_collect_customers' %}"><i class="fa fa-circle-o"></i>预收款(已收)</a>
+                        </li>
+                        <li
+                                {% if '/pre_pay_' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'pre_pay_customers' %}"><i class="fa fa-circle-o"></i>预付款(已付)</a>
+                        </li>
+                    </ul>
                 </li>
-                {% if '/card/' in request.path %}
-                    <li class="active treeview">
-
-                        {% else %}
-                    <li class="treeview">
-                {% endif %}
-                <a href="#">
-                    <i class="fa fa-credit-card"></i> <span>银行卡</span>
-                    <span class="pull-right-container">
+                <li class="treeview {% if '/card/' in request.path %}active{% endif %}">
+                    <a href="#">
+                        <i class="fa fa-credit-card"></i> <span>银行卡</span>
+                        <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
-                </a>
-                <ul class="treeview-menu">
-                    <li style="display: none"><a href="#"><i class="fa fa-circle-o"></i>统计</a></li>
-                    <li
-                            {% if '/card_list/' in request.path %}
-                                class="active"
-                            {% endif %}>
-                        <a href="{% url 'card_list' %}"><i class="fa fa-circle-o"></i>列表</a></li>
-                    <li
-                            {% if '/card_trans/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'card_trans' %}"><i class="fa fa-circle-o"></i>转账</a></li>
-                </ul>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li style="display: none"><a href="#"><i class="fa fa-circle-o"></i>统计</a></li>
+                        <li
+                                {% if '/card_list/' in request.path %}
+                                    class="active"
+                                {% endif %}>
+                            <a href="{% url 'card_list' %}"><i class="fa fa-circle-o"></i>列表</a></li>
+                        <li
+                                {% if '/card_trans/' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'card_trans' %}"><i class="fa fa-circle-o"></i>转账</a></li>
+                    </ul>
                 </li>
-                {% if '/pool/' in request.path %}
-                    <li class="active treeview">
-
-                        {% else %}
-                    <li class="treeview">
-                {% endif %}
-                <a href="#">
-                    <i class="fa fa-line-chart"></i> <span>资金池</span>
-                    <span class="pull-right-container">
+                <li class="treeview {% if '/pool/' in request.path %}active{% endif %}">
+                    <a href="#">
+                        <i class="fa fa-line-chart"></i> <span>资金池</span>
+                        <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
-                </a>
-                <ul class="treeview-menu">
-                    <li
-                            {% if '/pool_dash/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'pool_dash' %}"><i class="fa fa-circle-o"></i>概览</a></li>
-                    <li
-                            {% if '/pool_loans/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'pool_loans' %}"><i class="fa fa-circle-o"></i>超短贷</a></li>
-                    <li
-                            {% if '/pool_tickets/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'pool_tickets' %}"><i class="fa fa-circle-o"></i>池开票</a></li>
-                </ul>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li
+                                {% if '/pool_dash/' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'pool_dash' %}"><i class="fa fa-circle-o"></i>概览</a></li>
+                        <li
+                                {% if '/super_loan_lists/' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'super_loan_lists' %}"><i class="fa fa-circle-o"></i>超短贷</a>
+                        </li>
+                        <li
+                                {% if '/pool_licai_lists/' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'pool_licai_lists' %}"><i class="fa fa-circle-o"></i>理财</a>
+                        </li>
+                        <li
+                                {% if '/pool_tickets/' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'pool_tickets' %}"><i class="fa fa-circle-o"></i>池开票</a>
+                        </li>
+                    </ul>
                 </li>
-                {% if '/tool/' in request.path %}
-                    <li class="active treeview">
-                        {% else %}
-                    <li class="treeview">
-                {% endif %}
-                <a href="#">
-                    <i class="fa fa-calculator"></i> <span>计算器</span>
-                    <span class="pull-right-container">
+                <li class="treeview {% if '/tool/' in request.path %}active{% endif %}">
+                    <a href="#">
+                        <i class="fa fa-calculator"></i> <span>计算器</span>
+                        <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
-                </a>
-                <ul class="treeview-menu">
-                    <li
-                            {% if '/bestmix' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'bestmix' %}"><i class="fa fa-circle-o"></i>票据配比</a>
-                    </li>
-                    <li
-                            {% if '/avgday' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'avgday' %}"><i class="fa fa-circle-o"></i>平均天数</a>
-                    </li>
-{#                    <li#}
-{#                            {% if '/counter' in request.path %}#}
-{#                                class="active"#}
-{#                            {% endif %}><a href="{% url 'counter' %}"><i class="fa fa-circle-o"></i>利率</a>#}
-{#                    </li>#}
-                    <li
-                            {% if '/tiexian' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'tiexian' %}"><i class="fa fa-circle-o"></i>贴现</a>
-                    </li>
-                </ul>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li
+                                {% if '/bestmix' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'bestmix' %}"><i class="fa fa-circle-o"></i>票据配比</a>
+                        </li>
+                        <li
+                                {% if '/avgday' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'avgday' %}"><i class="fa fa-circle-o"></i>平均天数</a>
+                        </li>
+                        <li
+                                {% if '/tiexian' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'tiexian' %}"><i class="fa fa-circle-o"></i>贴现</a>
+                        </li>
+                    </ul>
                 </li>
 
                 <li {% if '/log/log_list' in request.path %}
@@ -348,24 +333,12 @@
                         <i class="fa fa-file"></i> <span>日报记录</span>
                     </a>
                 </li>
-                {% if '/sysconfig/' in request.path %}
-                    <li class="active treeview">
-                        {% else %}
-                    <li class="treeview">
-                {% endif %}
-                <a href="#">
-                    <i class="fa fa-save"></i> <span>配置</span>
-                    <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-                </a>
-                <ul class="treeview-menu">
-                    <li
-                            {% if '/inpoolPercent' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'inpoolPercent' %}"><i class="fa fa-circle-o"></i>入池额度比例</a>
-                    </li>
-                </ul>
+                <li {% if '/sysconfig/inpoolPercentList' in request.path %}
+                    class="active"
+                {% endif %}>
+                    <a href="{% url 'inpoolPercentList' %}">
+                        <i class="fa fa-save"></i> <span>配置入池额度</span>
+                    </a>
                 </li>
             </ul>
         </section>

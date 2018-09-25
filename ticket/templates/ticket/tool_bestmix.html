@@ -5,7 +5,6 @@
 {#{% load material_form %}#}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
 {% endblock %}
 {% block content %}
@@ -24,7 +23,72 @@
 
                     <div class="box box-danger">
                         <div class="box-body">
-                            {{ form | crispy }}
+                            <div class="row">
+                                <div class="col-md-5">
+                                    {{ form.money |as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.count |as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form.changecount |as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    {{ form.valuea |as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.valueta |as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form.groupa |as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    {{ form.valueb |as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.valuetb |as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form.groupb |as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    {{ form.valuec |as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.valuetc |as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form.groupc |as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    {{ form.valued |as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.valuetd |as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form.groupd |as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    {{ form.valuee |as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.valuete |as_crispy_field }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form.groupe |as_crispy_field }}
+                                </div>
+                            </div>
 
                         </div>
                         <div class="box-footer">
@@ -68,6 +132,7 @@
     <!-- page script -->
     <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/initItems.js' %}"></script>
 
     <script type="text/javascript">
 
@@ -80,6 +145,7 @@
                 'ordering': true,
                 'info': true,
                 'autoWidth': false,
+                'scrollY': 410,
                 "language": {
                     "processing": "处理中...",
                     "lengthMenu": "显示 _MENU_ 项结果",
@@ -113,7 +179,7 @@
                     "decimal": "-",
                     "thousands": "."
                 },
-                "order": [[5, 'asc']]
+                "order": [[6, 'asc']]
             });
         });
     </script>

@@ -3,13 +3,19 @@
 {% load crispy_forms_tags %}
 {% load humanize %}
 {% block content-header %}
-    <h1>
-        {% if isloan %}贷款{% else %}借款{% endif %}人
-            <small>{{ jiedairen }}</small>
+    <h1>{% if index == 3 %}应收款
+        {% elif index == 4 %}应付款
+        {% elif index == 5 %}预收款
+        {% elif index == 6 %}预付款
+        {% endif %}列表
     </h1>
     <ol class="breadcrumb">
         <button type="button" class="btn btn-warning center-block" data-toggle="modal" data-target="#myModal">
-            新建{% if isloan %}贷款{% else %}借款{% endif %}
+            新建{% if index == 3 %}应收款
+        {% elif index == 4 %}应付款
+        {% elif index == 5 %}预收款
+        {% elif index == 6 %}预付款
+        {% endif %}
             <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
         </button>
     </ol>
@@ -41,6 +47,7 @@
     <th>本金</th>
     <th>已{% if isloan %}还{% else %}收{% endif %}本金</th>
     <th>待{% if isloan %}还{% else %}收{% endif %}本金</th>
+    <th>年利率</th>
     <th>计息日期</th>
     <th>利息</th>
     <th>已{% if isloan %}还{% else %}收{% endif %}利息</th>
@@ -62,6 +69,7 @@
     <td>{{ item.benjin|floatformat:2|intcomma }}</td>
     <td>{{ item.benjin_payed|floatformat:2|intcomma }}</td>
     <td {% if item.benjin_needpay > 0 %}style="color: red"{% endif %}>{{ item.benjin_needpay|floatformat:2|intcomma }}</td>
+    <td>{{ item.lilv|floatformat:2|intcomma }}%</td>
     <td>{{ item.lixi_begin_date }}</td>
     <td>{{ item.lixi|floatformat:2|intcomma }}</td>
     <td>{{ item.lixi_payed|floatformat:2|intcomma }}</td>

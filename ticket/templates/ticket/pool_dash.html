@@ -31,30 +31,36 @@
                             <tbody>
                             <tr>
                                 <th>总额度 :</th>
-                                <td style="text-align:right;">{{ item.totalmoney|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;">{{ dash.edu_keyong|add:dash.edu_yiyong|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>可用额度 :</th>
-                                <td style="text-align:right;">{{ item.unusemoney|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;">{{ dash.edu_keyong|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>已用额度:</th>
-                                <td style="text-align:right;">{{ item.usedmoney|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;">{{ dash.edu_yiyong|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>入池票:{{ count_t }}张</th>
                                 <td style="text-align:right;"><a
-                                        href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__gt={{ today }}">{{ sum_money|floatformat:2|intcomma }}</a>
+                                        href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__gte={{ today }}">{{ dash.edu_chineipiao|floatformat:2|intcomma }}</a>
                                 </td>
                             </tr>
                             <tr>
                                 <th>保证金:</th>
-                                <td style="text-align:right;">{{ item.promoney|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;">{{ dash.edu_baozhengjin|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>理财:</th>
+                                <td style="text-align:right;"><a
+                                        href="{% url 'pool_licai_lists' %}">{{ dash.edu_licai|floatformat:2|intcomma }}</a>
+                                </td>
                             </tr>
                             <tr>
                                 <th>超短贷:</th>
                                 <td style="text-align:right;"><a
-                                        href="{% url 'pool_loans' %}">{{ superLoan|floatformat:2|intcomma }}</a>
+                                        href="{% url 'super_loan_lists' %}">{{ dash.edu_chaoduandai|floatformat:2|intcomma }}</a>
                                 </td>
                             </tr>
                             <tr>
@@ -85,11 +91,11 @@
                     </div>
                 </form>
             </div>
-            <form method='POST' id="signupForm" action="{% url 'pool_loans' %}"
+            <form method='POST' id="signupForm" action=""
                   onsubmit="return check();">{% csrf_token %}
                 <div class="col-md-3">
 
-                    <div class="box box-danger">
+                    <div class="box box-info">
                         <div class="box-header with-border">
                             <h3 class="box-title">新增超短贷：</h3>
                         </div>
@@ -104,65 +110,30 @@
 
                 </div>
             </form>
+            <form method='POST' action=""
+                  onsubmit="return check();">{% csrf_token %}
+                <div class="col-md-3">
+
+                    <div class="box box-warning">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">新增理财：</h3>
+                        </div>
+                        <div class="box-body">
+                            {{ pool_licai_form | crispy }}
+                        </div>
+
+                        <div class="box-footer">
+                            <input class="btn btn-primary" value="提交" type="submit" id="add_fee">
+                        </div>
+                    </div>
+
+                </div>
+            </form>
 
             <div class="col-md-12">
                 <div class="row">
                     <div>
-                        <table id="table_id" class="table table-striped table-bordered table-hover">
-                            <thead>
-                            <!--表格头部-->
-                            <th></th>
-                            <th>费用内容</th>
-                            <th>金额</th>
-                            <th>添加日期</th>
-                            <th>相关票据/<br/>银行卡</th>
-                            </thead>
-                            <!--表格内容-->
-                            <tbody>
-                            {% for i in data %}
-                                <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td>
-                                        {% if i.pool_status == 1 %}
-                                            <span class="label label-success">入池</span>
-                                        {% elif i.pool_status == 2 %}
-                                            <span class="label label-danger">出池</span>
-                                        {% elif i.pool_status == 3 %}
-                                            <span class="label label-info">保证金收入</span>
-                                        {% elif i.pool_status == 4 %}
-                                            <span class="label label-warning">保证金支出</span>
-                                        {% elif i.pool_status == 5 %}
-                                            <span class="label label-primary">开票付款</span>
-                                        {% elif i.pool_status == 6 %}
-                                            <span class="label label-info">新增超短贷</span>
-                                        {% elif i.pool_status == 7 %}
-                                            <span class="label label-warning">超短贷还款</span>
-                                        {% elif i.pool_status == 8 %}
-                                            <span class="label label-primary">保证金还超短贷</span>
-                                        {% elif i.pool_status == 9 %}
-                                            <span class="label label-primary">保证金还池开票</span>
-                                        {% endif %}</td>
-                                    <td>
-                                        {% if i.money > 0 %}
-                                            <span class="label label-success">
-                                        {% else %}
-                                            <span class="label label-danger">
-                                        {% endif %}
-                                        {{ i.money|floatformat:2|intcomma }}</span></td>
-                                    <td>{{ i.pub_date }}</td>
-                                    <td>
-                                        {% if i.ticket %}
-                                            <span class="label label-success">{{ i.ticket }}
-                                        {% elif i.card %}
-                                            <span class="label label-danger">{{ i.card }}
-                                        {% endif %}
-                                        </span></td>
-                                </tr>
-
-                            {% endfor %}
-
-                            </tbody>
-                        </table>
+                        {% include 'ticket/fee_list.html' %}
                     </div>
                     <!--引入pagination.html-->
                     {% include 'ticket/pagination.html' %}

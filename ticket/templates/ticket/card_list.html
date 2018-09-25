@@ -1,20 +1,11 @@
-{% extends "ticket/res_list.html" %}
+{% extends "ticket/res_list_with_form.html" %}
 {% load staticfiles %}
 {% load humanize %}
+{% load crispy_forms_tags %}
 {% block content-header %}
     <h1>
         账户明细
     </h1>
-    <ol class="breadcrumb">
-        <li>
-            <a class="blue" href="{% url 'card_add' %}">
-                <button type="submit" class="btn btn-warning center-block" id="all_checked">
-                    添加银行卡
-                    <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
-                </button>
-            </a>
-        </li>
-    </ol>
 {% endblock %}
 {% block table_tr %}
     <th>银行卡</th>
@@ -35,4 +26,11 @@
     {% endif %}</td>
     <td>{{ item.beizhu }}</td>
     <td>{{ item.pub_date }}</td>
+{% endblock %}
+{% block form-header %}
+    <h3 class="box-title">新建银行卡</h3>
+{% endblock %}
+
+{% block form-body %}
+    {{ form | crispy}}
 {% endblock %}
