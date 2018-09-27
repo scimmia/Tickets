@@ -27,7 +27,7 @@
 {% endblock %}
 {% block table_td %}
     <th style="display: none">{{ item.id }}</th>
-    <td><a class="green" href="{% url 'ticket_payorder' item.id %}" title="查看信息">
+    <td><a class="green" href="{% url 'ticket_order' item.id %}" title="查看信息">
                                 {{ item.pub_date }}
                             </a></td>
     <td>{{ item.ticket_sum|floatformat:2|intcomma }}</td>

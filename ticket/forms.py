@@ -7,36 +7,22 @@ from ticket.models import Ticket, Card, Pool, Fee, Loan_Order, CardTrans, SuperL
 
 
 class TicketForm(ModelForm):
-
     fenshu = forms.IntegerField(label="份数",required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
-    #自定义ModelForm的内容
     class Meta:
-        #该ModelForm参照Model: Node
         model = Ticket
-        #在Form中不显示node_signer这个字段
         exclude = ['gouruhuilv','pay_status','maichulilv','maichujiage','sell_status','lirun',]
 class TicketEditForm(ModelForm):
-
-    #自定义ModelForm的内容
     class Meta:
-        #该ModelForm参照Model: Node
         model = Ticket
-
-        #在Form中不显示node_signer这个字段
         exclude = []
 class TicketFeeForm(ModelForm):
 
-    #自定义ModelForm的内容
     class Meta:
-        #该ModelForm参照Model: Node
         model = Fee
-
-        #在Form中不显示node_signer这个字段
         fields = ['yinhangka','name','money',]
 class TicketOrderFeeForm(ModelForm):
     class Meta:
-        #该ModelForm参照Model: Node
         model = Fee
 
         fields = ['yinhangka','name','money',]

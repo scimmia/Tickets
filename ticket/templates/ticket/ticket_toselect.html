@@ -5,7 +5,8 @@
 {% block content-header %}
     <h1>
         票据
-        <small>待{{ title }}</small>
+        <small>待{% if index == 1 %}付款
+            {% elif index == 2 %}收款{% endif %}</small>
     </h1>
 {% endblock %}
 {% block search_header %}
@@ -157,9 +158,6 @@
     <div class="col-xs-2 pull-right">
         <form method='POST' id="signupForm"
               onsubmit="return check();">{% csrf_token %}
-            <input name="index" value="{{ index }}" style="display: none"
-                   class="textinput textInput form-control"
-                   id="id_index" type="text">
             <input name="selected_num" value="" style="display: none"
                    class="textinput textInput form-control"
                    id="id_selected_num" type="text">
@@ -173,7 +171,8 @@
                    class="textinput textInput form-control"
                    id="id_ids" type="text">
             <button type="submit" class="btn btn-warning center-block" id="all_checked">
-                去{{ title }}
+                去{% if index == 1 %}付款
+            {% elif index == 2 %}收款{% endif %}
                 <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
             </button>
 

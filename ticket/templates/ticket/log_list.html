@@ -1,5 +1,6 @@
 {% extends "ticket/res_list.html" %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% block content-header %}
     <h1>
@@ -66,19 +67,38 @@
         <a class="green" href="
             {% if i.pktype == 1 %}
                 {% url 'ticket_index' i.pk %}
-            {% elif i.pktype == 5 %}
-                {% url 'card_edit' i.pk %}
+            {% elif i.pktype == 2 %}
+                {% url 'ticket_order' i.pk %}
             {% elif i.pktype == 3 %}
                 {% url 'loanorder' i.pk %}
             {% elif i.pktype == 4 %}
                 {% url 'pool_dash' %}
             {% elif i.pktype == 5 %}
-                {% url 'pool_loan' i.pk %}
+                {% url 'card_edit' i.pk %}
             {% elif i.pktype == 6 %}
                 {% url 'pool_dash'%}
             {% elif i.pktype == 7 %}
                 {% url 'pool_loan' i.pk%}
-            {% endif %}" title="查看"> {{ i.pk }}
+            {% elif i.pktype == 8 %}
+                {% url 'pool_licai_lists'%}?pk={{  i.pk }}
+            {% endif %}" title="查看">
+            {% if i.pktype == 1 %}
+                票据
+            {% elif i.pktype == 2 %}
+                票据订单
+            {% elif i.pktype == 3 %}
+                借贷订单
+            {% elif i.pktype == 4 %}
+                预收付款
+            {% elif i.pktype == 5 %}
+                银行卡
+            {% elif i.pktype == 6 %}
+                保证金
+            {% elif i.pktype == 7 %}
+                超短贷
+            {% elif i.pktype == 8 %}
+                理财
+            {% endif %}{{ i.pk }}
             {% if not forloop.last %},{% endif %}
             {% if forloop.counter|divisibleby:4 %}<br/>{% endif %}
         </a>
@@ -86,12 +106,12 @@
     <td>
         {% for i in item.contdetail %}
             <span>{{ i.cont }}</span>
-            {% if i.money > 0 %}
-                <span style="color: red">+
+            <span style="color: {% if i.money > 0 %}
+                 red">+
             {% elif i.money < 0 %}
-                <span class="color: text-green">
+                 green">
             {% endif %}
-                {{ i.money }}</span>
+                {{ i.money|floatformat:2|intcomma }}</span>
             {% if not forloop.last %},{% endif %}
             {% if forloop.counter|divisibleby:3 %}<br/>{% endif %}
         {% endfor %}

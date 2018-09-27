@@ -430,6 +430,8 @@ OPER_TYPE= (
     (104,u'票据入池'),
     (105,u'票据在池到期'),
     (106,u'票据导入'),
+    (107,u'开票补充信息'),
+    (108,u'池开票补充信息'),
     (201,u'新建付款'),
     (202,u'新建收款'),
     (203,u'付款'),
@@ -506,4 +508,4 @@ class FeeDetail(models.Model):
 
 class MoneyWithCard(models.Model):
     money = models.FloatField(u'金额',default=0)
-    card = models.ForeignKey( Card, related_name='money_card', verbose_name=u'银行卡' ,  blank=True,null=True)
+    card = models.ForeignKey( Card, related_name='money_card', verbose_name=u'银行卡' ,  blank=False,null=False)

@@ -11,13 +11,19 @@ from ticket.models import OperLog, DashBoard, Card, FeeDetail, InpoolPercent, Ti
 
 
 def create_fee_detail(money, fee_detail_type, fee_detail_pk, log_temp):
-    fee_detail = FeeDetail()
-    fee_detail.oper_log = log_temp.log
-    fee_detail.money = money
-    fee_detail.fee_type = log_temp.log.oper_type
-    fee_detail.fee_detail_type = fee_detail_type
-    fee_detail.fee_detail_pk = fee_detail_pk
-    fee_detail.save()
+    if money != 0:
+        fee_detail = FeeDetail()
+        fee_detail.oper_log = log_temp.log
+        fee_detail.money = money
+        fee_detail.fee_type = log_temp.log.oper_type
+        fee_detail.fee_detail_type = fee_detail_type
+        fee_detail.fee_detail_pk = fee_detail_pk
+        fee_detail.save()
+    pass
+
+
+def create_ticket_order_fee(order, money, log_temp):
+    create_fee_detail(money, 2, order.pk, log_temp)
     pass
 
 
@@ -191,7 +197,7 @@ def get_query(request):
 def get_paged_page(request, raw_data, list_template, context={}):
     kwargs, query = get_query(request)
     data = raw_data.filter(**kwargs)
-    data_list, page_range, count, page_nums = pagination(request, data, 30)
+    data_list, page_range, count, page_nums = pagination(request, data, 50)
     context['data'] = data_list
     context['query'] = query
     context['page_range'] = page_range

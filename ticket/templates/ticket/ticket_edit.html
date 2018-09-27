@@ -2,14 +2,8 @@
 {% load staticfiles %}
 {% load crispy_forms_tags %}
 
-{#{% block extrahead %}#}
-{#    {{ block.super }}#}
-{#        {% include 'material/includes/material_css.html' %}#}
-{#    {% include 'material/includes/material_js.html' %}#}
-{##}
-{#{% endblock %}#}
 {% block css %}
-    <link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
 
     <script src="https://cdn.bootcss.com/jquery-validate/1.17.0/jquery.validate.js"></script>
 {% endblock %}
@@ -41,13 +35,26 @@
                             <h3 class="box-title">基本信息</h3>
                         </div>
                         <div class="box-body">
-                            {{ form.t_status |as_crispy_field}}
-                            {{ form.qianpaipiaohao |as_crispy_field}}
-                            {{ form.piaohao |as_crispy_field}}
-                            {{ form.chupiaohang |as_crispy_field}}
-                            {{ form.chupiaoriqi |as_crispy_field}}
-                            {{ form.daoqiriqi |as_crispy_field}}
-                            {{ form.piaomianjiage |as_crispy_field}}
+                            {{ form.t_status |as_crispy_field }}
+                            {{ form.t_type |as_crispy_field }}
+                            {{ form.qianpaipiaohao |as_crispy_field }}
+                            {{ form.piaohao |as_crispy_field }}
+                            <div id="div_id_chupiaohang" class="form-group">
+                                <label for="id_chupiaohang" class="control-label  requiredField">
+                                    出票行<span class="asteriskField">*</span>
+                                </label>
+                                <div class="controls ">
+                                    <select class="js-single form-control" name="chupiaohang" id="id_chupiaohang"
+                                            required>
+                                        {% for v in chupiaohang %}
+                                            <option value="{{ v }}"
+                                            {% if v == ticket_ins.chupiaohang %}selected = ""{% endif %}>{{ v }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {{ form.chupiaoriqi |as_crispy_field }}
+                            {{ form.daoqiriqi |as_crispy_field }}
                         </div>
                     </div>
 
@@ -59,17 +66,30 @@
                             <h3 class="box-title">买入信息</h3>
                         </div>
                         <div class="box-body">
-                             {{ form.pay_status |as_crispy_field}}
-                             {{ form.gongyingshang |as_crispy_field}}
-                             {{ form.gouruhuilv |as_crispy_field}}
-                             {{ form.gourujiage |as_crispy_field}}
-                             {{ form.gouruzijinchi |as_crispy_field}}
-                             {{ form.gourucard |as_crispy_field}}
-
+                            <div id="div_id_gongyingshang" class="form-group">
+                                <label for="id_gongyingshang" class="control-label  requiredField">
+                                    供应商<span class="asteriskField">*</span>
+                                </label>
+                                <div class="controls ">
+                                    <select class="js-single form-control" name="gongyingshang" id="id_gongyingshang"
+                                            required>
+                                        {% for v in gongyingshang %}
+                                            <option value="{{ v }}"
+                                            {% if v == ticket_ins.gongyingshang %}selected = ""{% endif %}>{{ v }}</option>>{{ v }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {{ form.piaomianjiage |as_crispy_field }}
+                            {{ form.gourujiage |as_crispy_field }}
+                            {{ form.gouruzijinchi |as_crispy_field }}
                         </div>
 
                     </div>
                     <div class="box box-danger">
+                        <div class="box-body">
+
+                        </div>
                         <div class="box-footer">
                             <input class="btn btn-primary" value="提交" type="submit">
                             <a><input class="btn btn-default" value="取消" type="button"></a>
@@ -80,31 +100,26 @@
                 </div>
                 <!--/.col (left) -->
                 <!-- right column -->
-                <div class="col-md-4">
-                    <!-- Horizontal Form -->
-                    <div class="box box-info" id="sellinfo" {% if ticket_ins.t_status != 3 %}
-                                style="display: none;"
-                            {% endif %}>
-                        <div class="box-header with-border">
-                            <h3 class="box-title">卖出信息</h3>
-                        </div>
-                        <!-- /.box-header -->
-                        <!-- form start -->
-                        <div class="box-body">
-                             {{ form.sell_status |as_crispy_field}}
-                             {{ form.maipiaoren |as_crispy_field}}
-                             {{ form.maichulilv |as_crispy_field}}
-                             {{ form.maichujiage |as_crispy_field}}
-                             {{ form.maichucard |as_crispy_field}}
-                             {{ form.lirun |as_crispy_field}}
-                        </div>
-                        <!-- /.box-body -->
-                        <!-- /.box-footer -->
-                    </div>
-                    <!-- /.box -->
-                </div>
                 <!--/.col (right) -->
             </form>
+            {% if ticket_ins.t_status == 2 %}
+                {% include "ticket/tool_counter.html" %}
+            {% else %}
+            <div class="col-md-4">
+                <div class="box box-info" id="sellinfo">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">卖出信息</h3>
+                    </div>
+                    <div class="box-body">
+                        {{ form.sell_status |as_crispy_field }}
+                        {{ form.maipiaoren |as_crispy_field }}
+                        {{ form.maichujiage |as_crispy_field }}
+                        {{ form.lirun |as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}>
+
         </div>
     </section>
 
@@ -113,46 +128,31 @@
 {% block script %}
 
     <!-- bootstrap datepicker -->
-    <script src="{% static 'plugins/datepicker/bootstrap-datepicker.js' %}"></script>
+    <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
+    <script src="{% static 'plugins/initItems.js' %}"></script>
+    <script src="{% static 'plugins/tiexian.js' %}"></script>
     <script type="text/javascript">
         $(function () {
+            $('.js-single').select2({
+                tags: true
+            });
 
             //Date picker
-            $.fn.datepicker.dates['cn'] = {   //切换为中文显示
-                days: ["周日", "周一", "周二", "周三", "周四", "周五", "周六", "周日"],
-                daysShort: ["日", "一", "二", "三", "四", "五", "六", "七"],
-                daysMin: ["日", "一", "二", "三", "四", "五", "六", "七"],
-                months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
-                monthsShort: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
-                today: "今天",
-                clear: "清除"
-            };
-            $('.dateinput').datepicker({
-                autoclose: true, //自动关闭
-                clearBtn: true,          //显示清除按钮
-                format: 'yyyy/mm/dd',
-                language: 'cn',           //语言
-            });
-            $("#id_t_status").bind("change", function () {
-                if (this.value == "1") {
-                    $("#sellinfo").hide();
-                } else if (this.value == "3") {
-                    $("#sellinfo").show();
-                } else if (this.value == "5") {
-                    $("#sellinfo").hide();
-                }
-            });
+            initDatePicker($('.input-daterange'));
+            initDatePicker($('#id_chupiaoriqi'));
+            initDatePicker($('#id_daoqiriqi'));
 
-            {#$("#sellinfo").hide();#}
-            {#$("#id_t_status").disabled();#}
-            {#$("#id_qianpaipiaohao").attr("disabled",true);#}
-            {#$("#id_piaohao").attr("disabled",true);#}
-            {#$("#id_chupiaohang").attr("disabled",true);#}
-            {#$("#id_chupiaoriqi").attr("disabled",true);#}
-            {#$("#id_daoqiriqi").attr("disabled",true);#}
-            {#$("#id_piaomianjiage").attr("disabled",true);#}
-            {#$("#id_gourujiage").attr("disabled",true);#}
+            $("#id_t_status option[value='3']").remove();
+            $("#id_t_status option[value='7']").remove();
         });
+
+        function exportbtn() {
+            $("#id_piaomianjiage").val($("input[name='je']").val() * 10000);
+            console.log($("#t_gourujiage").text())
+            $("#id_gourujiage").val($("#real_jine").text());
+        }
+        $("#exportbtn").val('填入');
+        $("#exportbtn").show();
 
     </script>
 

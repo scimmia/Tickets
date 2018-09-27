@@ -294,6 +294,8 @@
     <td>
         {% if item.t_status == 1 %}
             <span class="label label-success">在库
+        {% elif item.t_status == 2 %}
+            <span class="label label-danger">未完成
         {% elif item.t_status == 3 %}
             <span class="label label-danger">卖出
         {% elif item.t_status == 5 %}
