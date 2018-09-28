@@ -312,8 +312,6 @@ def create_pre_collect(customer, instance):
     instance.jiedairen = customer
     instance.order_type = 5
     instance.save()
-    customer.yushou_benjin += money
-    customer.save()
     log = LogTemp()
     log.oper_type = 307
     log.add_detail_predetail(instance.pk)
@@ -322,7 +320,7 @@ def create_pre_collect(customer, instance):
     log.add_yushou(money)
     log.save()
     utils.create_card_fee(card, money, log)
-    utils.create_loan_pre_fee(instance, money, log)
+    utils.create_loan_pre_collect_fee(customer, money, log)
 
 
 def pre_collect_customers(request):
@@ -352,8 +350,6 @@ def create_pre_pay(customer, instance):
     instance.jiedairen = customer
     instance.order_type = 6
     instance.save()
-    customer.yufu_benjin += money
-    customer.save()
     log = LogTemp()
     log.oper_type = 308
     log.add_detail_predetail(instance.pk)
@@ -362,7 +358,7 @@ def create_pre_pay(customer, instance):
     log.add_yufu(money)
     log.save()
     utils.create_card_fee(card, 0 - money, log)
-    utils.create_loan_pre_fee(instance, 0 - money, log)
+    utils.create_loan_pre_pay_fee(customer, money, log)
 
 
 def pre_pay_customers(request):
@@ -439,8 +435,10 @@ def xx_lists(request, index, pk):
 
 
 def pre_collect_list(request, pk):
-    return xx_lists(request, 5, pk)
+    fee_data = FeeDetail.objects.filter(fee_detail_type=41, fee_detail_pk=pk).order_by('-pub_date')
+    return utils.get_paged_page(request, fee_data, 'ticket/loan_pre_order.html')
 
 
 def pre_pay_list(request, pk):
-    return xx_lists(request, 6, pk)
+    fee_data = FeeDetail.objects.filter(fee_detail_type=42, fee_detail_pk=pk).order_by('-pub_date')
+    return utils.get_paged_page(request, fee_data, 'ticket/loan_pre_order.html')

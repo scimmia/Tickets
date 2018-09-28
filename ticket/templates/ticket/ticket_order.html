@@ -83,6 +83,10 @@
                         <table class="table">
                             <tbody>
                             <tr>
+                                <th>{% if index == 1 %}付款{% else %}收款{% endif %}人:</th>
+                                <td style="text-align:right;"><a>{{ order.customer }}</a></td>
+                            </tr>
+                            <tr>
                                 <th>票面价格:</th>
                                 <td style="text-align:right;"><a>{{ order.ticket_sum|floatformat:2|intcomma }}</a></td>
                             </tr>
@@ -116,17 +120,47 @@
                             {% endif %}：</h3>
                         </div>
                         <div class="box-body">
+                            {% if order.order_type == 1 %}
+                                <p>可用预收款：<span style="color: red">{{ order.customer.yushou_benjin }}元</span></p>
+                                <div id="div_id_zijinchipay" class="form-group checkbox">
+                                    <label for="id_zijinchipay" class="">
+                                        <input type="checkbox" name="zijinchipay" class="checkboxinput"
+                                               id="id_zijinchipay">
+                                        使用预收款
+                                    </label>
+                                </div>
+                            {% elif order.order_type == 2 %}
+                                <p>可用预付款：{{ order.customer.yufu_benjin }}</p>
+                                <div id="div_id_zijinchipay" class="form-group checkbox">
+                                <label for="id_zijinchipay" class="">
+                                    <input type="checkbox" name="zijinchipay" class="checkboxinput"
+                                           id="id_zijinchipay">
+                                    使用预付款
+                                </label>
+                                </div>
+                            {% endif %}
+                            <div id="div_id_yinhangka" class="form-group" style="display: block;"><label
+                                    for="id_yinhangka" class="control-label  requiredField">
+                                银行卡<span class="asteriskField">*</span> </label>
+                                <div class="controls "><select name="yinhangka" class="select form-control"
+                                                               id="id_yinhangka" required="">
+                                    <option value="" selected="">---------</option>
+                                    {% for v in card_data %}
+                                        <option value="{{ v.id }}">{{ v.name }}</option>
+                                    {% endfor %}
+                                </select></div>
+                            </div>
                             {{ feeform | crispy }}
+                            </div>
+
+                            <button type="submit" class="btn btn-danger center-block" id="add_fee">
+                                {% if order.order_type == 1 %}付款
+                                {% elif order.order_type == 2 %}收款{% endif %}
+                                <i class="ace-icon fa fa-cart-plus icon-on-right bigger-110"></i>
+                            </button>
                         </div>
 
-                        <button type="submit" class="btn btn-danger center-block" id="add_fee">
-                            {% if order.order_type == 1 %}付款
-                            {% elif order.order_type == 2 %}收款{% endif %}
-                            <i class="ace-icon fa fa-cart-plus icon-on-right bigger-110"></i>
-                        </button>
                     </div>
-
-                </div>
             </form>
             <div class="col-md-6">
                 <div>
@@ -135,9 +169,6 @@
                 {% include 'ticket/pagination.html' %}
 
             </div>
-        </div>
-        <div class="row">
-
         </div>
     </section>
 
@@ -236,7 +267,16 @@
                     "thousands": "."
                 },
             });
-
+            $("#id_zijinchipay").change(function () {
+                if ($("#id_zijinchipay").is(':checked')) {
+                    $("#div_id_yinhangka").hide()
+                    $("#id_yinhangka").val("")
+                    $("#id_yinhangka").removeAttr('required');
+                } else {
+                    $("#div_id_yinhangka").show()
+                    $("#id_yinhangka").prop("required", "true");
+                }
+            });
         });
     </script>
 

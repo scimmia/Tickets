@@ -19,6 +19,7 @@
 {% block table_tr %}
     <th style="display: none">ID</th>
     <th>添加日期</th>
+    <th>{% if index == 1 %}付款{% else %}收款{% endif %}人</th>
     <th>合计票面价格</th>
     <th>合计应{% if index == 1 %}付款{% else %}收款{% endif %}金额</th>
     <th>已{% if index == 1 %}支付{% else %}收取{% endif %}金额</th>
@@ -30,6 +31,7 @@
     <td><a class="green" href="{% url 'ticket_order' item.id %}" title="查看信息">
                                 {{ item.pub_date }}
                             </a></td>
+    <td>{{ item.customer }}</td>
     <td>{{ item.ticket_sum|floatformat:2|intcomma }}</td>
     <td>{{ item.money|floatformat:2|intcomma }}</td>
     {#                            <td>{{ item.total_sum }}</td>#}

@@ -64,7 +64,7 @@
                                 <th class="btbg font-center titfont">电票</th>
                                 <td><a href="{% url 'ticket_list' %}?t_status=1&t_type=2">
                                     <span class="pull-left">{{ kudianc }}张</span>
-                                    <span class="pull-right">{{ kudians |floatformat:2|intcomma}}元</span></a></td>
+                                    <span class="pull-right">{{ kudians |floatformat:2|intcomma }}元</span></a></td>
                                 <td><a href="{% url 'ticket_list' %}?t_status=5&t_type=2">
                                     <span class="pull-left">{{ chidianc }}张</span>
                                     <span class="pull-right">{{ chidians|floatformat:2|intcomma }}元</span></a></td>
@@ -111,13 +111,15 @@
                                 <th class="btbg font-center titfont">三日内到期<br>池开库存票</th>
                                 <td><a href="{% url 'ticket_list' %}?t_status=1&daoqiriqi__lte={{ threeday }}">
                                     <span class="pull-left">{{ daoqikucun_count }}张</span>
-                                    <span class="pull-right">{{ daoqikucun_sum|floatformat:2|intcomma }}元</span></a></td>
+                                    <span class="pull-right">{{ daoqikucun_sum|floatformat:2|intcomma }}元</span></a>
+                                </td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">本日到期<br>在池票</th>
                                 <td><a href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__lte={{ today }}">
                                     <span class="pull-left">{{ daoqizaichi_count }}张</span>
-                                    <span class="pull-right">{{ daoqizaichi_sum|floatformat:2|intcomma }}元</span></a></td>
+                                    <span class="pull-right">{{ daoqizaichi_sum|floatformat:2|intcomma }}元</span></a>
+                                </td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">月底到期<br>未还超短贷</th>
@@ -127,13 +129,13 @@
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">待收借款</th>
-                                <td><a href="{% url 'borrow_status' %}">
+                                <td><a href="{% url 'need_collect_customers' %}">
                                     <span class="pull-left">{{ daishou_count }}条</span>
                                     <span class="pull-right">{{ daishou_sum|floatformat:2|intcomma }}元</span></a></td>
                             </tr>
                             <tr>
                                 <th class="btbg font-center titfont">待还贷款</th>
-                                <td><a href="{% url 'loan_status' %}">
+                                <td><a href="{% url 'need_pay_customers' %}">
                                     <span class="pull-left">{{ daifu_count }}条</span>
                                     <span class="pull-right">{{ daifu_sum|floatformat:2|intcomma }}元</span></a></td>
                             </tr>
@@ -145,53 +147,68 @@
 
         </div>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">增幅</h3>
+                        <h3 class="box-title">每日统计</h3>
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <table class="table table-bordered table-striped">
+                        <table id="table_id" class="table table-striped table-bordered table-hover">
+                            <thead>
+                            <th class="btbg font-center titfont">统计日期</th>
+                            <th class="btbg font-center titfont">现金</th>
+                            <th class="btbg font-center titfont">库存票</th>
+                            <th class="btbg font-center titfont">可用额度</th>
+                            <th class="btbg font-center titfont">已用额度</th>
+                            <th class="btbg font-center titfont">保证金</th>
+                            <th class="btbg font-center titfont">池内票</th>
+                            <th class="btbg font-center titfont">理财</th>
+                            <th class="btbg font-center titfont">超短贷</th>
+                            <th class="btbg font-center titfont">应收</th>
+                            <th class="btbg font-center titfont">应付</th>
+                            <th class="btbg font-center titfont">预收</th>
+                            <th class="btbg font-center titfont">预付</th>
+                            <th class="btbg font-center titfont">业务费用</th>
+                            <th class="btbg font-center titfont">资本费用</th>
+                            <th class="btbg font-center titfont">管理杂费</th>
+                            <th class="btbg font-center titfont">业务利润</th>
+                            <th class="btbg font-center titfont">资本收益</th>
+                            <th class="btbg font-center titfont">其他利润</th>
+                            </thead>
+                            <!--表格内容-->
                             <tbody>
-                            <tr>
-                                <th></th>
-                                <th>今日</th>
-                                <th>前日</th>
-                                <th>增幅</th>
-                            </tr>
-                            <tr>
-                                <th>资产</th>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <th>现金</th>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <th>存票</th>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <th>应收款</th>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <th>应付款</th>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
+                            {% for item in dashs %}
+                                <tr>
+                                    <td><a class="green" href="{% url 'log_list' %}?search_date={{ item.day|date:'Y-m-d'}}"
+                                           title="查看信息">
+                                        {{ item.day|naturalday }}
+                                    </a></td>
+                                    <td>{{ item.xianjin }}</td>
+                                    <td>{{ item.kucun }}</td>
+                                    <td>{{ item.edu_keyong }}</td>
+                                    <td>{{ item.edu_yiyong }}</td>
+                                    <td>{{ item.edu_baozhengjin }}</td>
+                                    <td>{{ item.edu_chineipiao }}</td>
+                                    <td>{{ item.edu_licai }}</td>
+                                    <td>{{ item.edu_chaoduandai }}</td>
+                                    <td>{{ item.need_collect }}</td>
+                                    <td>{{ item.need_pay }}</td>
+                                    <td>{{ item.yushou }}</td>
+                                    <td>{{ item.yufu }}</td>
+                                    <td>{{ item.feiyong_yewu }}</td>
+                                    <td>{{ item.feiyong_ziben }}</td>
+                                    <td>{{ item.feiyong_za }}</td>
+                                    <td>{{ item.lirun_yewu }}</td>
+                                    <td>{{ item.lirun_ziben }}</td>
+                                    <td>{{ item.lirun_za }}</td>
+                                </tr>
+
+                            {% endfor %}
+
                             </tbody>
                         </table>
+                        {% include 'ticket/pagination.html' %}
                     </div>
                 </div>
             </div>

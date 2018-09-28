@@ -1,0 +1,51 @@
+{% extends "ticket/dashboard.html" %}
+{% load staticfiles %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+         <h1>
+            票据
+            <small>{% if order.order_type == 1 %}付款
+            {% elif order.order_type == 2 %}收款{% endif %}订单
+            </small>
+        </h1>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            {% include 'ticket/fee_list.html' %}
+        </div>
+        {% include 'ticket/pagination.html' %}
+
+    </section>
+
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
+    <script src="{% static 'plugins/initItems.js' %}"></script>
+
+    {% block othersScript %}
+    {% endblock %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            {% block initTables %}
+                var t = initSortTable($('#table_id'));
+            {% endblock %}
+            {% block initDatePicker %}
+            {% endblock %}
+            {% block initSelect %}
+            {% endblock %}
+            {% block initOthers %}
+            {% endblock %}
+        });
+    </script>
+{% endblock %}

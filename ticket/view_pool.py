@@ -4,7 +4,7 @@ from django.db.models import Q, Sum
 from django.shortcuts import render, redirect
 
 from ticket import utils
-from ticket.forms import SuperLoanForm, SuperLoanFeeForm, ProForm, PoolLicaiForm
+from ticket.forms import SuperLoanForm, MoneyForm, ProForm, PoolLicaiForm
 from ticket.models import Ticket, SuperLoan, Card, Fee, SuperLoanFee, FeeDetail, PoolLicai
 from ticket.utils import LogTemp
 
@@ -165,7 +165,7 @@ def super_loan_lists(request):
 def super_loan(request, pk):
     order = SuperLoan.objects.get(pk=pk)
     card_data = Card.objects.all()
-    poolfeeform = SuperLoanFeeForm(request.POST or None)
+    poolfeeform = MoneyForm(request.POST or None)
     context = {
         'poolfeeform': poolfeeform,
         'card_data': card_data,

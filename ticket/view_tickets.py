@@ -10,10 +10,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse
 
-from ticket import utils
-from ticket.forms import TicketForm, TicketEditForm, TicketOrderFeeForm, MoneyWithCardForm
-from ticket.models import Card, Fee, Ticket, Order, StoreFee, Pool, InpoolPercent, TicketsImport, \
-    StoreTicketsImport, FeeDetail
+from ticket import utils, view_loan
+from ticket.forms import TicketForm, TicketEditForm, MoneyForm
+from ticket.models import Card, Ticket, Order, TicketsImport, StoreTicketsImport, FeeDetail
 from ticket.utils import LogTemp
 
 
@@ -181,39 +180,42 @@ def tickets_needfix(request):
 
 
 def ticket_needselect(request, index):
-    if request.method == 'GET':
-        if index == 1:
-            raw_data = Ticket.objects.filter(~Q(t_status=2), pay_status=1, payorder=None, gourujiage__gt=0).order_by(
-                '-goumairiqi')
-        else:
-            raw_data = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None).order_by('-goumairiqi')
-        list_template = 'ticket/ticket_toselect.html'
-        context = {
-            'index': index,
-            'gongyingshang': get_ticketlists('gongyingshang'),
-        }
-        return utils.get_paged_page(request, raw_data, list_template, context)
-    elif request.method == 'POST':
+    context = {
+        'index': index,
+        'gongyingshang': get_ticketlists('gongyingshang'),
+    }
+    if request.method == 'POST':
         ids = request.POST['ids']
         selected_num = request.POST['selected_num']
         selected_piaomian = request.POST['selected_piaomian']
         selected_real = request.POST['selected_real']
-        raw_data = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
-
-        context = {
-            'index': index,
-            'data': raw_data,
-            'ids': ids,
-            'selected_num': selected_num,
-            'selected_piaomian': selected_piaomian,
-            'selected_real': selected_real,
-        }
-        if index == 2:
-            prices = set([])
-            for t in raw_data:
-                prices.add(str(t.piaomianjiage))
-            context['prices'] = prices
-        return render(request, 'ticket/ticket_order_preview.html', context)
+        if int(selected_num) > 0:
+            raw_data = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
+            context = {
+                'index': index,
+                'data': raw_data,
+                'ids': ids,
+                'selected_num': selected_num,
+                'selected_piaomian': selected_piaomian,
+                'selected_real': selected_real,
+            }
+            if index == 1:
+                context['maipiaoren'] = raw_data[0].gongyingshang
+            elif index == 2:
+                prices = set([])
+                for t in raw_data:
+                    prices.add(str(t.piaomianjiage))
+                context['prices'] = prices
+            return render(request, 'ticket/ticket_order_preview.html', context)
+        else:
+            context['message'] = u'请选择至少一张票据'
+    if index == 1:
+        raw_data = Ticket.objects.filter(~Q(t_status=2), pay_status=1, payorder=None, gourujiage__gt=0).order_by(
+            '-goumairiqi')
+    else:
+        raw_data = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None).order_by('-goumairiqi')
+    list_template = 'ticket/ticket_toselect.html'
+    return utils.get_paged_page(request, raw_data, list_template, context)
 
 
 def ticket_needpay(request):
@@ -228,6 +230,7 @@ def ticket_createorder(request):
     if request.method == 'POST':
         order = Order()
         order.order_type = int(request.POST['ordertype'])
+        order.customer = view_loan.get_customer_by_name(request.POST['maipiaoren'])
         order.save()
         log = LogTemp()
 
@@ -235,16 +238,13 @@ def ticket_createorder(request):
         if order.order_type == 1:
             Ticket.objects.filter(id__in=ids.split(',')).update(pay_status=2, payorder=order, paytime=order.pub_date)
             log.oper_type = 201
-            log.add_detail_ticketorder(order.pk)
         elif order.order_type == 2:
             Ticket.objects.filter(id__in=ids.split(',')).update(t_status=3, sell_status=4, sellorder=order,
                                                                 selltime=order.pub_date,
                                                                 maipiaoren=request.POST['maipiaoren'])
             log.oper_type = 202
-            log.add_detail_ticketorder(order.pk)
-
-        tickets = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
         log.add_detail_ticketorder(order.pk)
+        tickets = Ticket.objects.filter(id__in=ids.split(',')).order_by('-goumairiqi')
         for t in tickets:
             log.add_detail_ticket(t.pk)
             order.ticket_count += 1
@@ -290,50 +290,89 @@ def ticket_order(request, pk):
     elif order.order_type == 2:
         ticket_data = Ticket.objects.filter(sellorder=pk).order_by('-goumairiqi')
     list_template = 'ticket/ticket_order.html'
-    feeform = MoneyWithCardForm(request.POST or None)
+    card_data = Card.objects.all()
+    feeform = MoneyForm(request.POST or None)
     context = {
         'order': order,
         'ticket_data': ticket_data,
+        'card_data': card_data,
         'feeform': feeform,
     }
     if request.method == 'POST':
         if feeform.is_valid():
-            instance = feeform.save(commit=False)
-            money = instance.money
-            card = instance.card
-            log = LogTemp()
-            log.add_detail_ticketorder(pk)
-            log.add_detail_card(card.pk)
-            if order.order_type == 1:
-                if money > order.needpay_sum:
-                    context['message'] = u'付款金额不能大于待支付金额'
-                else:
-                    log.oper_type = 203
-                    order.payfee_count += 1
-                    order.payfee_sum += money
-                    order.needpay_sum -= money
-                    order.save()
-                    log.add_xianjin(0 - money)
-                    log.add_need_pay(0 - money)
-                    log.save()
-                    utils.create_card_fee(card, 0 - money, log)
-                    utils.create_ticket_order_fee(order, 0 - money, log)
-                    context['message'] = u'付款成功'
-            elif order.order_type == 2:
-                if money > order.needpay_sum:
-                    context['message'] = u'收款金额不能大于待收取金额'
-                else:
-                    log.oper_type = 204
-                    order.payfee_count += 1
-                    order.payfee_sum += money
-                    order.needpay_sum -= money
-                    order.save()
-                    log.add_xianjin(money)
-                    log.add_need_collect(0 - money)
-                    log.save()
-                    utils.create_card_fee(card, money, log)
-                    utils.create_ticket_order_fee(order, money, log)
-                    context['message'] = u'收款成功'
+            money = feeform.cleaned_data.get('money')
+            if 'zijinchipay' in request.POST.keys():
+                log = LogTemp()
+                log.add_detail_ticketorder(pk)
+                if order.order_type == 1:
+                    if money > order.needpay_sum:
+                        context['message'] = u'付款金额不能大于待支付金额'
+                    elif money > order.customer.yufu_benjin:
+                        context['message'] = u'付款金额不能大于可用预付金额'
+                    else:
+                        log.oper_type = 205
+                        order.payfee_count += 1
+                        order.payfee_sum += money
+                        order.needpay_sum -= money
+                        order.save()
+                        log.add_yushou(0 - money)
+                        log.add_need_pay(0 - money)
+                        log.save()
+                        utils.create_loan_pre_collect_fee(order.customer, 0 - money, log)
+                        utils.create_ticket_order_fee(order, 0 - money, log)
+                        context['message'] = u'付款成功'
+                elif order.order_type == 2:
+                    if money > order.needpay_sum:
+                        context['message'] = u'收款金额不能大于待收取金额'
+                    elif money > order.customer.yushou_benjin:
+                        context['message'] = u'收款金额不能大于可用预收金额'
+                    else:
+                        log.oper_type = 206
+                        order.payfee_count += 1
+                        order.payfee_sum += money
+                        order.needpay_sum -= money
+                        order.save()
+                        log.add_yufu(0 - money)
+                        log.add_need_collect(0 - money)
+                        log.save()
+                        utils.create_loan_pre_pay_fee(order.customer, 0 - money, log)
+                        utils.create_ticket_order_fee(order, money, log)
+                        context['message'] = u'收款成功'
+            else:
+                card = Card.objects.get(pk=int(request.POST['yinhangka']))
+                log = LogTemp()
+                log.add_detail_ticketorder(pk)
+                log.add_detail_card(card.pk)
+                if order.order_type == 1:
+                    if money > order.needpay_sum:
+                        context['message'] = u'付款金额不能大于待支付金额'
+                    else:
+                        log.oper_type = 203
+                        order.payfee_count += 1
+                        order.payfee_sum += money
+                        order.needpay_sum -= money
+                        order.save()
+                        log.add_xianjin(0 - money)
+                        log.add_need_pay(0 - money)
+                        log.save()
+                        utils.create_card_fee(card, 0 - money, log)
+                        utils.create_ticket_order_fee(order, 0 - money, log)
+                        context['message'] = u'付款成功'
+                elif order.order_type == 2:
+                    if money > order.needpay_sum:
+                        context['message'] = u'收款金额不能大于待收取金额'
+                    else:
+                        log.oper_type = 204
+                        order.payfee_count += 1
+                        order.payfee_sum += money
+                        order.needpay_sum -= money
+                        order.save()
+                        log.add_xianjin(money)
+                        log.add_need_collect(0 - money)
+                        log.save()
+                        utils.create_card_fee(card, money, log)
+                        utils.create_ticket_order_fee(order, money, log)
+                        context['message'] = u'收款成功'
     fee_data = FeeDetail.objects.filter(fee_detail_type=2, fee_detail_pk=pk).order_by('-pub_date')
     return utils.get_paged_page(request, fee_data, list_template, context)
 

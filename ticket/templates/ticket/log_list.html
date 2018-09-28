@@ -73,6 +73,10 @@
                 {% url 'loanorder' i.pk %}
             {% elif i.pktype == 4 %}
                 {% url 'pool_dash' %}
+            {% elif i.pktype == 41 %}
+                {% url 'pre_collect_list' i.pk %}
+            {% elif i.pktype == 42 %}
+                {% url 'pre_pay_list' i.pk %}
             {% elif i.pktype == 5 %}
                 {% url 'card_edit' i.pk %}
             {% elif i.pktype == 6 %}
@@ -90,6 +94,10 @@
                 借贷订单
             {% elif i.pktype == 4 %}
                 预收付款
+            {% elif i.pktype == 41 %}
+                预收款
+            {% elif i.pktype == 42 %}
+                预付款
             {% elif i.pktype == 5 %}
                 银行卡
             {% elif i.pktype == 6 %}
