@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 
 from ticket import utils
 from ticket.forms import SuperLoanForm, MoneyForm, ProForm, PoolLicaiForm
-from ticket.models import Ticket, SuperLoan, Card, Fee, SuperLoanFee, FeeDetail, PoolLicai
+from ticket.models import Ticket, SuperLoan, Card, FeeDetail, PoolLicai
 from ticket.utils import LogTemp
 
 
@@ -185,11 +185,6 @@ def super_loan(request, pk):
                     log.add_chaoduandai(0 - money)
                     if 'zijinchipay' in request.POST.keys():
                         # 资金池还款
-                        instance = SuperLoanFee()
-                        instance.superloan = order
-                        instance.money = 0 - money
-                        instance.name = '保证金还超短贷本金'
-                        instance.save()
                         log.add_baozhengjin(0 - money)
                         log.save()
                         utils.create_pro_fee(0 - money, log)
@@ -215,11 +210,6 @@ def super_loan(request, pk):
                     utils.pay_super_loan_lixi(order, money)
                     if 'zijinchipay' in request.POST.keys():
                         # 资金池还款
-                        instance = SuperLoanFee()
-                        instance.superloan = order
-                        instance.money = 0 - money
-                        instance.name = '保证金还超短贷利息'
-                        instance.save()
                         log.add_baozhengjin(0 - money)
                         log.save()
                         utils.create_pro_fee(0 - money, log)

@@ -2,7 +2,7 @@
 from django.forms import ModelForm
 from django import forms
 
-from ticket.models import Ticket, Card, Pool, Fee, Loan_Order, CardTrans, SuperLoan, Per_Detail, MoneyWithCard, \
+from ticket.models import Ticket, Card, Loan_Order, CardTrans, SuperLoan, Per_Detail, MoneyWithCard, \
     PoolLicai
 
 

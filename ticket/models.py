@@ -285,136 +285,6 @@ class PoolLicai(models.Model):
         verbose_name_plural = '理财'
 
 
-class SuperLoanFee(models.Model):
-    superloan = models.ForeignKey(SuperLoan, related_name='superloan_fee_a', verbose_name=u'超短贷', blank=True, null=True)
-    name = models.CharField(u'费用内容', max_length=50)
-    money = models.FloatField(u'金额', default=0)
-    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = '超短贷费用'
-        verbose_name_plural = '超短贷费用'
-
-
-class Fee(models.Model):
-    order = models.ForeignKey(Order, related_name='order_fee', verbose_name=u'订单费用', blank=True, null=True)
-    loanorder = models.ForeignKey(Loan_Order, related_name='loanorder_fee', verbose_name=u'借贷费用', blank=True, null=True)
-    superloan = models.ForeignKey(SuperLoan, related_name='superloan_fee', verbose_name=u'超短贷', blank=True, null=True)
-    yinhangka = models.ForeignKey(Card, related_name='fee_card', verbose_name=u'银行卡', blank=False, null=False)
-    name = models.CharField(u'费用内容', max_length=50)
-    money = models.FloatField(u'金额', default=0)
-    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
-
-    FEE_TYPE = (
-        (11, u'银行卡存入'),
-        (12, u'银行卡取出'),
-        (13, u'银行卡转入'),
-        (14, u'银行卡转出'),
-        (21, u'从保证金提取'),
-        (22, u'充值到保证金'),
-        (31, u'还超短贷'),
-        (41, u'借款给他人'),
-        (42, u'从他人处贷款'),
-        (411, u'从他人处预收款'),
-        (422, u'预付款款给他人'),
-        (43, u'收回借款本金'),
-        (44, u'偿还贷款本金'),
-        (45, u'收回借款费用支出'),
-        (46, u'偿还贷款费用支出'),
-        (47, u'收回借款费用收入'),
-        (48, u'偿还贷款费用收入'),
-        (49, u'收回借款利息'),
-        (50, u'偿还贷款利息'),
-        (51, u'偿还超短贷本金'),
-        (52, u'偿还超短贷利息'),
-        (1, u'付款订单'),
-        (2, u'付款订单'),
-        (3, u'付款支付'),
-        (4, u'收款收取'),
-        (5, u'付款费用支出'),
-        (6, u'收款费用支出'),
-        (7, u'付款费用收入'),
-        (8, u'收款费用收入'),
-    )
-    fee_type = models.IntegerField(
-        u'费用类型',
-        choices=FEE_TYPE,
-        default=1,
-    )
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = '费用'
-        verbose_name_plural = '费用'
-
-
-class StoreFee(models.Model):
-    ticket = models.ForeignKey(Ticket, related_name='storefee_ticket', verbose_name=u'票据', blank=True, null=True)
-    money = models.FloatField(u'金额', default=0)
-    pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
-    create_date = models.DateField(u'添加日期', auto_now_add=True)
-
-    STROEFEE_STATUS = (
-        (1, u'入库'),
-        (2, u'离库'),
-    )
-    storefee_status = models.IntegerField(
-        u'费用内容',
-        choices=STROEFEE_STATUS,
-        default=1,
-    )
-
-    def __str__(self):
-        return (u'%d' % (self.storefee_status))
-
-    class Meta:
-        verbose_name = '库存费用'
-        verbose_name_plural = '库存费用'
-
-
-class Pool(models.Model):
-    create_date = models.DateField(u'添加日期', auto_now_add=True)
-    totalmoney = models.FloatField(u'总额度', default=0)
-    promoney = models.FloatField(u'保证金', default=0)
-    loanmoney = models.FloatField(u'超短贷', default=0)
-    unusemoney = models.FloatField(u'可用额度', default=0)
-    usedmoney = models.FloatField(u'已用额度', default=0)
-    ticket = models.ForeignKey(Ticket, related_name='pool_ticket', verbose_name=u'票据', blank=True, null=True)
-    card = models.ForeignKey(Card, related_name='pool_card', verbose_name=u'银行卡', blank=True, null=True)
-    loan = models.ForeignKey(SuperLoan, related_name='pool_loan', verbose_name=u'超短贷', blank=True, null=True)
-    money = models.FloatField(u'金额', default=0)
-    pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
-
-    POOL_STATUS = (
-        (1, u'入池'),
-        (2, u'出池'),
-        (3, u'保证金收入'),
-        (4, u'保证金支出'),
-        (5, u'开票付款'),
-        (6, u'新增超短贷'),
-        (7, u'超短贷还款'),
-        (8, u'保证金还超短贷'),
-        (9, u'保证金还池开票'),
-    )
-    pool_status = models.IntegerField(
-        u'费用内容',
-        choices=POOL_STATUS,
-        default=1,
-    )
-
-    def __str__(self):
-        return (u'%d' % (self.pool_status))
-
-    class Meta:
-        verbose_name = '资金池'
-        verbose_name_plural = '资金池'
-
-
 class InpoolPercent(models.Model):
     tags = models.CharField(u'标签', max_length=50, primary_key=True)
     inpoolPer = models.FloatField(u'入池额度比例', default=0)
@@ -460,6 +330,10 @@ class AllInfo(models.Model):
 
 
 class DashBoard(AllInfo):
+    day = models.DateField(u'统计日期', auto_created=False, primary_key=True)
+
+
+class DashBoardSum(AllInfo):
     day = models.DateField(u'统计日期', auto_created=False, primary_key=True)
 
 
