@@ -237,7 +237,7 @@ function getVal(val, type) {
     var vals = parseFloat(val);
     if (type == 'm' && !isNaN(vals)) {
         var mlv = numMulti(val, 1.2);
-        $("#yxlvi").val(mlv.toFixed(2));
+        $("#yxlvi").val(mlv.toFixed(3));
     }
     if (type == 'y' && !isNaN(vals)) {
         var ylv = numDiv(val, 1.2);
