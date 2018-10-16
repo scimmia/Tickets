@@ -171,13 +171,15 @@ function getlilv() {
 
 //按利率计算
 function countbylilv(je) {
-    var txlv = $("input[name='txlv']").val();
+    var txlv = $("input[name='yxlv']").val();
     var sxf = parseInt($("input[name='sxf']").val());
     var days = getDays();
     console.log(days);
     var ts = days[0];
-    var txlx = (je * txlv * ts / 3  + je * sxf / 10).toFixed(2);
-    var jine = (je * 10000 - je * txlv/3 * ts- je/ 10 * sxf ).toFixed(2);//(rililv=txlv/1000/30)
+    // je * 10000 * ts * (txlv/30/1000)
+    // je * 10000 * ts * (txlv/360/100)
+    var txlx = (je * ts * txlv / 3.6  + je * sxf / 10).toFixed(2);
+    var jine = (je * 10000 - je * txlv/3.6 * ts- je/ 10 * sxf ).toFixed(2);//(rililv=txlv/1000/30)
     var everytenprice = (txlx * 10 / je).toFixed(2);
     if (isNaN(ts))
         ts = 0;
@@ -239,7 +241,7 @@ function getVal(val, type) {
     }
     if (type == 'y' && !isNaN(vals)) {
         var ylv = numDiv(val, 1.2);
-        $("#txlvi").val(ylv.toFixed(2));
+        $("#txlvi").val(ylv.toFixed(5));
     }
     return true;
 }
