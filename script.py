@@ -221,9 +221,12 @@ def countLoanOrderLixi():
 #     pass
 
 def dailyJob():
-    buildDailyReport()
-    countLoanOrderLixi()
-    countSuperLoanLixi()
+    try:
+        buildDailyReport()
+        countLoanOrderLixi()
+        countSuperLoanLixi()
+    except:
+        pass
     pass
 
 schedule.every().day.at("00:30").do(dailyJob)
