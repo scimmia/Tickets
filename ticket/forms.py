@@ -3,7 +3,7 @@ from django.forms import ModelForm
 from django import forms
 
 from ticket.models import Ticket, Card, Loan_Order, CardTrans, SuperLoan, Per_Detail, MoneyWithCard, \
-    PoolLicai
+    PoolLicai, MoneyWithCardPool, PoolPercent, Pool
 
 
 class TicketForm(ModelForm):
@@ -18,6 +18,18 @@ class TicketEditForm(ModelForm):
     class Meta:
         model = Ticket
         exclude = []
+
+
+class TicketTransForm(forms.Form):
+    p_status = forms.ChoiceField(label="",
+                                 choices=(
+                                     (1, "入库"),
+                                     (2, "入池"),
+                                 ),
+                                 widget=forms.RadioSelect,
+                                 initial='1',
+                                 )
+    pool = forms.ModelChoiceField(label=" ",queryset=Pool.objects.all(), required=False)
 
 
 class MoneyWithCardForm(ModelForm):
@@ -38,6 +50,16 @@ class CardTransForm(ModelForm):
         exclude = ['pub_date']
 
 
+class PoolForm(forms.Form):
+    name = forms.CharField(label="名称", required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+
+class PoolPercentForm(ModelForm):
+    class Meta:
+        model = PoolPercent
+        fields = ['pool','tags','inpoolPer']
+
+
 class ProForm(ModelForm):
     p_status = forms.ChoiceField(label="类型",
                                  choices=(
@@ -49,8 +71,8 @@ class ProForm(ModelForm):
                                  )
 
     class Meta:
-        model = MoneyWithCard
-        fields = ['p_status', 'money', 'card', ]
+        model = MoneyWithCardPool
+        fields = ['pool', 'p_status', 'money', 'card', ]
 
 
 class SuperLoanForm(ModelForm):
@@ -65,7 +87,7 @@ class SuperLoanForm(ModelForm):
 
     class Meta:
         model = SuperLoan
-        fields = ['benjin', 'isMonthlilv', 'lilv', 'lixi_begin_date', 'lixi_end_date']
+        fields = ['pool', 'benjin', 'isMonthlilv', 'lilv', 'lixi_begin_date', 'lixi_end_date']
 
 
 class PoolLicaiForm(ModelForm):
@@ -80,7 +102,7 @@ class PoolLicaiForm(ModelForm):
 
     class Meta:
         model = PoolLicai
-        fields = ['benjin', 'isMonthlilv', 'lilv', 'lixi_begin_date', 'lixi_end_date', 'is_front', 'yinhangka']
+        fields = ['pool', 'benjin', 'isMonthlilv', 'lilv', 'lixi_begin_date', 'lixi_end_date', 'is_front', 'yinhangka']
 
 
 class MoneyForm(forms.Form):

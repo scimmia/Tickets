@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from ticket import utils
 from ticket.forms import CardForm, CardTransForm
 from ticket.models import Card, CardTrans, FeeDetail
-from ticket.utils import LogTemp
 
 
 def card_list(request):
@@ -13,10 +12,10 @@ def card_list(request):
     }
     if request.method == 'POST':
         instance = form.save()
-        log = LogTemp()
+        log, detail = utils.create_log()
         log.oper_type = 401
-        log.add_detail_card(instance.pk)
-        log.save()
+        detail.add_detail_card(instance.pk)
+        utils.save_log(log, detail)
         context['message'] = u'保存成功'
     raw_data = Card.objects.all()
     list_template = 'ticket/card_list.html'
@@ -36,16 +35,15 @@ def card_edit(request, pk):
         card_ins.save()
 
         if request.POST['fee'].strip(' ') != '':
-            log = LogTemp()
+            log, detail = utils.create_log()
             log.oper_type = 402
             money = float(request.POST['fee'])
             if request.POST['p_status'] == '4':  # 银行卡取出
                 money = 0 - money
                 log.oper_type = 403
-            log.add_detail_card(pk)
-            log.add_xianjin(money)
-            log.save()
+            detail.add_detail_card(pk)
             utils.create_card_fee(card_ins, money, log)
+            utils.save_log(log, detail)
         context['message'] = u'保存成功'
 
     fee_data = FeeDetail.objects.filter(fee_detail_type=5,fee_detail_pk=pk).order_by('-pub_date')
@@ -67,13 +65,13 @@ def card_trans(request):
                 context['message'] = u'转账金额不能小于0'
             else:
                 instance.save()
-                log = LogTemp()
+                log,detail = utils.create_log()
                 log.oper_type = 404
-                log.add_detail_card(instance.fromCard.pk)
-                log.add_detail_card(instance.fromCard.pk)
-                log.save()
+                detail.add_detail_card(instance.fromCard.pk)
                 utils.create_card_fee(instance.fromCard, 0 - instance.money, log)
+                detail.add_detail_card(instance.toCard.pk)
                 utils.create_card_fee(instance.toCard, instance.money, log)
+                utils.save_log(log,detail)
                 context['message'] = u'转账成功'
 
     data = CardTrans.objects.all().order_by('-pub_date')

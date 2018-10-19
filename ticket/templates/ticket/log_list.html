@@ -25,14 +25,16 @@
                         <div class="col-sm-8">
                             <div class="input-daterange input-group">
                                 <span class="input-group-addon" id="date-picker">添加时间</span>
-                                <input type="text" class="form-control dateinput" name="search_date__gte" autocomplete="off"
+                                <input type="text" class="form-control dateinput" name="search_date__gte"
+                                       autocomplete="off"
                                        data-date-format="yyyy-mm-dd"
                                         {% if request.GET.search_date__gte %} value=
                                             {{ request.GET.search_date__gte }}{% endif %}>
                                 <span class="input-group-addon">
                                 <i class="fa fa-exchange"></i>
                             </span>
-                                <input type="text" class="form-control dateinput" name="search_date__lte" autocomplete="off"
+                                <input type="text" class="form-control dateinput" name="search_date__lte"
+                                       autocomplete="off"
                                        data-date-format="yyyy-mm-dd"
                                         {% if request.GET.search_date__lte %} value=
                                             {{ request.GET.search_date__lte }}{% endif %}>
@@ -64,62 +66,41 @@
     <td>{{ item.pub_date }} </td>
     <td>{{ item.get_oper_type_display }}</td>
     <td>{% for i in item.detail %}
-        <a class="green" href="
-            {% if i.pktype == 1 %}
-                {% url 'ticket_index' i.pk %}
-            {% elif i.pktype == 2 %}
-                {% url 'ticket_order' i.pk %}
-            {% elif i.pktype == 3 %}
-                {% url 'loanorder' i.pk %}
-            {% elif i.pktype == 4 %}
-                {% url 'pool_dash' %}
-            {% elif i.pktype == 41 %}
-                {% url 'pre_collect_list' i.pk %}
-            {% elif i.pktype == 42 %}
-                {% url 'pre_pay_list' i.pk %}
-            {% elif i.pktype == 5 %}
-                {% url 'card_edit' i.pk %}
-            {% elif i.pktype == 6 %}
-                {% url 'pool_dash'%}
-            {% elif i.pktype == 7 %}
-                {% url 'pool_loan' i.pk%}
-            {% elif i.pktype == 8 %}
-                {% url 'pool_licai_lists'%}?pk={{  i.pk }}
-            {% endif %}" title="查看">
-            {% if i.pktype == 1 %}
-                票据
-            {% elif i.pktype == 2 %}
-                票据订单
-            {% elif i.pktype == 3 %}
-                借贷订单
-            {% elif i.pktype == 4 %}
-                预收付款
-            {% elif i.pktype == 41 %}
-                预收款
-            {% elif i.pktype == 42 %}
-                预付款
-            {% elif i.pktype == 5 %}
-                银行卡
-            {% elif i.pktype == 6 %}
-                保证金
-            {% elif i.pktype == 7 %}
-                超短贷
-            {% elif i.pktype == 8 %}
-                理财
-            {% endif %}{{ i.pk }}
-            {% if not forloop.last %},{% endif %}
-            {% if forloop.counter|divisibleby:4 %}<br/>{% endif %}
-        </a>
+        {% if i.pktype == 1 %}
+            <a class="green" href="{% url 'ticket_index' i.pk %}">票据{{ i.pk }}</a>
+        {% elif i.pktype == 2 %}
+            <a class="green" href="{% url 'ticket_order' i.pk %}">票据订单{{ i.pk }}</a>
+        {% elif i.pktype == 3 %}
+            <a class="green" href="{% url 'loanorder' i.pk %}">借贷订单{{ i.pk }}</a>
+        {% elif i.pktype == 4 %}
+            <a class="green" href="{% url 'pool_dash' %}">资金池{{ i.pk }}</a>
+        {% elif i.pktype == 9 %}
+            <a class="green" href="{% url 'pool_detail' i.pk %}">资金池{{ i.pk }}</a>
+        {% elif i.pktype == 41 %}
+            <a class="green" href="{% url 'pre_collect_list' i.pk %}">预收款{{ i.pk }}</a>
+        {% elif i.pktype == 42 %}
+            <a class="green" href="{% url 'pre_pay_list' i.pk %}">预付款{{ i.pk }}</a>
+        {% elif i.pktype == 5 %}
+            <a class="green" href="{% url 'card_edit' i.pk %}">银行卡{{ i.pk }}</a>
+        {% elif i.pktype == 6 %}
+            <a class="green" href="{% url 'pool_dash' %}">保证金{{ i.pk }}</a>
+        {% elif i.pktype == 7 %}
+            <a class="green" href="{% url 'pool_loan' i.pk %}">超短贷{{ i.pk }}</a>
+        {% elif i.pktype == 8 %}
+            <a class="green" href="{% url 'pool_licai_lists' %}?pk={{ i.pk }}">理财{{ i.pk }}</a>
+        {% endif %}
+        {% if not forloop.last %},{% endif %}
+        {% if forloop.counter|divisibleby:4 %}<br/>{% endif %}
     {% endfor %}</td>
     <td>
         {% for i in item.contdetail %}
             <span>{{ i.cont }}</span>
             <span style="color: {% if i.money > 0 %}
-                 red">+
+                red">+
             {% elif i.money < 0 %}
-                 green">
+                green">
             {% endif %}
-                {{ i.money|floatformat:2|intcomma }}</span>
+            {{ i.money|floatformat:2|intcomma }}</span>
             {% if not forloop.last %},{% endif %}
             {% if forloop.counter|divisibleby:3 %}<br/>{% endif %}
         {% endfor %}

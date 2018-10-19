@@ -1,42 +1,60 @@
 import datetime
+from decimal import Decimal
 
 from django.db.models import Q, Sum
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, get_object_or_404, render
 
 from ticket import utils
-from ticket.forms import SuperLoanForm, MoneyForm, ProForm, PoolLicaiForm
-from ticket.models import Ticket, SuperLoan, Card, FeeDetail, PoolLicai
-from ticket.utils import LogTemp
+from ticket.forms import SuperLoanForm, MoneyForm, ProForm, PoolLicaiForm, PoolForm, PoolPercentForm
+from ticket.models import Ticket, SuperLoan, Card, FeeDetail, PoolLicai, Pool, OperLog, PoolPercent, \
+    PoolPercentDetail
+from ticket.utils import create_pool_percent
 
 
 def pool_dash(request):
+    pool_form = PoolForm(request.POST or None)
     pro_form = ProForm(request.POST or None)
     super_loan_form = SuperLoanForm(request.POST or None)
     licai_form = PoolLicaiForm(request.POST or None)
 
     context = {}
     if request.method == 'POST':
-        if pro_form.is_valid():
+        log, detail = utils.create_log()
+        # 新建资金池
+        if pool_form.is_valid():
+            pro_form = ProForm()
             licai_form = PoolLicaiForm()
             super_loan_form = SuperLoanForm()
-            pool = pro_form.save(commit=False)
-            money = pool.money
-            card = pool.card
-            log = LogTemp()
-            log.add_detail_pro()
-            log.add_detail_card(card.pk)
+            pool = Pool()
+            pool.name = pool_form.cleaned_data.get('name')
+            pool.save()
+            detail.add_detail_pool(pool.pk)
+            log.oper_type = 500
+            utils.save_log(log, detail)
+            context['message'] = u'新建资金池成功'
+        # 存取保证金
+        elif pro_form.is_valid():
+            pool_form = PoolForm()
+            licai_form = PoolLicaiForm()
+            super_loan_form = SuperLoanForm()
+            pro = pro_form.save(commit=False)
+            money = pro.money
+            card = pro.card
+            pool = pro.pool
+            detail.add_detail_pool(pool.pk)
+            detail.add_detail_card(card.pk)
             if pro_form.cleaned_data.get('p_status') == '2':
                 money = 0 - money
                 log.oper_type = 502
             else:
                 log.oper_type = 501
-            log.add_xianjin(0 - money)
-            log.add_baozhengjin(money)
-            log.save()
-            utils.create_pro_fee(money, log)
-            utils.create_card_fee(pool.card, 0 - money, log)
+            utils.create_pro_fee(pool, money, log)
+            utils.create_card_fee(pro.card, 0 - money, log)
+            utils.save_log(log, detail)
             context['message'] = u'保存保证金成功'
+        #     新建超短贷
         elif super_loan_form.is_valid():
+            pool_form = PoolForm()
             pro_form = ProForm()
             licai_form = PoolLicaiForm()
             instance = super_loan_form.save(commit=False)
@@ -45,14 +63,15 @@ def pool_dash(request):
             instance.benjin_needpay = super_loan_form.cleaned_data.get('benjin')
             instance.lixi_sum_date = instance.lixi_begin_date
             instance.save()
-            log = LogTemp()
             log.oper_type = 503
-            log.add_detail_superloan(instance.pk)
-            log.add_chaoduandai(instance.benjin)
-            log.save()
+            detail.add_detail_pool(instance.pool.pk)
+            detail.add_detail_superloan(instance.pk)
             utils.create_super_loan_fee(instance, instance.benjin, log)
+            utils.save_log(log, detail)
             context['message'] = u'保存超短贷成功'
+        #     新建理财
         elif licai_form.is_valid():
+            pool_form = PoolForm()
             pro_form = ProForm()
             super_loan_form = SuperLoanForm()
             instance = licai_form.save(commit=False)
@@ -64,36 +83,30 @@ def pool_dash(request):
             if (instance.lixi_end_date - today).days <= 0:
                 instance.is_end = True
             instance.save()
-            instance.yinhangka.money -= instance.benjin
-            instance.yinhangka.save()
-            log = LogTemp()
             log.oper_type = 510
-            log.add_detail_licai(instance.pk)
-            log.add_detail_card(instance.yinhangka.pk)
-            log.add_licai(instance.benjin)
-            log.add_xianjin(0 - instance.benjin)
-            log.save()
+            detail.add_detail_pool(instance.pool.pk)
+            detail.add_detail_licai(instance.pk)
+            detail.add_detail_card(instance.yinhangka.pk)
             utils.create_licai_fee(instance, instance.benjin, log)
             utils.create_card_fee(instance.yinhangka, 0 - instance.benjin, log)
+            utils.save_log(log, detail)
             if instance.is_front:
-                instance.yinhangka.money += instance.lixi
-                instance.yinhangka.save()
-                lixilog = LogTemp()
+                lixilog, lixidetail = utils.create_log()
                 lixilog.oper_type = 511
-                lixilog.add_detail_licai(instance.pk)
-                lixilog.add_detail_card(instance.yinhangka.pk)
-                lixilog.add_xianjin(instance.lixi)
-                lixilog.save()
-                utils.create_licai_fee(instance, instance.lixi, lixilog)
+                lixidetail.add_detail_licai(instance.pk)
+                lixidetail.add_detail_card(instance.yinhangka.pk)
                 utils.create_card_fee(instance.yinhangka, instance.lixi, lixilog)
+                utils.save_log(lixilog, lixidetail)
             context['message'] = u'保存理财成功'
 
     pro_form.fields['card'].required = True
+    context['pool_form'] = pool_form
     context['form'] = pro_form
     context['loanform'] = super_loan_form
     context['pool_licai_form'] = licai_form
 
-    dash = utils.get_dash()
+    # dash = utils.get_dash()
+    dash = Pool.objects.aggregate(Sum('edu_keyong'), Sum('edu_yiyong'), Sum('edu_baozhengjin'), Sum('edu_chineipiao'), Sum('edu_licai'), Sum('edu_chaoduandai'))
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     count_t = Ticket.objects.filter(Q(t_status=5) & Q(daoqiriqi__gte=today)).count()
     count_chikai = Ticket.objects.filter(gouruzijinchi=True).count()
@@ -106,8 +119,8 @@ def pool_dash(request):
     context['sum_chikai'] = sum_chikai
     context['count_chikai'] = count_chikai
 
-    fee_data = FeeDetail.objects.filter(fee_detail_type__in=[6, 7, 8]).order_by('-pub_date')
-    return utils.get_paged_page(request, fee_data, 'ticket/pool_dash.html', context)
+    pool_data = Pool.objects.filter().order_by('-update_date')
+    return utils.get_paged_page(request, pool_data, 'ticket/pool_dash.html', context)
 
 
 def pool_licai_lists(request):
@@ -116,48 +129,35 @@ def pool_licai_lists(request):
         ids = request.POST['ids']
         if len(ids) > 0:
             licais = PoolLicai.objects.filter(id__in=ids.split(','))
+            licai_count = 0
             for t in licais:
                 if t.is_end and (not t.is_payed):
                     t.is_payed = True
                     t.save()
-                    log = LogTemp()
+                    log, detail = utils.create_log()
                     log.oper_type = 512
-                    log.add_detail_licai(t.pk)
-                    log.add_detail_card(t.yinhangka.pk)
-                    log.add_licai(0 - t.benjin)
-                    log.add_xianjin(t.benjin)
+                    detail.add_detail_pool(t.pool.pk)
+                    detail.add_detail_licai(t.pk)
+                    detail.add_detail_card(t.yinhangka.pk)
                     money = t.benjin
                     if not t.is_front:
                         money += t.lixi
-                        log.add_xianjin(t.lixi)
-                    log.save()
-                    t.yinhangka.money += money
-                    t.yinhangka.save()
+                        log.lirun_yewu += Decimal(t.lixi)
                     utils.create_licai_fee(t, 0 - t.benjin, log)
                     utils.create_card_fee(t.yinhangka, money, log)
-        context['message'] = u'收款成功'
+                    utils.save_log(log, detail)
+                    licai_count += 1
+            if licai_count > 0:
+                context['message'] = (u'对%d条到期理财收款成功' % licai_count)
+            else:
+                context['errormsg'] = u'请选择至少一条“到期”理财'
+        else:
+            context['errormsg'] = u'请选择至少一条理财'
     data = PoolLicai.objects.all().order_by('-pub_date')
     return utils.get_paged_page(request, data, 'ticket/pool_licais.html', context)
 
 
 def super_loan_lists(request):
-    super_loan_form = SuperLoanForm(request.POST or None)
-    # 新建超短贷
-    if request.method == 'POST':
-        if super_loan_form.is_valid():
-            instance = super_loan_form.save(commit=False)
-            if super_loan_form.cleaned_data.get('isMonthlilv') == '2':
-                instance.lilv = super_loan_form.cleaned_data.get('lilv') * 1.2
-            instance.benjin_needpay = super_loan_form.cleaned_data.get('benjin')
-            instance.lixi_sum_date = instance.lixi_begin_date
-            instance.save()
-            log = LogTemp()
-            log.oper_type = 503
-            log.add_detail_superloan(instance.pk)
-            log.add_chaoduandai(instance.benjin)
-            log.save()
-            utils.create_super_loan_fee(instance, instance.benjin, log)
-            return redirect('pool_dash')
     loan_data = SuperLoan.objects.all().order_by('-pub_date')
     return utils.get_paged_page(request, loan_data, 'ticket/pool_loans.html')
 
@@ -176,52 +176,47 @@ def super_loan(request, pk):
             money = poolfeeform.cleaned_data.get('money')
             if 'benjin' in request.POST.keys():
                 if money > order.benjin_needpay:
-                    context['message'] = u'金额不能大于待还本金'
+                    context['errormsg'] = u'金额不能大于待还本金'
                 else:
-                    log = LogTemp()
-                    log.add_detail_superloan(pk)
+                    log, detail = utils.create_log()
+                    detail.add_detail_superloan(pk)
                     log.oper_type = 504
-                    utils.pay_super_loan_benjin(order, money)
-                    log.add_chaoduandai(0 - money)
                     if 'zijinchipay' in request.POST.keys():
                         # 资金池还款
-                        log.add_baozhengjin(0 - money)
-                        log.save()
-                        utils.create_pro_fee(0 - money, log)
+                        detail.add_detail_pool(order.pool.pk)
+                        utils.create_pro_fee(order.pool, 0 - money, log)
                         pass
                     else:
                         # 银行卡还款
                         card = Card.objects.get(pk=int(request.POST['yinhangka']))
-                        log.add_detail_card(card.pk)
-                        log.add_xianjin(0 - money)
-                        log.save()
+                        detail.add_detail_card(card.pk)
                         utils.create_card_fee(card, 0 - money, log)
+                    utils.pay_super_loan_benjin(order, money)
                     utils.create_super_loan_fee(order, 0 - money, log)
+                    utils.save_log(log, detail)
                     context['message'] = u'还款成功'
                 pass
             elif 'lixi' in request.POST.keys():
                 if money > order.lixi_needpay:
-                    context['message'] = u'金额不能大于待还利息'
+                    context['errormsg'] = u'金额不能大于待还利息'
                 else:
-                    log = LogTemp()
-                    log.add_detail_superloan(pk)
+                    log, detail = utils.create_log()
+                    detail.add_detail_superloan(pk)
                     log.oper_type = 505
-                    log.add_feiyong_yewu(money)
+                    log.feiyong_yewu += Decimal(money)
                     utils.pay_super_loan_lixi(order, money)
                     if 'zijinchipay' in request.POST.keys():
                         # 资金池还款
-                        log.add_baozhengjin(0 - money)
-                        log.save()
-                        utils.create_pro_fee(0 - money, log)
+                        detail.add_detail_pool(order.pool.pk)
+                        utils.create_pro_fee(order.pool, 0 - money, log)
                         pass
                     else:
                         # 银行卡还款
                         card = Card.objects.get(pk=int(request.POST['yinhangka']))
-                        log.add_detail_card(card.pk)
-                        log.add_xianjin(0 - money)
-                        log.save()
+                        detail.add_detail_card(card.pk)
                         utils.create_card_fee(card, 0 - money, log)
-                    utils.create_super_loan_fee(order, 0 - money, log)
+                    # utils.create_super_loan_fee(order, 0 - money, log)
+                    utils.save_log(log, detail)
                     context['message'] = u'还息成功'
                 pass
     fee_data = FeeDetail.objects.filter(fee_detail_type=7, fee_detail_pk=pk).order_by('-pub_date')
@@ -236,7 +231,7 @@ def pool_tickets(request):
     if request.method == 'POST':
         if 'ids' in request.POST.keys():
             ids = request.POST['ids']
-            log = LogTemp()
+            log, detail = utils.create_log()
             log.oper_type = 506
             if len(ids) > 0:
                 tickets = Ticket.objects.filter(id__in=ids.split(','))
@@ -244,12 +239,63 @@ def pool_tickets(request):
                     if not t.payedzijinchi:
                         t.payedzijinchi = True
                         t.save()
-                        log.add_detail_ticket(t.pk)
-                        log.add_baozhengjin(0 - t.gourujiage)
-            log.save()
+                        detail.add_detail_ticket(t.pk)
+                        log.edu_baozhengjin -= Decimal(t.gourujiage)
+            utils.save_log(log, detail)
             context['message'] = u'还款成功'
             pass
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     raw_data = Ticket.objects.filter(Q(gouruzijinchi=True) & Q(payedzijinchi=False) & Q(daoqiriqi__lte=today)).order_by(
         '-goumairiqi')
     return utils.get_paged_page(request, raw_data, 'ticket/pool_tickets.html', context)
+
+
+def pool_detail(request, pk):
+    pool = get_object_or_404(Pool, pk=pk)
+    context = {
+        'dash': pool,
+    }
+
+    fee_data = FeeDetail.objects.filter(fee_detail_type=9, fee_detail_pk=pk).order_by('-pub_date')
+    return utils.get_paged_page(request, fee_data, 'ticket/pool_detail.html', context)
+
+
+
+def pool_percent_list(request):
+    form = PoolPercentForm(request.POST or None)
+    pools = Pool.objects.all()
+    if PoolPercent.objects.filter(tags='!默认!').count() < len(pools):
+        for pool in pools:
+            create_pool_percent(pool,'!默认!', 100)
+    if request.method == 'POST':
+        if form.is_valid():
+            t = form.save(commit=False)
+            inpoolPer = request.POST['inpoolPer']
+            if create_pool_percent(t.pool,t.tags, inpoolPer):
+                message = u'保存成功'
+            else:
+                message = u'保存失败'
+
+    data = PoolPercent.objects.all().order_by('tags')
+
+    return render(request, 'ticket/inpoolPer_list.html', locals())
+
+
+def pool_percent_detail(request ,pk):
+    pool_percent = PoolPercent.objects.get(pk = pk)
+    if request.method == 'POST':
+        inpoolPer = request.POST['inpoolPer']
+        try:
+            pool_percent.inpoolPer = inpoolPer
+            pool_percent.save()
+            temp = PoolPercentDetail()
+            temp.inpoolPercent = pool_percent
+            temp.inpoolPer = inpoolPer
+            temp.save()
+            message = u'保存成功'
+        except:
+            message = u'保存失败'
+    data = PoolPercentDetail.objects.filter(inpoolPercent=pool_percent).order_by('-pub_date')
+    item = data[0]
+    return render(request, 'ticket/inpoolPer.html', locals())
+

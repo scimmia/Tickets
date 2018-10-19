@@ -10,94 +10,35 @@
 {% block search_header %}
     <div class="col-xs-12">
         <div class="box">
-            <div class="box-header with-border">
-                <h3 class="box-title">搜索</h3>
-
-                <div class="box-tools pull-right">
-                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                    </button>
-                </div>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body" style="display: none;">
+            <div class="box-body" >
                 <form class="navbar-for navbar-container" role="search" method="get" action="">{% csrf_token %}
                     <div class="row">
 
                         <div class="col-sm-3">
                             <div class="input-group">
-                                <span class="input-group-addon" id="chupiaohang__contains">票号</span>
-                                <input type="text" class="form-control" placeholder=""
-                                       aria-describedby="piaohao__contains"
-                                       name="piaohao__contains"
-                                       {% if request.GET.piaohao__contains %}value =
-                                           {{ request.GET.piaohao__contains }}{% endif %}>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <span class="input-group-addon" id="chupiaohang__contains">出票行</span>
-                                <input type="text" class="form-control" placeholder=""
-                                       aria-describedby="chupiaohang__contains"
-                                       name="chupiaohang__contains"
-                                       {% if request.GET.chupiaohang__contains %}value =
-                                           {{ request.GET.chupiaohang__contains }}{% endif %}>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <span class="input-group-addon">供应商</span>
-                                <select class="js-single form-control" name="gongyingshang">
-                                    <option value="">所有</option>
-                                    {% for v in gongyingshang %}
-                                        <option value="{{ v }}"
-                                                {% if request.GET.gongyingshang and request.GET.gongyingshang == v %}
-                                                selected{% endif %}>{{ v }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <span class="input-group-addon">买票人</span>
-                                <select class="js-single form-control" name="maipiaoren">
-                                    <option value="">所有</option>
-                                    {% for v in maipiaoren %}
-                                        <option value="{{ v }}"
-                                                {% if request.GET.maipiaoren and request.GET.maipiaoren == v %}
-                                                selected{% endif %}>{{ v }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <span class="input-group-addon" id="pay_status">付款状态</span>
-                                <select class="form-control" name="pay_status">
+                                <span class="input-group-addon" id="is_end">到期状态</span>
+                                <select class="form-control" name="is_end">
                                     <option value="">所有状态</option>
-                                    <option value="1" {% if request.GET.pay_status and request.GET.pay_status == '1' %}
-                                            selected{% endif %}>待付款
+                                    <option value="False" {% if request.GET.is_end and request.GET.is_end == 'False' %}
+                                            selected{% endif %}>未到期
                                     </option>
-                                    <option value="2" {% if request.GET.pay_status and request.GET.pay_status == '2' %}
-                                            selected{% endif %}>已付款
+                                    <option value="True" {% if request.GET.is_end and request.GET.is_end == 'True' %}
+                                            selected{% endif %}>已到期
                                     </option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-sm-3">
                             <div class="input-group">
-                                <span class="input-group-addon" id="sell_status">收款状态</span>
-                                <select class="form-control" name="sell_status">
+                                <span class="input-group-addon" id="is_payed">收款状态</span>
+                                <select class="form-control" name="is_payed">
                                     <option value="">所有状态</option>
-                                    <option value="3"
-                                            {% if request.GET.sell_status and request.GET.sell_status == '3' %}
+                                    <option value="False"
+                                            {% if request.GET.is_payed and request.GET.is_payed == 'False' %}
                                             selected{% endif %}>待收款
                                     </option>
-                                    <option value="4"
-                                            {% if request.GET.sell_status and request.GET.sell_status == '4' %}
+                                    <option value="True"
+                                            {% if request.GET.is_payed and request.GET.is_payed == 'True' %}
                                             selected{% endif %}>已收款
                                     </option>
                                 </select>
@@ -105,54 +46,67 @@
                         </div>
                         <div class="col-sm-3">
                             <div class="input-group">
-                                <span class="input-group-addon" id="date-picker">票面价格</span>
-                                <input type="number" class="form-control" name="piaomianjiage__gte"
-                                        {% if request.GET.piaomianjiage__gte %} value=
-                                            {{ request.GET.piaomianjiage__gte }}{% endif %}>
+                                <span class="input-group-addon" id="is_front">利息前置</span>
+                                <select class="form-control" name="is_front">
+                                    <option value="">所有状态</option>
+                                    <option value="True"
+                                            {% if request.GET.is_front and request.GET.is_front == 'True' %}
+                                            selected{% endif %}>是
+                                    </option>
+                                    <option value="False"
+                                            {% if request.GET.is_front and request.GET.is_front == 'False' %}
+                                            selected{% endif %}>否
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon" id="date-picker">本金</span>
+                                <input type="number" class="form-control" name="benjin__gte"
+                                        {% if request.GET.benjin__gte %} value=
+                                            {{ request.GET.benjin__gte }}{% endif %}>
                                 <span class="input-group-addon">
                                 <i class="fa fa-exchange"></i>
                             </span>
-                                <input type="number" class="form-control" name="piaomianjiage__lte"
-                                        {% if request.GET.piaomianjiage__lte %} value=
-                                            {{ request.GET.piaomianjiage__lte }}{% endif %}>
+                                <input type="number" class="form-control" name="benjin__lte"
+                                        {% if request.GET.benjin__lte %} value=
+                                            {{ request.GET.benjin__lte }}{% endif %}>
                             </div>
                         </div>
-
                     </div>
                     <div class="row">
                         <div class="col-sm-4">
                             <div class="input-daterange input-group">
-                                <span class="input-group-addon" id="date-picker">出票日期</span>
-                                <input type="text" class="form-control dateinput" name="chupiaoriqi__gte"
+                                <span class="input-group-addon" id="date-picker">计息日期</span>
+                                <input type="text" class="form-control dateinput" name="lixi_begin_date__gte"
                                        data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.chupiaoriqi__gte %} value=
-                                            {{ request.GET.chupiaoriqi__gte }}{% endif %}>
+                                        {% if request.GET.lixi_begin_date__gte %} value=
+                                            {{ request.GET.lixi_begin_date__gte }}{% endif %}>
                                 <span class="input-group-addon">
                                 <i class="fa fa-exchange"></i>
                             </span>
-                                <input type="text" class="form-control dateinput" name="chupiaoriqi__lte"
+                                <input type="text" class="form-control dateinput" name="lixi_begin_date__lte"
                                        data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.chupiaoriqi__lte %} value=
-                                            {{ request.GET.chupiaoriqi__lte }}{% endif %}>
+                                        {% if request.GET.lixi_begin_date__lte %} value=
+                                            {{ request.GET.lixi_begin_date__lte }}{% endif %}>
 
                             </div>
                         </div>
                         <div class="col-sm-4">
-
-
                             <div class="input-daterange input-group">
                                 <span class="input-group-addon" id="date-picker">到期日期</span>
-                                <input type="text" class="form-control dateinput" name="daoqiriqi__gte"
+                                <input type="text" class="form-control dateinput" name="lixi_end_date__gte"
                                        data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.daoqiriqi__gte %} value=
-                                            {{ request.GET.daoqiriqi__gte }}{% endif %}>
+                                        {% if request.GET.lixi_end_date__gte %} value=
+                                            {{ request.GET.lixi_end_date__gte }}{% endif %}>
                                 <span class="input-group-addon">
                                 <i class="fa fa-exchange"></i>
                             </span>
-                                <input type="text" class="form-control dateinput" name="daoqiriqi__lte"
+                                <input type="text" class="form-control dateinput" name="lixi_end_date__lte"
                                        data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.daoqiriqi__lte %} value=
-                                            {{ request.GET.daoqiriqi__lte }}{% endif %}>
+                                        {% if request.GET.lixi_end_date__lte %} value=
+                                            {{ request.GET.lixi_end_date__lte }}{% endif %}>
 
                             </div>
                         </div>
@@ -167,52 +121,13 @@
 								</span>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <div class="input-daterange input-group">
-                                <span class="input-group-addon" id="date-picker">购买日期</span>
-                                <input type="text" class="form-control dateinput" name="goumairiqi__gte"
-                                       data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.goumairiqi__gte %} value=
-                                            {{ request.GET.goumairiqi__gte }}{% endif %}>
-                                <span class="input-group-addon">
-                                <i class="fa fa-exchange"></i>
-                            </span>
-                                <input type="text" class="form-control dateinput" name="goumairiqi__lte"
-                                       data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.goumairiqi__lte %} value=
-                                            {{ request.GET.goumairiqi__lte }}{% endif %}>
-
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-
-
-                            <div class="input-daterange input-group">
-                                <span class="input-group-addon" id="date-picker">卖出日期</span>
-                                <input type="text" class="form-control dateinput" name="maichuriqi__gte"
-                                       data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.maichuriqi__gte %} value=
-                                            {{ request.GET.maichuriqi__gte }}{% endif %}>
-                                <span class="input-group-addon">
-                                <i class="fa fa-exchange"></i>
-                            </span>
-                                <input type="text" class="form-control dateinput" name="maichuriqi__lte"
-                                       data-date-format="yyyy-mm-dd"
-                                        {% if request.GET.maichuriqi__lte %} value=
-                                            {{ request.GET.maichuriqi__lte }}{% endif %}>
-
-                            </div>
-                        </div>
-
-                    </div>
                 </form>
                 <!-- /.row -->
             </div>
         </div>
         <form method='POST' action="" id="signupForm" class="form-inline  pull-right"
               onsubmit="return check();">{% csrf_token %}
-            <span class="">已选择<a id="count_select">0</a>项</span>
+            <span >已选择<mark id="count_select">0</mark>项</span>
 
             <input name="ids" value="" style="display: none"
                    class="textinput textInput form-control "
@@ -233,7 +148,7 @@
     <th>利率(%)</th>
     <th>利息</th>
     <th>计息日期</th>
-    <th>结息日期</th>
+    <th>到期日期</th>
     <th>利息前置</th>
     <th>银行卡</th>
     <th>收款状态</th>
@@ -247,9 +162,7 @@
             <span class="label label-success">未到期
         {% endif %}
         </span></td>
-    <td><a class="green" href="" title="查看信息">
-        {{ item.pub_date }}
-    </a></td>
+    <td>{{ item.pub_date }}</td>
     <td>{{ item.benjin|floatformat:2|intcomma }}</td>
     <td>{{ item.lilv|floatformat:2|intcomma }}</td>
     <td>{{ item.lixi|floatformat:2|intcomma }}</td>

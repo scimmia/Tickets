@@ -237,10 +237,10 @@
         }
          ids=(ids.substring(ids.length-1)==',')?ids.substring(0,ids.length-1):ids;
 
-        $("#selected_piaomian").text(total);
-        $("#id_selected_piaomian").val(total);
-        $("#selected_gouru").text(totalgouru);
-        $("#id_selected_real").val(totalgouru);
+        $("#selected_piaomian").text(total.toFixed(2));
+        $("#id_selected_piaomian").val(total.toFixed(2));
+        $("#selected_gouru").text(totalgouru.toFixed(2));
+        $("#id_selected_real").val(totalgouru.toFixed(2));
         $("#id_selected_num").val(a.length);
         $("#id_ids").val(ids);
 

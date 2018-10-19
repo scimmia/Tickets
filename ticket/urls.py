@@ -18,9 +18,9 @@ urlpatterns = [
     url(r'^ticket/ticket_needpay/', view_tickets.ticket_needpay, name='ticket_needpay'),
     url(r'^ticket/ticket_needcollect/', view_tickets.ticket_needcollect, name='ticket_needcollect'),
     url(r'^ticket/ticket_createorder/', view_tickets.ticket_createorder, name='ticket_createorder'),
-    url(r'^order/ticket_payorders/', view_tickets.ticket_payorders, name='ticket_payorders'),
-    url(r'^order/ticket_sellorders/', view_tickets.ticket_sellorders, name='ticket_sellorders'),
-    url(r'^order/ticket_order/(?P<pk>\d+)/$', view_tickets.ticket_order, name='ticket_order'),
+    url(r'^ticket/ticket_payorders/', view_tickets.ticket_payorders, name='ticket_payorders'),
+    url(r'^ticket/ticket_sellorders/', view_tickets.ticket_sellorders, name='ticket_sellorders'),
+    url(r'^ticket/ticket_order/(?P<pk>\d+)/$', view_tickets.ticket_order, name='ticket_order'),
     url(r'^ticket/ticket_add/', view_tickets.ticket_add, name='ticket_add'),
     url(r'^ticket/ticket_import', view_tickets.ticket_import, name='ticket_import'),
     url(r'^ticket/flow_import', view_tickets.flow_import, name='flow_import'),
@@ -38,10 +38,13 @@ urlpatterns = [
     url(r'^loan/need_pay_lists/(?P<pk>\d+)/$', view_loan.need_pay_lists, name='need_pay_lists'),
 
     url(r'^pool/pool_dash/', view_pool.pool_dash, name='pool_dash'),
+    url(r'^pool/pool_detail/(?P<pk>\d+)/$', view_pool.pool_detail, name='pool_detail'),
     url(r'^pool/pool_licai_lists/', view_pool.pool_licai_lists, name='pool_licai_lists'),
     url(r'^pool/super_loan_lists/', view_pool.super_loan_lists, name='super_loan_lists'),
     url(r'^pool/super_loan/(?P<pk>\d+)/$', view_pool.super_loan, name='pool_loan'),
     url(r'^pool/pool_tickets/', view_pool.pool_tickets, name='pool_tickets'),
+    url(r'^pool/pool_percent_list/', view_pool.pool_percent_list, name='pool_percent_list'),
+    url(r'^pool/pool_percent_detail/(?P<pk>\d+)/$', view_pool.pool_percent_detail, name='pool_percent_detail'),
 
     url(r'^card/card_list/', view_card.card_list, name='card_list'),
     url(r'^card/card_edit/(?P<pk>\d+)/$', view_card.card_edit, name='card_edit'),
@@ -53,8 +56,5 @@ urlpatterns = [
     url(r'^tool/bestmix/', view_tools.best_mix, name='bestmix'),
     url(r'^tool/avgday/', view_tools.avg_day, name='avgday'),
     url(r'^tool/tiexian/', view_tools.tiexian, name='tiexian'),
-
-    url(r'^sysconfig/inpoolPercent_list', view_tools.pool_percent_list, name='inpoolPercentList'),
-    url(r'^sysconfig/inpoolPercent_detail', view_tools.pool_percent_detail, name='inpoolPercentDetail'),
 
 ]

@@ -4,8 +4,113 @@
 {% load humanize %}
 {% block content-header %}
     <h1>
-        超短贷
+        超短贷列表
     </h1>
+{% endblock %}
+{% block search_header %}
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-body" >
+                <form class="navbar-for navbar-container" role="search" method="get" action="">{% csrf_token %}
+                    <div class="row">
+
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon" id="is_end">到期状态</span>
+                                <select class="form-control" name="is_end">
+                                    <option value="">所有状态</option>
+                                    <option value="False" {% if request.GET.is_end and request.GET.is_end == 'False' %}
+                                            selected{% endif %}>未到期
+                                    </option>
+                                    <option value="True" {% if request.GET.is_end and request.GET.is_end == 'True' %}
+                                            selected{% endif %}>已到期
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="input-group">
+                                <span class="input-group-addon" id="is_payed">收款状态</span>
+                                <select class="form-control" name="is_payed">
+                                    <option value="">所有状态</option>
+                                    <option value="False"
+                                            {% if request.GET.is_payed and request.GET.is_payed == 'False' %}
+                                            selected{% endif %}>待还清
+                                    </option>
+                                    <option value="True"
+                                            {% if request.GET.is_payed and request.GET.is_payed == 'True' %}
+                                            selected{% endif %}>已还清
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="input-group">
+                                <span class="input-group-addon" id="date-picker">本金</span>
+                                <input type="number" class="form-control" name="benjin__gte"
+                                        {% if request.GET.benjin__gte %} value=
+                                            {{ request.GET.benjin__gte }}{% endif %}>
+                                <span class="input-group-addon">
+                                <i class="fa fa-exchange"></i>
+                            </span>
+                                <input type="number" class="form-control" name="benjin__lte"
+                                        {% if request.GET.benjin__lte %} value=
+                                            {{ request.GET.benjin__lte }}{% endif %}>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="input-daterange input-group">
+                                <span class="input-group-addon" id="date-picker">计息日期</span>
+                                <input type="text" class="form-control dateinput" name="lixi_begin_date__gte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.lixi_begin_date__gte %} value=
+                                            {{ request.GET.lixi_begin_date__gte }}{% endif %}>
+                                <span class="input-group-addon">
+                                <i class="fa fa-exchange"></i>
+                            </span>
+                                <input type="text" class="form-control dateinput" name="lixi_begin_date__lte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.lixi_begin_date__lte %} value=
+                                            {{ request.GET.lixi_begin_date__lte }}{% endif %}>
+
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="input-daterange input-group">
+                                <span class="input-group-addon" id="date-picker">到期日期</span>
+                                <input type="text" class="form-control dateinput" name="lixi_end_date__gte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.lixi_end_date__gte %} value=
+                                            {{ request.GET.lixi_end_date__gte }}{% endif %}>
+                                <span class="input-group-addon">
+                                <i class="fa fa-exchange"></i>
+                            </span>
+                                <input type="text" class="form-control dateinput" name="lixi_end_date__lte"
+                                       data-date-format="yyyy-mm-dd"
+                                        {% if request.GET.lixi_end_date__lte %} value=
+                                            {{ request.GET.lixi_end_date__lte }}{% endif %}>
+
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+								<span class="input-group-btn">
+									<button type="submit" class="btn btn-purple btn-sm">
+										查询
+										<i class="ace-icon fa fa-search icon-on-right bigger-110"></i>
+									</button>
+
+
+								</span>
+                        </div>
+                    </div>
+                </form>
+                <!-- /.row -->
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block table_tr %}
     <th>状态</th>
@@ -14,6 +119,7 @@
     <th>已还本金</th>
     <th>待还本金</th>
     <th>计息日期</th>
+    <th>到期日期</th>
     <th>利息</th>
     <th>已还利息</th>
     <th>待还利息</th>
@@ -34,6 +140,7 @@
     <td>{{ item.benjin_payed|floatformat:2|intcomma }}</td>
     <td {% if item.benjin_needpay > 0 %}style="color: red"{% endif %}>{{ item.benjin_needpay|floatformat:2|intcomma }}</td>
     <td>{{ item.lixi_begin_date }}</td>
+    <td>{{ item.lixi_end_date }}</td>
     <td>{{ item.lixi|floatformat:2|intcomma }}</td>
     <td>{{ item.lixi_payed|floatformat:2|intcomma }}</td>
     <td {% if item.lixi_needpay > 0 %}style="color: red"{% endif %}>{{ item.lixi_needpay|floatformat:2|intcomma }}</td>

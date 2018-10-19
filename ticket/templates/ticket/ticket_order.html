@@ -101,7 +101,7 @@
                             </tr>
                             <tr>
                                 <th>待{% if order.order_type == 1 %}支付{% elif order.order_type == 2 %}收取{% endif %}:</th>
-                                <td style="text-align:right;"><a>{{ order.needpay_sum|floatformat:2|intcomma }}</a></td>
+                                <td style="text-align:right;"><span class="label label-danger" id="needpay_sum">{{ order.needpay_sum|floatformat:2|intcomma }}</span></td>
                             </tr>
                             </tbody>
                         </table>
@@ -276,6 +276,9 @@
                     $("#div_id_yinhangka").show()
                     $("#id_yinhangka").prop("required", "true");
                 }
+            });
+            $("#needpay_sum").click(function(){
+                $("#id_money").val({{ order.needpay_sum }});
             });
         });
     </script>

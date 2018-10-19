@@ -1,3 +1,6 @@
+import datetime
+from decimal import Decimal
+
 from django.db import models
 
 
@@ -43,11 +46,26 @@ class Card(models.Model):
         return self.name
 
 
+class Pool(models.Model):
+    name = models.CharField(u'资金池', max_length=50)
+    edu_keyong = models.DecimalField(u'可用额度', default=0, max_digits=10, decimal_places=2)
+    edu_yiyong = models.DecimalField(u'已用额度', default=0, max_digits=10, decimal_places=2)
+    edu_baozhengjin = models.DecimalField(u'保证金', default=0, max_digits=10, decimal_places=2)
+    edu_chineipiao = models.DecimalField(u'池内票', default=0, max_digits=10, decimal_places=2)
+    edu_licai = models.DecimalField(u'理财', default=0, max_digits=10, decimal_places=2)
+    edu_chaoduandai = models.DecimalField(u'超短贷', default=0, max_digits=10, decimal_places=2)
+    pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
+    update_date = models.DateTimeField(u'修改日期', auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Customer(models.Model):
     name = models.CharField(u'姓名', max_length=100)
     need_collect_benjin = models.FloatField(u'应收本金', default=0)
     need_collect_lixi = models.FloatField(u'应收利息', default=0)
-    need_pay_benjin = models.FloatField(u'应收本金', default=0)
+    need_pay_benjin = models.FloatField(u'应付本金', default=0)
     need_pay_lixi = models.FloatField(u'应付利息', default=0)
     yufu_benjin = models.FloatField(u'预付本金', default=0)
     yufu_lixi = models.FloatField(u'预付利息', default=0)
@@ -168,6 +186,7 @@ class Ticket(models.Model):
         choices=TICKET_TYPES,
         default=1,
     )
+    pool_in = models.ForeignKey(Pool, related_name='t_pool_in', verbose_name=u'资金池', blank=True, null=True)
     goumairiqi = models.DateTimeField(u'购买日期', auto_now_add=True)
     qianpaipiaohao = models.CharField(u'前排票号', max_length=100, blank=True, null=True)
     piaohao = models.CharField(u'票号', max_length=100, blank=True, null=True)
@@ -177,6 +196,7 @@ class Ticket(models.Model):
     piaomianjiage = models.FloatField(u'票面价格(元)', default=0)
     gourujiage = models.FloatField(u'购入价格', default=0)
     gouruzijinchi = models.BooleanField(u'资金池购入', default=False)
+    pool_buy = models.ForeignKey(Pool, related_name='t_pool_buy', verbose_name=u'资金池购入', blank=True, null=True)
     payedzijinchi = models.BooleanField(u'保证金还款', default=False)
     gongyingshang = models.CharField(u'供应商', max_length=100)
     pay_status = models.IntegerField(
@@ -263,6 +283,7 @@ class StoreTicketsImport(models.Model):
 
 
 class SuperLoan(BaseLoan):
+    pool = models.ForeignKey(Pool, related_name='super_loan_pool', verbose_name=u'资金池', blank=False, null=False)
     class Meta:
         verbose_name = '超短贷'
         verbose_name_plural = '超短贷'
@@ -279,20 +300,23 @@ class PoolLicai(models.Model):
     is_end = models.BooleanField(u'是否到期', default=False)
     is_payed = models.BooleanField(u'是否还清', default=False)
     yinhangka = models.ForeignKey(Card, related_name='licai_card', verbose_name=u'银行卡', blank=False, null=False)
+    pool = models.ForeignKey(Pool, related_name='licai_pool', verbose_name=u'资金池', blank=False, null=False)
 
     class Meta:
         verbose_name = '理财'
         verbose_name_plural = '理财'
 
 
-class InpoolPercent(models.Model):
-    tags = models.CharField(u'标签', max_length=50, primary_key=True)
-    inpoolPer = models.FloatField(u'入池额度比例', default=0)
-    is_active = models.BooleanField(u'状态', default=True)
+class PoolPercent(models.Model):
+    pool = models.ForeignKey(Pool, related_name='percent_pool', verbose_name=u'资金池', blank=False, null=False)
+    tags = models.CharField(u'标签', max_length=50)
+    inpoolPer = models.FloatField(u'入池额度比例(%)', default=0)
+    is_active = models.BooleanField(u'激活', default=True)
+    class Meta:
+        unique_together = ("pool", "tags")
 
-
-class InpoolPercentDetail(models.Model):
-    inpoolPercent = models.ForeignKey(InpoolPercent, related_name='pool_loan', verbose_name=u'超短贷', blank=True,
+class PoolPercentDetail(models.Model):
+    inpoolPercent = models.ForeignKey(PoolPercent, related_name='pool_loan', verbose_name=u'超短贷', blank=True,
                                       null=True)
     inpoolPer = models.FloatField(u'入池额度比例', default=0)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
@@ -365,6 +389,7 @@ OPER_TYPE = (
     (402, u'银行卡存入'),
     (403, u'银行卡取出'),
     (404, u'银行卡转账'),
+    (500, u'新建资金池'),
     (501, u'存入保证金'),
     (502, u'取出保证金'),
     (503, u'新增超短贷'),
@@ -408,6 +433,7 @@ FeeDetail_Type = (
     (6, u'保证金'),
     (7, u'超短贷'),
     (8, u'理财'),
+    (9, u'资金池'),
 )
 
 
@@ -432,3 +458,9 @@ class FeeDetail(models.Model):
 class MoneyWithCard(models.Model):
     money = models.FloatField(u'金额', default=0)
     card = models.ForeignKey(Card, related_name='money_card', verbose_name=u'银行卡', blank=False, null=False)
+
+
+class MoneyWithCardPool(models.Model):
+    money = models.FloatField(u'金额', default=0)
+    card = models.ForeignKey(Card, related_name='moneys_card', verbose_name=u'银行卡', blank=False, null=False)
+    pool = models.ForeignKey(Pool, related_name='moneys_pool', verbose_name=u'资金池', blank=False, null=False)

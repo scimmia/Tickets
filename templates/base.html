@@ -8,13 +8,13 @@
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Bootstrap 3.3.6 -->
-{#        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">#}
+    {#        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">#}
     <link href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
-{#        <link rel="stylesheet" href="{% static 'plugins/font-awesome-4.6.3/css/font-awesome.min.css' %}">#}
+    {#        <link rel="stylesheet" href="{% static 'plugins/font-awesome-4.6.3/css/font-awesome.min.css' %}">#}
     <link href="https://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
     <!-- Ionicons -->
-{#        <link rel="stylesheet" href="{% static 'plugins/ionicons-2.0.1/css/ionicons.min.css' %}">#}
+    {#        <link rel="stylesheet" href="{% static 'plugins/ionicons-2.0.1/css/ionicons.min.css' %}">#}
     <link href="https://cdn.bootcss.com/ionicons/2.0.1/css/ionicons.min.css" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -23,11 +23,11 @@
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
     <!-- Theme style -->
-{#        <link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">#}
+    {#        <link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">#}
     <link href="https://cdn.bootcss.com/admin-lte/2.3.6/css/AdminLTE.min.css" rel="stylesheet">
     <!-- AdminLTE Skins. Choose a skin from the css/skins
          folder instead of downloading all of them to reduce the load. -->
-{#        <link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">#}
+    {#        <link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">#}
     <link href="https://cdn.bootcss.com/admin-lte/2.3.6/css/skins/_all-skins.min.css" rel="stylesheet">
     <link href="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
     {% block css %}{% endblock %}
@@ -177,29 +177,6 @@
                             {% endif %}><a href="{% url 'ticket_needcollect' %}"><i class="fa fa-circle-o"></i>待收款</a>
                     </li>
                     <li
-                            {% if '/tickets_needfix/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'tickets_needfix' %}"><i class="fa fa-circle-o"></i>待完成</a></li>
-                    <li
-                            {% if '/ticket_import/' in request.path %}
-                                class="active"
-                            {% endif %}><a href="{% url 'ticket_import' %}"><i class="fa fa-circle-o"></i>导入</a></li>
-                </ul>
-                </li>
-                {% if '/order/' in request.path %}
-                    <li class="active treeview">
-
-                        {% else %}
-                    <li class="treeview">
-                {% endif %}
-                <a href="#">
-                    <i class="fa fa-balance-scale"></i> <span>订单</span>
-                    <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-                </a>
-                <ul class="treeview-menu">
-                    <li
                             {% if '/ticket_payorders/' in request.path %}
                                 class="active"
                             {% endif %}><a href="{% url 'ticket_payorders' %}"><i class="fa fa-circle-o"></i>付款订单</a>
@@ -209,6 +186,14 @@
                                 class="active"
                             {% endif %}><a href="{% url 'ticket_sellorders' %}"><i class="fa fa-circle-o"></i>收款订单</a>
                     </li>
+                    <li
+                            {% if '/tickets_needfix/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'tickets_needfix' %}"><i class="fa fa-circle-o"></i>待完成</a></li>
+                    <li
+                            {% if '/ticket_import/' in request.path %}
+                                class="active"
+                            {% endif %}><a href="{% url 'ticket_import' %}"><i class="fa fa-circle-o"></i>导入</a></li>
                 </ul>
                 </li>
                 <li class="treeview {% if '/loan/' in request.path %}active{% endif %}">
@@ -290,6 +275,11 @@
                                     class="active"
                                 {% endif %}><a href="{% url 'pool_tickets' %}"><i class="fa fa-circle-o"></i>池开票</a>
                         </li>
+                        <li
+                                {% if '/pool_percent_list/' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'pool_percent_list' %}"><i class="fa fa-circle-o"></i>配置入池额度</a>
+                        </li>
                     </ul>
                 </li>
                 <li class="treeview {% if '/tool/' in request.path %}active{% endif %}">
@@ -333,13 +323,6 @@
                         <i class="fa fa-file"></i> <span>日报记录</span>
                     </a>
                 </li>
-                <li {% if '/sysconfig/inpoolPercentList' in request.path %}
-                    class="active"
-                {% endif %}>
-                    <a href="{% url 'inpoolPercentList' %}">
-                        <i class="fa fa-save"></i> <span>配置入池额度</span>
-                    </a>
-                </li>
             </ul>
         </section>
         <!-- /.sidebar -->
@@ -349,9 +332,13 @@
     <div class="content-wrapper">
 
         {% if message %}
-            <div class="callout callout-danger">
-
+            <div class="callout callout-success">
                 <p>{{ message }}</p>
+            </div>
+        {% endif %}
+        {% if errormsg %}
+            <div class="callout callout-danger">
+                <p>{{ errormsg }}</p>
             </div>
         {% endif %}
         {#        主体内容全放到这里！#}

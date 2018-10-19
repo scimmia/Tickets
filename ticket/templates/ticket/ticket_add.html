@@ -42,6 +42,7 @@
                         </div>
                         <div class="box-body">
                             {{ form.t_status |as_crispy_field }}
+                            {{ form.pool_in |as_crispy_field }}
                             {{ form.t_type |as_crispy_field }}
                             {{ form.qianpaipiaohao |as_crispy_field }}
                             {{ form.piaohao |as_crispy_field }}
@@ -87,6 +88,7 @@
                             {{ form.piaomianjiage |as_crispy_field }}
                             {{ form.gourujiage |as_crispy_field }}
                             {{ form.gouruzijinchi |as_crispy_field }}
+                            {{ form.pool_buy |as_crispy_field }}
                         </div>
 
                     </div>
@@ -131,9 +133,31 @@
             initDatePicker($('.input-daterange'));
             initDatePicker($('#id_chupiaoriqi'));
             initDatePicker($('#id_daoqiriqi'));
-
+            $("#div_id_pool_in").hide()
+            $("#div_id_pool_buy").hide()
             $("#id_t_status option[value='3']").remove();
             $("#id_t_status option[value='7']").remove();
+            $("#id_t_status").change(function () {
+                var ss = $(this).children('option:selected').val();
+                if (ss != '5') {
+                    $("#div_id_pool_in").hide()
+                    $("#id_pool_in").val("")
+                    $("#id_pool_in").removeAttr('required');
+                } else {
+                    $("#div_id_pool_in").show()
+                    $("#id_pool_in").prop("required", "true");
+                }
+            });
+            $("#id_gouruzijinchi").change(function () {
+                if ($("#id_gouruzijinchi").is(':checked')) {
+                    $("#div_id_pool_buy").show()
+                    $("#id_pool_buy").prop("required", "true");
+                } else {
+                    $("#div_id_pool_buy").hide()
+                    $("#id_pool_buy").val("")
+                    $("#id_pool_buy").removeAttr('required');
+                }
+            });
         });
 
         function exportbtn() {

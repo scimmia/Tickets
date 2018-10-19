@@ -122,8 +122,8 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th class="btbg font-center titfont">月底到期<br>未还超短贷</th>
-                                <td><a href="{% url 'super_loan_lists' %}">
+                                <th class="btbg font-center titfont">三日内到期<br>未还超短贷</th>
+                                <td><a href="{% url 'super_loan_lists' %}?is_payed=False&lixi_end_date__lte={{ today }}">
                                     <span class="pull-left">{{ loan_count }}条</span>
                                     <span class="pull-right">{{ loan_sum|floatformat:2|intcomma }}元</span></a></td>
                             </tr>

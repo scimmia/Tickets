@@ -31,36 +31,36 @@
                             <tbody>
                             <tr>
                                 <th>总额度 :</th>
-                                <td style="text-align:right;">{{ dash.edu_keyong|add:dash.edu_yiyong|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;">{{ dash.edu_keyong__sum|add:dash.edu_yiyong__sum|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>可用额度 :</th>
-                                <td style="text-align:right;">{{ dash.edu_keyong|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;">{{ dash.edu_keyong__sum|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>已用额度:</th>
-                                <td style="text-align:right;">{{ dash.edu_yiyong|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;">{{ dash.edu_yiyong__sum|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>入池票:{{ count_t }}张</th>
                                 <td style="text-align:right;"><a
-                                        href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__gte={{ today }}">{{ dash.edu_chineipiao|floatformat:2|intcomma }}</a>
+                                        href="{% url 'ticket_list' %}?t_status=5&daoqiriqi__gte={{ today }}">{{ dash.edu_chineipiao__sum|floatformat:2|intcomma }}</a>
                                 </td>
                             </tr>
                             <tr>
                                 <th>保证金:</th>
-                                <td style="text-align:right;">{{ dash.edu_baozhengjin|floatformat:2|intcomma }}</td>
+                                <td style="text-align:right;">{{ dash.edu_baozhengjin__sum|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>理财:</th>
                                 <td style="text-align:right;"><a
-                                        href="{% url 'pool_licai_lists' %}">{{ dash.edu_licai|floatformat:2|intcomma }}</a>
+                                        href="{% url 'pool_licai_lists' %}">{{ dash.edu_licai__sum|floatformat:2|intcomma }}</a>
                                 </td>
                             </tr>
                             <tr>
                                 <th>超短贷:</th>
                                 <td style="text-align:right;"><a
-                                        href="{% url 'super_loan_lists' %}">{{ dash.edu_chaoduandai|floatformat:2|intcomma }}</a>
+                                        href="{% url 'super_loan_lists' %}">{{ dash.edu_chaoduandai__sum|floatformat:2|intcomma }}</a>
                                 </td>
                             </tr>
                             <tr>
@@ -72,8 +72,63 @@
                         </table>
                     </div>
                 </div>
+                <form method='POST' action=''>{% csrf_token %}
+                    <!-- left column -->
+                    <div class="box box-danger">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">新增资金池：</h3>
+                        </div>
+                        <div class="box-body">
+                            {{ pool_form|crispy }}
+                        </div>
+                        <div class="box-footer">
+                            <input class="btn btn-primary" value="提交" type="submit">
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                </form>
             </div>
+            <div class="col-md-9">
+                <div class="row">
+                    <table id="table_id" class="table table-striped table-bordered table-hover">
+                        <thead>
+                        <th></th>
+                        <th>资金池</th>
+                        <th>可用额度</th>
+                        <th>已用额度</th>
+                        <th>保证金</th>
+                        <th>池内票</th>
+                        <th>理财</th>
+                        <th>超短贷</th>
+                        <th>池开票</th>
+                        </thead>
+                        <!--表格内容-->
+                        <tbody>
+                        {% for item in data %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><a class="green" href="{% url 'pool_detail' item.pk %}"
+                                       title="查看信息">
+                                    {{ item.name }}
+                                </a></td>
+                                <td>{{ item.edu_keyong }}</td>
+                                <td>{{ item.edu_yiyong }}</td>
+                                <td>{{ item.edu_baozhengjin }}</td>
+                                <td><a href="{% url 'ticket_list' %}?pool_in={{ item.pk }}&t_status=5">{{ item.edu_chineipiao }}</a></td>
+                                <td><a href="{% url 'pool_licai_lists' %}?pool={{ item.pk }}">{{ item.edu_licai|floatformat:2|intcomma }}</a></td>
+                                <td><a href="{% url 'super_loan_lists' %}?pool={{ item.pk }}">{{ item.edu_chaoduandai|floatformat:2|intcomma }}</a></td>
+                                <td><a href="{% url 'pool_tickets' %}?pool_buy={{ item.pk }}&gouruzijinchi=True">查看</a></td>
+                            </tr>
 
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+
+                    {% include 'ticket/pagination.html' %}
+                </div>
+
+            </div>
             <div class="col-md-3">
                 <form method='POST' action=''>{% csrf_token %}
                     <!-- left column -->
@@ -130,16 +185,7 @@
                 </div>
             </form>
 
-            <div class="col-md-12">
-                <div class="row">
-                    <div>
-                        {% include 'ticket/fee_list.html' %}
-                    </div>
-                    <!--引入pagination.html-->
-                    {% include 'ticket/pagination.html' %}
-                </div>
 
-            </div>
 
 
         </div>
@@ -152,7 +198,47 @@
     <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
     <script src="{% static 'plugins/initItems.js' %}"></script>
     <script>
-        initSortTable($('#table_id'));
         initDatePicker($('.dateinput'));
+        var t = $('#table_id').DataTable({
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'ordering': true,
+                'info': true,
+                'autoWidth': false,
+                "language": {
+                    "processing": "处理中...",
+                    "lengthMenu": "显示 _MENU_ 项结果",
+                    "zeroRecords": "没有匹配结果",
+                    "info": "",
+                    "infoEmpty": "",
+                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "infoPostFix": "",
+                    "search": "搜索:",
+                    "searchPlaceholder": "搜索...",
+                    "url": "",
+                    "emptyTable": "表中数据为空",
+                    "loadingRecords": "载入中...",
+                    "infoThousands": ",",
+                    "paginate": {
+                        "first": "首页",
+                        "previous": "上页",
+                        "next": "下页",
+                        "last": "末页"
+                    },
+                    "aria": {
+                        "paginate": {
+                            'first': '首页',
+                            'previous': '上页',
+                            'next': '下页',
+                            'last': '末页'
+                        },
+                        "sortAscending": ": 以升序排列此列",
+                        "sortDescending": ": 以降序排列此列"
+                    },
+                    "decimal": "-",
+                    "thousands": "."
+                },
+            });
     </script>
 {% endblock %}

@@ -11,7 +11,8 @@ if __name__ == '__main__':
 import django     #加载django
 django.setup()#启动django
 
-from ticket import models
+from ticket import models, utils
+
 
 def writeHeader(workbook,worksheet):
     merge_format = workbook.add_format({
@@ -86,26 +87,26 @@ def buildDailyReport():
     worksheet.write(startrow-1,3,('=sum(D%d:D%d)' % (startrow+1,startrow+ticketsInStore.count())))
     worksheet.write(startrow-1,4,('%d条' % (ticketsInStore.count())))
 
-    borrowOrders = models.Customer.objects.filter(Q(borrow_benjin__gt=0) | Q(borrow_lixi__gt=0)).order_by('-pub_date')
+    borrowOrders = models.Customer.objects.filter(Q(need_collect_benjin__gt=0) | Q(need_collect_lixi__gt=0)).order_by('-pub_date')
     for inx, order in enumerate(borrowOrders):
         worksheet.write(inx+startrow, 5, order.name)
-        worksheet.write(inx+startrow, 6, order.borrow_benjin+order.borrow_lixi)
-        # worksheet.write(inx+startrow, 7, order.borrow_lixi)
+        worksheet.write(inx+startrow, 6, order.need_collect_benjin)
+        worksheet.write(inx+startrow, 7, order.need_collect_lixi)
     sumCont = '=sum(G%d:G%d)' % (startrow+1,startrow+borrowOrders.count())
     print(sumCont)
     worksheet.write(startrow-1,6,sumCont)
     worksheet.write(startrow-1,7,('%d条' % (borrowOrders.count())))
 
     startrow = 6
-    loanOrders = models.Customer.objects.filter(Q(loan_benjin__gt=0) | Q(loan_lixi__gt=0)).order_by('-pub_date')
+    loanOrders = models.Customer.objects.filter(Q(need_pay_benjin__gt=0) | Q(need_pay_lixi__gt=0)).order_by('-pub_date')
     sumCont = '=sum(J%d:J%d)' % (startrow + 1, startrow + loanOrders.count())
     print(sumCont)
     worksheet.write(startrow - 1, 9, sumCont)
     worksheet.write(startrow-1,10,('%d条' % (loanOrders.count())))
     for order in loanOrders:
         worksheet.write(startrow, 8, order.name)
-        worksheet.write(startrow, 9, order.loan_benjin+order.loan_lixi)
-        # worksheet.write(startrow, 10, order.order_date,date_format)
+        worksheet.write(startrow, 9, order.need_pay_benjin)
+        worksheet.write(startrow, 10, order.need_pay_lixi)
         startrow = startrow + 1
 
 
@@ -185,37 +186,39 @@ def buildDailyReport():
 
 def countSuperLoanLixi():
     raw_data = models.SuperLoan.objects.filter(is_payed=False).order_by('-lixi_sum_date')
-    countLoanLixi(raw_data)
+    for order in raw_data:
+        utils.count_super_loan_lixi(order)
     pass
 
 def countLoanOrderLixi():
     raw_data = models.Loan_Order.objects.filter(is_payed=False).order_by('-lixi_sum_date')
-    countLoanLixi(raw_data)
+    for order in raw_data:
+        utils.count_loan_lixi(order)
     pass
 
-def countLoanLixi(raw_data):
-    today = datetime.date.today()
-    for order in raw_data:
-        days = (today - order.lixi_sum_date).days
-        if days > 0:
-            addLixi = order.benjin_needpay * order.lilv * days / 360
-            order.lixi = round(addLixi + order.lixi, 2)
-            order.lixi_needpay = round(addLixi + order.lixi_needpay, 2)
-            order.lixi_sum_date = today
-            order.save()
-            try:
-                order._meta.get_field('jiedairen')
-                customer = order.jiedairen
-                if order.order_type == 3:
-                    customer.borrow_lixi = customer.borrow_lixi + addLixi
-                    customer.save()
-                elif order.order_type == 4:
-                    customer.loan_lixi = customer.loan_lixi + addLixi
-                    customer.save()
-            except:
-                pass
-        pass
-    pass
+# def countLoanLixi(raw_data):
+#     today = datetime.date.today()
+#     for order in raw_data:
+#         days = (today - order.lixi_sum_date).days
+#         if days > 0:
+#             addLixi = order.benjin_needpay * order.lilv * days / 360
+#             order.lixi = round(addLixi + order.lixi, 2)
+#             order.lixi_needpay = round(addLixi + order.lixi_needpay, 2)
+#             order.lixi_sum_date = today
+#             order.save()
+#             try:
+#                 order._meta.get_field('jiedairen')
+#                 customer = order.jiedairen
+#                 if order.order_type == 3:
+#                     customer.borrow_lixi = customer.borrow_lixi + addLixi
+#                     customer.save()
+#                 elif order.order_type == 4:
+#                     customer.loan_lixi = customer.loan_lixi + addLixi
+#                     customer.save()
+#             except:
+#                 pass
+#         pass
+#     pass
 
 def dailyJob():
     buildDailyReport()

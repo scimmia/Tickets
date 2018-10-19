@@ -10,11 +10,13 @@
 {% endblock %}
 
 {% block table_tr %}
+    <td>资金池</td>
     <td>标签</td>
     <td>比例</td>
 {% endblock %}
 {% block table_td %}
-    <td><a class="green" href="{% url 'inpoolPercentDetail' %}?tag={{ item.tags }}"
+    <td>{{ item.pool }}</td>
+    <td><a class="green" href="{% url 'pool_percent_detail' item.id%}"
            title="查看信息">
         {{ item.tags }}
     </a></td>
@@ -28,67 +30,54 @@
 {% endblock %}
 
 {% block form-body %}
-    <div id="div_id_thetags" class="form-group"><label for="disabledTextInput">
-        标签<span class="asteriskField">*</span> </label>
-
-        <select name="thetags" class="js-single form-control" required id="id_thetags">
-            {% for v in data %}
-                <option value="{{ v.tags }}">{{ v.tags }}</option>
-            {% endfor %}
-        </select></div>
-    <div class="input-group">
-        <span class="input-group-addon">比例：</span>
-        <input type="number" name="inpoolPer" step="any" max="100" min="0"
-               class="numberinput form-control" required="">
-        <span class="input-group-addon">%</span>
-    </div>
+    {{ form |crispy }}
 {% endblock %}
 {% block initSelect %}
     $('#id_thetags').select2({
-        height: '40px',
-        tags: true
+    height: '40px',
+    tags: true
     });
 {% endblock %}
 {% block initTables %}
     $('#table_id').DataTable({
-        'paging': true,
-        'lengthChange': false,
-        'searching': true,
-        'ordering': true,
-        'info': true,
-        'autoWidth': false,
-        'scrollY': 410,
-        "language": {
-            "processing": "处理中...",
-            "lengthMenu": "显示 _MENU_ 项结果",
-            "zeroRecords": "没有匹配结果",
-            "info": "",
-            "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
-            "infoFiltered": "(由 _MAX_ 项结果过滤)",
-            "infoPostFix": "",
-            "search": "搜索:",
-            "searchPlaceholder": "搜索...",
-            "url": "",
-            "emptyTable": "表中数据为空",
-            "loadingRecords": "载入中...",
-            "infoThousands": ",",
-            "paginate": {
-                "first": "首页",
-                "previous": "上页",
-                "next": "下页",
-                "last": "末页"
-            },
-            "aria": {
-                "paginate": {
-                    'first': '首页',
-                    'previous': '上页',
-                    'next': '下页',
-                    'last': '末页'
-                },
-                "sortAscending": ": 以升序排列此列",
-                "sortDescending": ": 以降序排列此列"
-            },
-        }
+    'paging': true,
+    'lengthChange': false,
+    'searching': true,
+    'ordering': true,
+    'info': true,
+    'autoWidth': false,
+    'scrollY': 410,
+    "language": {
+    "processing": "处理中...",
+    "lengthMenu": "显示 _MENU_ 项结果",
+    "zeroRecords": "没有匹配结果",
+    "info": "",
+    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
+    "infoFiltered": "(由 _MAX_ 项结果过滤)",
+    "infoPostFix": "",
+    "search": "搜索:",
+    "searchPlaceholder": "搜索...",
+    "url": "",
+    "emptyTable": "表中数据为空",
+    "loadingRecords": "载入中...",
+    "infoThousands": ",",
+    "paginate": {
+    "first": "首页",
+    "previous": "上页",
+    "next": "下页",
+    "last": "末页"
+    },
+    "aria": {
+    "paginate": {
+    'first': '首页',
+    'previous': '上页',
+    'next': '下页',
+    'last': '末页'
+    },
+    "sortAscending": ": 以升序排列此列",
+    "sortDescending": ": 以降序排列此列"
+    },
+    }
     });
 
 {% endblock %}

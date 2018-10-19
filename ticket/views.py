@@ -11,10 +11,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse
 
+from ticket import utils
 from ticket.models import Ticket, TicketsImport, StoreTicketsImport, SuperLoan, Loan_Order, DashBoard
 
 
-@login_required
 def dashboard(request):
     ts = Ticket.objects.values('t_status', 't_type').annotate(t_count=Count('id'), sum_money=Sum('piaomianjiage'))
     kudianc = 0
@@ -74,7 +74,7 @@ def dashboard(request):
             daoqikucun_sum = round(t['sum_money'], 2)
     # ts = SuperLoan.objects.filter(Q(needpay_sum__gt=0)|Q(needpay_lixi__gt=0)).annotate(t_count = Count('id'),sum_money=Sum('needpay_sum'),sum_lixi=Sum('needpay_lixi'))
 
-    superLoans = SuperLoan.objects.filter(is_payed=False)
+    superLoans = SuperLoan.objects.filter(is_payed=False,lixi_end_date__lte=threeday)
     loan_count = 0
     loan_sum = 0
     for superLoan in superLoans:
@@ -96,6 +96,7 @@ def dashboard(request):
             daishou_sum += loanOrder.benjin_needpay + loanOrder.lixi_needpay
 
     dashs = DashBoard.objects.filter().order_by('-day')
+    dashs, page_range, count, page_nums = utils.pagination(request, dashs)
 
     return render(request, 'ticket/dashboard.html', locals())
 

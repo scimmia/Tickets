@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 from ticket import utils
 from ticket.forms import BestMixForm
-from ticket.models import InpoolPercent, InpoolPercentDetail, OperLog
+from ticket.models import OperLog
 
 
 class MixItem(object):
@@ -137,55 +137,6 @@ def tiexian(request):
     return render(request, 'ticket/tool_tiexian.html')
 
 
-def create_pool_percent(tag, inpoolPer):
-    try:
-        obj, created = InpoolPercent.objects.update_or_create(
-            tags=tag,
-            defaults={'inpoolPer': inpoolPer},
-        )
-        temp = InpoolPercentDetail()
-        temp.inpoolPercent = obj
-        temp.inpoolPer = inpoolPer
-        temp.save()
-        return True
-    except:
-        return False
-
-
-def pool_percent_list(request):
-    if InpoolPercent.objects.filter(tags='!默认!').count() == 0:
-        create_pool_percent('!默认!', 100)
-    if request.method == 'POST':
-        tag = request.POST['thetags']
-        inpoolPer = request.POST['inpoolPer']
-        if create_pool_percent(tag, inpoolPer):
-            message = u'保存成功'
-        else:
-            message = u'保存失败'
-
-    data = InpoolPercent.objects.all().order_by('tags')
-
-    return render(request, 'ticket/inpoolPer_list.html', locals())
-
-
-def pool_percent_detail(request):
-    if 'tag' in request.GET.keys():
-        tag = request.GET['tag']
-
-    if request.method == 'POST':
-        inpoolPer = request.POST['inpoolPer']
-        if create_pool_percent(tag, inpoolPer):
-            message = u'保存成功'
-        else:
-            message = u'保存失败'
-    data = InpoolPercentDetail.objects.filter(inpoolPercent__tags=tag).order_by('-pub_date')
-    items_total = []
-    items_date = []
-    for i in range(len(data)):
-        list.insert(items_total, 0, data[i].inpoolPer)
-        list.insert(items_date, 0, data[i].pub_date)
-    item = data[0]
-    return render(request, 'ticket/inpoolPer.html', locals())
 
 
 # 日志
@@ -199,7 +150,43 @@ def log_list(request):
     for t in data_list:
         try:
             t.detail = json.loads(t.detail)
-            t.contdetail = json.loads(t.contdetail)
+            t.contdetail = []
+            if t.xianjin != 0:
+                t.contdetail.append({'cont': u'银行卡', 'money': t.xianjin})
+            if t.kucun != 0:
+                t.contdetail.append({'cont': u'库存', 'money': t.kucun})
+            if t.edu_keyong != 0:
+                t.contdetail.append({'cont': u'可用额度', 'money': t.edu_keyong})
+            if t.edu_yiyong != 0:
+                t.contdetail.append({'cont': u'已用额度', 'money': t.edu_yiyong})
+            if t.edu_baozhengjin != 0:
+                t.contdetail.append({'cont': u'保证金', 'money': t.edu_baozhengjin})
+            if t.edu_chineipiao != 0:
+                t.contdetail.append({'cont': u'池内票', 'money': t.edu_chineipiao})
+            if t.edu_licai != 0:
+                t.contdetail.append({'cont': u'理财', 'money': t.edu_licai})
+            if t.edu_chaoduandai != 0:
+                t.contdetail.append({'cont': u'超短贷', 'money': t.edu_chaoduandai})
+            if t.need_collect != 0:
+                t.contdetail.append({'cont': u'待收', 'money': t.need_collect})
+            if t.need_pay != 0:
+                t.contdetail.append({'cont': u'待付', 'money': t.need_pay})
+            if t.yushou != 0:
+                t.contdetail.append({'cont': u'预收', 'money': t.yushou})
+            if t.yufu != 0:
+                t.contdetail.append({'cont': u'预付', 'money': t.yufu})
+            if t.feiyong_yewu != 0:
+                t.contdetail.append({'cont': u'业务费用', 'money': t.feiyong_yewu})
+            if t.feiyong_ziben != 0:
+                t.contdetail.append({'cont': u'资本费用', 'money': t.feiyong_ziben})
+            if t.feiyong_za != 0:
+                t.contdetail.append({'cont': u'管理杂费', 'money': t.feiyong_za})
+            if t.lirun_yewu != 0:
+                t.contdetail.append({'cont': u'业务利润', 'money': t.lirun_yewu})
+            if t.lirun_ziben != 0:
+                t.contdetail.append({'cont': u'资本收益', 'money': t.lirun_ziben})
+            if t.lirun_za != 0:
+                t.contdetail.append({'cont': u'其他利润', 'money': t.lirun_za})
         except:
             pass
     # 建立context字典，将值传递到相应页面

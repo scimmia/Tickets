@@ -6,18 +6,18 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count
 from django.shortcuts import render
 
-from ticket import view_tools
-from ticket.models import OperLog, DashBoard, Card, FeeDetail, InpoolPercent, Ticket
+from ticket.models import OperLog, DashBoard, FeeDetail, Ticket, PoolPercent, PoolPercentDetail
 
 
 def create_fee_detail(money, fee_detail_type, fee_detail_pk, log_temp):
     if money != 0:
         fee_detail = FeeDetail()
-        fee_detail.oper_log = log_temp.log
         fee_detail.money = money
-        fee_detail.fee_type = log_temp.log.oper_type
         fee_detail.fee_detail_type = fee_detail_type
         fee_detail.fee_detail_pk = fee_detail_pk
+        if isinstance(log_temp, OperLog):
+            fee_detail.oper_log = log_temp
+            fee_detail.fee_type = log_temp.oper_type
         fee_detail.save()
     pass
 
@@ -28,8 +28,10 @@ def create_ticket_order_fee(order, money, log_temp):
 
 
 def create_card_fee(card, money, log_temp):
-    card.money = card.money + money
+    card.money += money
     card.save()
+    if isinstance(log_temp, OperLog):
+        log_temp.xianjin += Decimal(money)
     create_fee_detail(money, 5, card.pk, log_temp)
     pass
 
@@ -58,16 +60,38 @@ def create_loan_pre_pay_fee(customer, money, log_temp):
     pass
 
 
-def create_pro_fee(money, log_temp):
-    create_fee_detail(money, 6, u'保证金', log_temp)
+def create_pro_fee(pool, money, log_temp):
+    pool.edu_baozhengjin += Decimal(money)
+    pool.edu_keyong += Decimal(money)
+    pool.save()
+    log_temp.edu_baozhengjin += Decimal(money)
+    log_temp.edu_keyong += Decimal(money)
+    log_temp.save()
+    create_fee_detail(money, 9, pool.pk, log_temp)
 
 
 def create_super_loan_fee(super_loan, money, log_temp):
+    super_loan.pool.edu_chaoduandai += Decimal(money)
+    super_loan.pool.edu_keyong -= Decimal(money)
+    super_loan.pool.edu_yiyong += Decimal(money)
+    super_loan.pool.save()
+    log_temp.edu_chaoduandai += Decimal(money)
+    log_temp.edu_keyong -= Decimal(money)
+    log_temp.edu_yiyong += Decimal(money)
+    log_temp.save()
+    create_fee_detail(money, 9, super_loan.pool.pk, log_temp)
     create_fee_detail(money, 7, super_loan.pk, log_temp)
 
 
 def create_licai_fee(licai, money, log_temp):
-    create_fee_detail(money, 8, licai.pk, log_temp)
+    licai.pool.edu_licai += Decimal(money)
+    licai.pool.edu_keyong += Decimal(money)
+    licai.pool.save()
+    if isinstance(log_temp, OperLog):
+        log_temp.edu_licai += Decimal(money)
+        log_temp.edu_keyong += Decimal(money)
+        # log_temp.save()
+    create_fee_detail(money, 9, licai.pool.pk, log_temp)
 
 
 # 结息（借贷及超短贷）
@@ -112,11 +136,11 @@ def payLoanLixi(order, money):
 def count_super_loan_lixi(order):
     lixi = count_loan_lixi(order)
     if lixi > 0:
-        log = LogTemp()
+        log, detail = create_log()
         log.oper_type = 507
-        log.add_detail_superloan(order.pk)
-        log.add_need_pay(lixi)
-        log.save()
+        detail.add_detail_superloan(order.pk)
+        log.need_pay += Decimal(lixi)
+        save_log(log, detail)
     return lixi
 
 
@@ -136,11 +160,11 @@ def pay_super_loan_lixi(order, money):
 def count_order_loan_lixi(order):
     lixi = count_loan_lixi(order)
     if lixi > 0:
-        log = LogTemp()
+        log, detail = create_log()
         log.oper_type = 309
-        log.add_detail_loanorder(order.pk)
-        log.add_need_pay(lixi)
-        log.save()
+        detail.add_detail_loanorder(order.pk)
+        log.need_pay += Decimal(lixi)
+        save_log(log, detail)
     return lixi
 
 
@@ -172,13 +196,28 @@ def pay_order_loan_lixi(order, money):
         customer.save()
 
 
-def get_pool_percent(tag=u'!默认!'):
-    if InpoolPercent.objects.filter(tags__contains=tag).count() == 0:
-        if InpoolPercent.objects.filter(tags='!默认!').count() == 0:
-            view_tools.create_pool_percent('!默认!', 100)
+def create_pool_percent(pool, tag, inpoolPer):
+    try:
+        obj, created = PoolPercent.objects.update_or_create(
+            pool=pool, tags=tag,
+            defaults={'inpoolPer': inpoolPer},
+        )
+        temp = PoolPercentDetail()
+        temp.inpoolPercent = obj
+        temp.inpoolPer = inpoolPer
+        temp.save()
+        return True
+    except:
+        return False
+
+
+def get_pool_percent(pool, tag=u'!默认!'):
+    if PoolPercent.objects.filter(pool=pool, tags__contains=tag).count() == 0:
+        if PoolPercent.objects.filter(pool=pool, tags='!默认!').count() == 0:
+            create_pool_percent(pool, '!默认!', 100)
             return 100
-        return InpoolPercent.objects.get(tags='!默认!').inpoolPer
-    return InpoolPercent.objects.filter(tags__contains=tag).last().inpoolPer
+        return PoolPercent.objects.get(pool=pool, tags='!默认!').inpoolPer
+    return PoolPercent.objects.filter(tags__contains=tag).last().inpoolPer
 
 
 def get_dash(day=datetime.date.today()):
@@ -273,31 +312,13 @@ def pagination(request, queryset, display_amount=10, after_range_num=5, before_r
     return objects, page_range, count, num_pages
 
 
-class LogTemp:
+class LogDetailTemp:
     def __init__(self):
-        self.log = OperLog()
-        self.xianjin = 0
-        self.kucun = 0
-        self.edu_keyong = 0
-        self.edu_yiyong = 0
-        self.edu_baozhengjin = 0
-        self.edu_chineipiao = 0
-        self.edu_licai = 0
-        self.edu_chaoduandai = 0
-        self.need_collect = 0
-        self.need_pay = 0
-        self.yushou = 0
-        self.yufu = 0
-        self.feiyong_yewu = 0
-        self.feiyong_ziben = 0
-        self.feiyong_za = 0
-        self.lirun_yewu = 0
-        self.lirun_ziben = 0
-        self.lirun_za = 0
-        self.oper_type = 0
         self.detail = []
-        self.contdetail = []
         pass
+
+    def get_save_detail(self):
+        return json.dumps(self.detail)
 
     def add_detail(self, pktype, pk):
         self.detail.append({'pktype': pktype, 'pk': pk})
@@ -327,147 +348,45 @@ class LogTemp:
     def add_detail_licai(self, pk):
         self.add_detail(8, pk)
 
-    def add_xianjin(self, money):
-        self.xianjin += money
+    def add_detail_pool(self, pk):
+        self.add_detail(9, pk)
 
-    def add_kucun(self, money):
-        self.kucun += money
 
-    def add_keyong(self, money):
-        self.edu_keyong += money
+def create_log():
+    detail = LogDetailTemp()
+    log = OperLog()
+    log.save()
+    return log, detail
 
-    def add_yiyong(self, money):
-        self.edu_yiyong += money
 
-    def add_baozhengjin(self, money):
-        self.edu_baozhengjin += money
-        self.add_keyong(money)
+def save_log(log, detail):
+    log.detail = detail.get_save_detail()
+    log.save()
+    save_log_to_dash(log)
 
-    def add_chineipiao(self, money):
-        self.edu_chineipiao += money
 
-    def add_licai(self, money):
-        self.edu_licai += money
-        self.add_keyong(money)
-
-    def add_chaoduandai(self, money):
-        self.edu_chaoduandai += money
-        self.add_keyong(0 - money)
-        self.add_yiyong(money)
-
-    def add_need_collect(self, money):
-        self.need_collect += money
-
-    def add_need_pay(self, money):
-        self.need_pay += money
-
-    def add_yushou(self, money):
-        self.yushou += money
-
-    def add_yufu(self, money):
-        self.yufu += money
-
-    def add_feiyong_yewu(self, money):
-        self.feiyong_yewu += money
-
-    def add_feiyong_ziben(self, money):
-        self.feiyong_ziben += money
-
-    def add_feiyong_za(self, money):
-        self.feiyong_za += money
-
-    def add_lirun_yewu(self, money):
-        self.lirun_yewu += money
-
-    def add_lirun_ziben(self, money):
-        self.lirun_ziben += money
-
-    def add_lirun_za(self, money):
-        self.lirun_za += money
-
-    def build_detail(self):
-        if len(self.detail) > 0:
-            if self.xianjin != 0:
-                self.contdetail.append({'cont': u'银行卡', 'money': self.xianjin})
-            if self.kucun != 0:
-                self.contdetail.append({'cont': u'库存', 'money': self.kucun})
-            if self.edu_keyong != 0:
-                self.contdetail.append({'cont': u'可用额度', 'money': self.edu_keyong})
-            if self.edu_yiyong != 0:
-                self.contdetail.append({'cont': u'已用额度', 'money': self.edu_yiyong})
-            if self.edu_baozhengjin != 0:
-                self.contdetail.append({'cont': u'保证金', 'money': self.edu_baozhengjin})
-            if self.edu_chineipiao != 0:
-                self.contdetail.append({'cont': u'池内票', 'money': self.edu_chineipiao})
-            if self.edu_licai != 0:
-                self.contdetail.append({'cont': u'理财', 'money': self.edu_licai})
-            if self.edu_chaoduandai != 0:
-                self.contdetail.append({'cont': u'超短贷', 'money': self.edu_chaoduandai})
-            if self.need_collect != 0:
-                self.contdetail.append({'cont': u'待收', 'money': self.need_collect})
-            if self.need_pay != 0:
-                self.contdetail.append({'cont': u'待付', 'money': self.need_pay})
-            if self.yushou != 0:
-                self.contdetail.append({'cont': u'预收', 'money': self.yushou})
-            if self.yufu != 0:
-                self.contdetail.append({'cont': u'预付', 'money': self.yufu})
-            if self.feiyong_yewu != 0:
-                self.contdetail.append({'cont': u'业务费用', 'money': self.feiyong_yewu})
-            if self.feiyong_ziben != 0:
-                self.contdetail.append({'cont': u'资本费用', 'money': self.feiyong_ziben})
-            if self.feiyong_za != 0:
-                self.contdetail.append({'cont': u'管理杂费', 'money': self.feiyong_za})
-            if self.lirun_yewu != 0:
-                self.contdetail.append({'cont': u'业务利润', 'money': self.lirun_yewu})
-            if self.lirun_ziben != 0:
-                self.contdetail.append({'cont': u'资本收益', 'money': self.lirun_ziben})
-            if self.lirun_za != 0:
-                self.contdetail.append({'cont': u'其他利润', 'money': self.lirun_za})
-
-    def save(self):
-        self.log.xianjin = Decimal(self.xianjin)
-        self.log.kucun = Decimal(self.kucun)
-        self.log.edu_keyong = Decimal(self.edu_keyong)
-        self.log.edu_yiyong = Decimal(self.edu_yiyong)
-        self.log.edu_baozhengjin = Decimal(self.edu_baozhengjin)
-        self.log.edu_chineipiao = Decimal(self.edu_chineipiao)
-        self.log.edu_licai = Decimal(self.edu_licai)
-        self.log.edu_chaoduandai = Decimal(self.edu_chaoduandai)
-        self.log.need_collect = Decimal(self.need_collect)
-        self.log.need_pay = Decimal(self.need_pay)
-        self.log.yushou = Decimal(self.yushou)
-        self.log.yufu = Decimal(self.yufu)
-        self.log.feiyong_yewu = Decimal(self.feiyong_yewu)
-        self.log.feiyong_ziben = Decimal(self.feiyong_ziben)
-        self.log.feiyong_za = Decimal(self.feiyong_za)
-        self.log.lirun_yewu = Decimal(self.lirun_yewu)
-        self.log.lirun_ziben = Decimal(self.lirun_ziben)
-        self.log.lirun_za = Decimal(self.lirun_za)
-        self.log.oper_type = self.oper_type
-        self.log.detail = json.dumps(self.detail)
-        self.build_detail()
-        self.log.contdetail = json.dumps(self.contdetail)
-        self.log.save()
-        self.save_dash()
-
-    def save_dash(self):
+def save_log_to_dash(log):
+    try:
         dash = get_dash()
-        dash.xianjin += self.log.xianjin
-        dash.kucun += self.log.kucun
-        dash.edu_keyong += self.log.edu_keyong
-        dash.edu_yiyong += self.log.edu_yiyong
-        dash.edu_baozhengjin += self.log.edu_baozhengjin
-        dash.edu_chineipiao += self.log.edu_chineipiao
-        dash.edu_licai += self.log.edu_licai
-        dash.edu_chaoduandai += self.log.edu_chaoduandai
-        dash.need_collect += self.log.need_collect
-        dash.need_pay += self.log.need_pay
-        dash.yushou += self.log.yushou
-        dash.yufu += self.log.yufu
-        dash.feiyong_yewu += self.log.feiyong_yewu
-        dash.feiyong_ziben += self.log.feiyong_ziben
-        dash.feiyong_za += self.log.feiyong_za
-        dash.lirun_yewu += self.log.lirun_yewu
-        dash.lirun_ziben += self.log.lirun_ziben
-        dash.lirun_za += self.log.lirun_za
+        dash.xianjin += Decimal(log.xianjin)
+        dash.kucun += Decimal(log.kucun)
+        dash.edu_keyong += Decimal(log.edu_keyong)
+        dash.edu_yiyong += Decimal(log.edu_yiyong)
+        dash.edu_baozhengjin += Decimal(log.edu_baozhengjin)
+        dash.edu_chineipiao += Decimal(log.edu_chineipiao)
+        dash.edu_licai += Decimal(log.edu_licai)
+        dash.edu_chaoduandai += Decimal(log.edu_chaoduandai)
+        dash.need_collect += Decimal(log.need_collect)
+        dash.need_pay += Decimal(log.need_pay)
+        dash.yushou += Decimal(log.yushou)
+        dash.yufu += Decimal(log.yufu)
+        dash.feiyong_yewu += Decimal(log.feiyong_yewu)
+        dash.feiyong_ziben += Decimal(log.feiyong_ziben)
+        dash.feiyong_za += Decimal(log.feiyong_za)
+        dash.lirun_yewu += Decimal(log.lirun_yewu)
+        dash.lirun_ziben += Decimal(log.lirun_ziben)
+        dash.lirun_za += Decimal(log.lirun_za)
         dash.save()
+    except:
+        pass
+    pass

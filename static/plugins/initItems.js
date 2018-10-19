@@ -1,5 +1,6 @@
 function initDatePicker(val) {
     val.datepicker({
+        daysOfWeekHighlighted: "0,6",
         language: "zh-CN",
         autoclose: true,
         todayHighlight: true, //自动关闭
