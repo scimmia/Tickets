@@ -36,12 +36,12 @@ def ticket_add(request):
             while counter <= times:
                 counter += 1
                 instance.pk = None
-                instance.save()
-                detail.add_detail_ticket(instance.pk)
                 if instance.gouruzijinchi and instance.t_status != 2:
+                    instance.gongyingshang = instance.pool_buy.name
                     instance.pay_status = 2
                     instance.gourujiage = instance.piaomianjiage
-                    instance.save()
+                instance.save()
+                detail.add_detail_ticket(instance.pk)
             if instance.t_status == 1:
                 log.kucun += Decimal(instance.gourujiage * times)
             elif instance.t_status == 5:
@@ -111,6 +111,7 @@ def ticket_index(request, pk):
                     instance.pool_in.save()
                     utils.create_fee_detail(jiage, 9, instance.pool_in.pk, log)
                 if instance.gouruzijinchi and instance.t_status != 2:
+                    instance.gongyingshang = instance.pool_buy.name
                     instance.pay_status = 2
                     instance.gourujiage = instance.piaomianjiage
                     instance.save()
@@ -394,9 +395,9 @@ def ticket_order(request, pk):
     if request.method == 'POST':
         if feeform.is_valid():
             money = feeform.cleaned_data.get('money')
-            if 'zijinchipay' in request.POST.keys():
-                # 使用预收付款
+            if 'yushoufupay' in request.POST.keys():
                 if order.order_type == 1:
+                    # 待付款订单，使用预付款
                     if money > order.needpay_sum:
                         context['errormsg'] = u'付款金额不能大于待支付金额'
                     elif money > order.customer.yufu_benjin:
@@ -409,13 +410,14 @@ def ticket_order(request, pk):
                         order.payfee_sum += money
                         order.needpay_sum -= money
                         order.save()
-                        log.yushou -= Decimal(money)
+                        log.yufu -= Decimal(money)
                         log.need_pay -= Decimal(money)
-                        utils.create_loan_pre_collect_fee(order.customer, 0 - money, log)
+                        utils.create_loan_yu_fu_fee(order.customer, 0 - money, log)
                         utils.create_ticket_order_fee(order, 0 - money, log)
                         utils.save_log(log, detail)
                         context['message'] = u'付款成功'
                 elif order.order_type == 2:
+                    # 待收款订单，使用预收款
                     if money > order.needpay_sum:
                         context['errormsg'] = u'收款金额不能大于待收取金额'
                     elif money > order.customer.yushou_benjin:
@@ -428,15 +430,16 @@ def ticket_order(request, pk):
                         order.payfee_sum += money
                         order.needpay_sum -= money
                         order.save()
-                        log.yufu -= Decimal(money)
+                        log.yushou -= Decimal(money)
                         log.need_collect -= Decimal(money)
-                        utils.create_loan_pre_pay_fee(order.customer, 0 - money, log)
+                        utils.create_loan_yu_shou_fee(order.customer, 0 - money, log)
                         utils.create_ticket_order_fee(order, money, log)
                         utils.save_log(log, detail)
                         context['message'] = u'收款成功'
             else:
                 card = Card.objects.get(pk=int(request.POST['yinhangka']))
                 if order.order_type == 1:
+                    # 待付款订单，使用现金
                     if money > order.needpay_sum:
                         context['errormsg'] = u'付款金额不能大于待支付金额'
                     else:
@@ -454,6 +457,7 @@ def ticket_order(request, pk):
                         utils.save_log(log, detail)
                         context['message'] = u'付款成功'
                 elif order.order_type == 2:
+                    # 待收款订单，使用现金
                     if money > order.needpay_sum:
                         context['errormsg'] = u'收款金额不能大于待收取金额'
                     else:

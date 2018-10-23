@@ -8,24 +8,20 @@
         {% elif index == 4 %}应付款
         {% elif index == 5 %}预收款
         {% elif index == 6 %}预付款
-        {% endif %}人列表
+        {% endif %}订单列表
     </h1>
 {% endblock %}
 {% block table_tr %}
     <th>
-        {% if index == 3 %}应收款
-        {% elif index == 4 %}应付款
-        {% elif index == 5 %}预收款
-        {% elif index == 6 %}预付款
-        {% endif %}人
+        客户
     </th>
-    <th>{% if index == 3 %}待收
-    {% elif index == 4 %}待还
+    <th>{% if index == 3 %}应收
+    {% elif index == 4 %}应付
     {% elif index == 5 %}累计
     {% elif index == 6 %}累计{% endif %}本金
     </th>
-    <th>{% if index == 3 %}待收
-    {% elif index == 4 %}待还
+    <th>{% if index == 3 %}应收
+    {% elif index == 4 %}应付
     {% elif index == 5 %}累计
     {% elif index == 6 %}累计{% endif %}利息
     </th>

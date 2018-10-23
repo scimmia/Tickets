@@ -49,10 +49,11 @@
     <th>待{% if isloan %}还{% else %}收{% endif %}本金</th>
     <th>年利率</th>
     <th>计息日期</th>
+    <th>到期日期</th>
     <th>利息</th>
     <th>已{% if isloan %}还{% else %}收{% endif %}利息</th>
     <th>待{% if isloan %}还{% else %}收{% endif %}利息</th>
-    <th>结息日期</th>
+    <th>上次结息</th>
 {% endblock %}
 {% block table_td %}
     <!--通过for循环从data取出的具体表格内容-->
@@ -71,6 +72,7 @@
     <td {% if item.benjin_needpay > 0 %}style="color: red"{% endif %}>{{ item.benjin_needpay|floatformat:2|intcomma }}</td>
     <td>{{ item.lilv|floatformat:2|intcomma }}%</td>
     <td>{{ item.lixi_begin_date }}</td>
+    <td>{{ item.lixi_end_date }}</td>
     <td>{{ item.lixi|floatformat:2|intcomma }}</td>
     <td>{{ item.lixi_payed|floatformat:2|intcomma }}</td>
     <td {% if item.lixi_needpay > 0 %}style="color: red"{% endif %}>{{ item.lixi_needpay|floatformat:2|intcomma }}</td>

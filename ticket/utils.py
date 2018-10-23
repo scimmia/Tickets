@@ -46,14 +46,14 @@ def create_loan_pre_fee(order, money, log_temp):
     pass
 
 
-def create_loan_pre_collect_fee(customer, money, log_temp):
+def create_loan_yu_shou_fee(customer, money, log_temp):
     customer.yushou_benjin += money
     customer.save()
     create_fee_detail(money, 41, customer.pk, log_temp)
     pass
 
 
-def create_loan_pre_pay_fee(customer, money, log_temp):
+def create_loan_yu_fu_fee(customer, money, log_temp):
     customer.yufu_benjin += money
     customer.save()
     create_fee_detail(money, 42, customer.pk, log_temp)

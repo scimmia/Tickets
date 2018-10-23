@@ -13,10 +13,9 @@
         <h1>
             借贷
             <small>{% if order.order_type == 3 %}应收款
-        {% elif order.order_type == 4 %}应付款
-        {% elif index == 5 %}预收款
-        {% elif index == 6 %}预付款
-        {% endif %}订单</small>
+            {% elif order.order_type == 4 %}应付款
+            {% endif %}订单
+            </small>
         </h1>
     </section>
 
@@ -25,14 +24,14 @@
             <div class="col-xs-3 ">
                 <div class="box box-success">
                     <div class="box-header with-border">
-                        <h3 class="box-title">{% if order.order_type == 4 %}贷款{% else %}借款{% endif %}信息：</h3>
+                        <h3 class="box-title">{% if order.order_type == 4 %}应付款{% else %}应收款{% endif %}信息：</h3>
                         {% if order.is_payed %}<span class="label label-danger pull-right">已完成</span>{% endif %}
                     </div>
                     <div class="box-body">
                         <table class="table">
                             <tbody>
                             <tr>
-                                <th>借贷人:</th>
+                                <th>客户:</th>
                                 <td style="text-align:right;"><a>{{ order.jiedairen }}</a></td>
                             </tr>
                             <tr>
@@ -44,15 +43,16 @@
                                 <td style="text-align:right;"><a>{{ order.benjin|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
-                                <th>已{% if order.order_type == 4  %}还{% else %}收{% endif %}本金:</th>
-                                <td style="text-align:right;"><a>{{ order.benjin_payed|floatformat:2|intcomma }}</a></td>
+                                <th>已{% if order.order_type == 4 %}还{% else %}收{% endif %}本金:</th>
+                                <td style="text-align:right;"><a>{{ order.benjin_payed|floatformat:2|intcomma }}</a>
+                                </td>
                             </tr>
                             <tr>
                                 <th>累计利息:</th>
                                 <td style="text-align:right;"><a>{{ order.lixi|floatformat:2|intcomma }}</a></td>
                             </tr>
                             <tr>
-                                <th>已{% if order.order_type == 4  %}还{% else %}收{% endif %}利息:</th>
+                                <th>已{% if order.order_type == 4 %}还{% else %}收{% endif %}利息:</th>
                                 <td style="text-align:right;"><a>{{ order.lixi_payed|floatformat:2|intcomma }}</a></td>
                             </tr>
                             </tbody>
@@ -62,12 +62,12 @@
                         <table class="table">
                             <tbody>
                             <tr>
-                                <th>待{% if order.order_type == 4  %}还{% else %}收{% endif %}本金:</th>
-                                <td style="text-align:right;{% if order.needpay_sum > 0 %}color: red{% endif %}">{{ order.benjin_needpay|floatformat:2|intcomma }}</td>
+                                <th>待{% if order.order_type == 4 %}还{% else %}收{% endif %}本金:</th>
+                                <td  id="benjin_needpay" style="text-align:right;{% if order.benjin_needpay > 0 %}color: red{% endif %}">{{ order.benjin_needpay|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
-                                <th>待{% if order.order_type == 4  %}还{% else %}收{% endif %}利息:</th>
-                                <td style="text-align:right;{% if order.needpay_lixi > 0 %}color: red{% endif %}">{{ order.lixi_needpay|floatformat:2|intcomma }}</td>
+                                <th>待{% if order.order_type == 4 %}还{% else %}收{% endif %}利息:</th>
+                                <td  id="lixi_needpay" style="text-align:right;{% if order.lixi_needpay > 0 %}color: red{% endif %}">{{ order.lixi_needpay|floatformat:2|intcomma }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -90,8 +90,10 @@
 
                         <div class="box-footer">
 
-                            <input class="btn btn-primary" name="benjin" value="{% if order.order_type == 4  %}还{% else %}收{% endif %}本" type="submit">
-                            <input class="btn btn-success" name="lixi" value="{% if order.order_type == 4  %}还{% else %}收{% endif %}息" type="submit">
+                            <input class="btn btn-primary" name="benjin"
+                                   value="{% if order.order_type == 4 %}还{% else %}收{% endif %}本" type="submit">
+                            <input class="btn btn-success" name="lixi"
+                                   value="{% if order.order_type == 4 %}还{% else %}收{% endif %}息" type="submit">
                             <input class="btn btn-danger" style="display:none;" name="fee" value="费用" type="submit">
                         </div>
 
@@ -123,6 +125,12 @@
         $(document).ready(function () {
             initSortTable($('#table_id'));
             $('#div_id_fee_status').hide();
+            $("#benjin_needpay").click(function () {
+                $("#id_money").val({{ order.benjin_needpay }});
+            });
+            $("#lixi_needpay").click(function () {
+                $("#id_money").val({{ order.lixi_needpay }});
+            });
         });
     </script>
 

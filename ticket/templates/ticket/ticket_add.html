@@ -2,12 +2,6 @@
 {% load staticfiles %}
 {% load crispy_forms_tags %}
 
-{#{% block extrahead %}#}
-{#    {{ block.super }}#}
-{#        {% include 'material/includes/material_css.html' %}#}
-{#    {% include 'material/includes/material_js.html' %}#}
-{##}
-{#{% endblock %}#}
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
 
@@ -15,7 +9,6 @@
 {% endblock %}
 
 {% load crispy_forms_tags %}
-{#{% load material_form %}#}
 
 {% block content %}
     <!-- Content Header (Page header) -->
@@ -105,9 +98,6 @@
                     </div>
 
                 </div>
-                <!--/.col (left) -->
-                <!-- right column -->
-                <!--/.col (right) -->
             </form>
             {% include "ticket/tool_counter.html" %}
 
@@ -150,9 +140,13 @@
             });
             $("#id_gouruzijinchi").change(function () {
                 if ($("#id_gouruzijinchi").is(':checked')) {
+                    $("#div_id_gongyingshang").hide()
+                    $("#id_gongyingshang").removeAttr('required');
                     $("#div_id_pool_buy").show()
                     $("#id_pool_buy").prop("required", "true");
                 } else {
+                    $("#div_id_gongyingshang").show()
+                    $("#id_gongyingshang").prop("required", "true");
                     $("#div_id_pool_buy").hide()
                     $("#id_pool_buy").val("")
                     $("#id_pool_buy").removeAttr('required');

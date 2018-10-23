@@ -168,9 +168,9 @@ def log_list(request):
             if t.edu_chaoduandai != 0:
                 t.contdetail.append({'cont': u'超短贷', 'money': t.edu_chaoduandai})
             if t.need_collect != 0:
-                t.contdetail.append({'cont': u'待收', 'money': t.need_collect})
+                t.contdetail.append({'cont': u'应收', 'money': t.need_collect})
             if t.need_pay != 0:
-                t.contdetail.append({'cont': u'待付', 'money': t.need_pay})
+                t.contdetail.append({'cont': u'应付', 'money': t.need_pay})
             if t.yushou != 0:
                 t.contdetail.append({'cont': u'预收', 'money': t.yushou})
             if t.yufu != 0:

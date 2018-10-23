@@ -83,8 +83,8 @@ class Customer(models.Model):
 
 class Order(models.Model):
     ORDER_TYPE = (
-        (1, u'付款订单'),
-        (2, u'收款订单'),
+        (1, u'待付款订单'),
+        (2, u'待收款订单'),
     )
     order_type = models.IntegerField(
         u'订单类型',
@@ -97,7 +97,7 @@ class Order(models.Model):
     fee_sum = models.FloatField(u'合计费用金额', default=0)
     fee_count = models.IntegerField(u'费用数目', default=0)
     payfee_sum = models.FloatField(u'已支付金额', default=0)
-    payfee_count = models.IntegerField(u'已支付数目', default=0)
+    payfee_count = models.IntegerField(u'已支付次数', default=0)
     total_sum = models.FloatField(u'总金额', default=0)
     needpay_sum = models.FloatField(u'剩余金额', default=0)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
@@ -370,21 +370,21 @@ OPER_TYPE = (
     (106, u'票据导入'),
     (107, u'开票补充信息'),
     (108, u'池开票补充信息'),
-    (201, u'新建付款'),
-    (202, u'新建收款'),
-    (203, u'现金付票款'),
-    (204, u'现金收票款'),
-    (205, u'使用预收款付应收票款'),
-    (206, u'使用预付款付应付票款'),
-    (301, u'新建应收款'),
-    (302, u'新建应付款'),
+    (201, u'新建待付款订单'),
+    (202, u'新建待收款订单'),
+    (203, u'现金付待付款订单'),
+    (204, u'现金收待收款订单'),
+    (205, u'使用预付款付待付款订单'),
+    (206, u'使用预收款收待收款订单'),
+    (301, u'新建应收款订单'),
+    (302, u'新建应付款订单'),
     (303, u'应收款收本'),
     (304, u'应收款收息'),
     (305, u'应付款还本'),
     (306, u'应付款还息'),
-    (307, u'新建预收款'),
-    (308, u'新建预付款'),
-    (309, u'借贷款结息'),
+    (307, u'新建预收款订单'),
+    (308, u'新建预付款订单'),
+    (309, u'应收付款结息'),
     (401, u'新建银行卡'),
     (402, u'银行卡存入'),
     (403, u'银行卡取出'),

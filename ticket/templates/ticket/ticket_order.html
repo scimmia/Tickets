@@ -11,8 +11,8 @@
     <section class="content-header">
         <h1>
             票据
-            <small>{% if order.order_type == 1 %}付款
-            {% elif order.order_type == 2 %}收款{% endif %}订单
+            <small>{% if order.order_type == 1 %}待付款
+            {% elif order.order_type == 2 %}待收款{% endif %}订单
             </small>
         </h1>
     </section>
@@ -72,9 +72,9 @@
                 <div class="box box-success">
                     <div class="box-header with-border">
                         <h3 class="box-title">{% if order.order_type == 1 %}
-                            付款
+                            待付款
                         {% elif order.order_type == 2 %}
-                            收款
+                            待收款
                         {% endif %}信息：</h3>
                         {% if order.needpay_sum == 0 %}<span class="label label-danger pull-right">已完成</span>{% endif %}
 
@@ -83,7 +83,7 @@
                         <table class="table">
                             <tbody>
                             <tr>
-                                <th>{% if index == 1 %}付款{% else %}收款{% endif %}人:</th>
+                                <th>{% if order.order_type == 1 %}供应商{% else %}买票人{% endif %}:</th>
                                 <td style="text-align:right;"><a>{{ order.customer }}</a></td>
                             </tr>
                             <tr>
@@ -121,21 +121,21 @@
                         </div>
                         <div class="box-body">
                             {% if order.order_type == 1 %}
-                                <p>可用预收款：<span style="color: red">{{ order.customer.yushou_benjin }}元</span></p>
-                                <div id="div_id_zijinchipay" class="form-group checkbox">
-                                    <label for="id_zijinchipay" class="">
-                                        <input type="checkbox" name="zijinchipay" class="checkboxinput"
-                                               id="id_zijinchipay">
-                                        使用预收款
+                                <p>可用预付款：<span style="color: red">{{ order.customer.yufu_benjin }}元</span></p>
+                                <div id="div_id_yushoufupay" class="form-group checkbox">
+                                    <label for="id_yushoufupay" class="">
+                                        <input type="checkbox" name="yushoufupay" class="checkboxinput"
+                                               id="id_yushoufupay">
+                                        使用预付款
                                     </label>
                                 </div>
                             {% elif order.order_type == 2 %}
-                                <p>可用预付款：{{ order.customer.yufu_benjin }}</p>
-                                <div id="div_id_zijinchipay" class="form-group checkbox">
-                                <label for="id_zijinchipay" class="">
-                                    <input type="checkbox" name="zijinchipay" class="checkboxinput"
-                                           id="id_zijinchipay">
-                                    使用预付款
+                                <p>可用预收款：{{ order.customer.yushou_benjin }}</p>
+                                <div id="div_id_yushoufupay" class="form-group checkbox">
+                                <label for="id_yushoufupay" class="">
+                                    <input type="checkbox" name="yushoufupay" class="checkboxinput"
+                                           id="id_yushoufupay">
+                                    使用预收款
                                 </label>
                                 </div>
                             {% endif %}
@@ -267,8 +267,8 @@
                     "thousands": "."
                 },
             });
-            $("#id_zijinchipay").change(function () {
-                if ($("#id_zijinchipay").is(':checked')) {
+            $("#id_yushoufupay").change(function () {
+                if ($("#id_yushoufupay").is(':checked')) {
                     $("#div_id_yinhangka").hide()
                     $("#id_yinhangka").val("")
                     $("#id_yinhangka").removeAttr('required');

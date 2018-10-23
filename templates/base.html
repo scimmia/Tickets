@@ -53,36 +53,6 @@
 
             <div class="navbar-custom-menu">
                 <ul class="nav navbar-nav">
-                    <!-- Messages: style can be found in dropdown.less-->
-                    <li class="dropdown messages-menu">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-envelope-o"></i>
-                            <span class="label label-success">4</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="header">此功能暂缺</li>
-                        </ul>
-                    </li>
-                    <!-- Notifications: style can be found in dropdown.less -->
-                    <li class="dropdown notifications-menu">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-bell-o"></i>
-                            <span class="label label-warning">10</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="header">此功能暂缺</li>
-                        </ul>
-                    </li>
-                    <!-- Tasks: style can be found in dropdown.less -->
-                    <li class="dropdown tasks-menu">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-flag-o"></i>
-                            <span class="label label-danger">9</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li class="header">此功能暂缺</li>
-                        </ul>
-                    </li>
                     {% if user.is_authenticated %}
                         <li>
                             <a href="{% url 'logout' %}">
@@ -170,21 +140,21 @@
                     <li
                             {% if '/ticket_needpay/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_needpay' %}"><i class="fa fa-circle-o"></i>待付款</a></li>
+                            {% endif %}><a href="{% url 'ticket_needpay' %}"><i class="fa fa-circle-o"></i>待付款票据</a></li>
                     <li
                             {% if '/ticket_needcollect/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_needcollect' %}"><i class="fa fa-circle-o"></i>待收款</a>
+                            {% endif %}><a href="{% url 'ticket_needcollect' %}"><i class="fa fa-circle-o"></i>待收款票据</a>
                     </li>
                     <li
                             {% if '/ticket_payorders/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_payorders' %}"><i class="fa fa-circle-o"></i>付款订单</a>
+                            {% endif %}><a href="{% url 'ticket_payorders' %}"><i class="fa fa-circle-o"></i>待付款订单</a>
                     </li>
                     <li
                             {% if '/ticket_sellorders/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_sellorders' %}"><i class="fa fa-circle-o"></i>收款订单</a>
+                            {% endif %}><a href="{% url 'ticket_sellorders' %}"><i class="fa fa-circle-o"></i>待收款订单</a>
                     </li>
                     <li
                             {% if '/tickets_needfix/' in request.path %}
@@ -209,22 +179,22 @@
                                     class="active"
                                 {% endif %}>
                             <a href="{% url 'need_collect_customers' %}">
-                                <i class="fa fa-circle-o"></i>应收订单</a>
+                                <i class="fa fa-circle-o"></i>应收款订单</a>
                         </li>
                         <li
                                 {% if '/need_pay_' in request.path %}
                                     class="active"
-                                {% endif %}><a href="{% url 'need_pay_customers' %}"><i class="fa fa-circle-o"></i>应付订单</a>
+                                {% endif %}><a href="{% url 'need_pay_customers' %}"><i class="fa fa-circle-o"></i>应付款订单</a>
                         </li>
                         <li
                                 {% if '/pre_collect_' in request.path %}
                                     class="active"
-                                {% endif %}><a href="{% url 'pre_collect_customers' %}"><i class="fa fa-circle-o"></i>预收款(已收)</a>
+                                {% endif %}><a href="{% url 'pre_collect_customers' %}"><i class="fa fa-circle-o"></i>预收款订单</a>
                         </li>
                         <li
                                 {% if '/pre_pay_' in request.path %}
                                     class="active"
-                                {% endif %}><a href="{% url 'pre_pay_customers' %}"><i class="fa fa-circle-o"></i>预付款(已付)</a>
+                                {% endif %}><a href="{% url 'pre_pay_customers' %}"><i class="fa fa-circle-o"></i>预付款订单</a>
                         </li>
                     </ul>
                 </li>
