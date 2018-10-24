@@ -250,7 +250,7 @@ def get_query(request):
 def get_paged_page(request, raw_data, list_template, context={}):
     kwargs, query = get_query(request)
     data = raw_data.filter(**kwargs)
-    data_list, page_range, count, page_nums = pagination(request, data, 50)
+    data_list, page_range, count, page_nums = pagination(request, data, 100)
     context['data'] = data_list
     context['query'] = query
     context['page_range'] = page_range

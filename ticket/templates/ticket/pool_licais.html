@@ -195,18 +195,31 @@
     });
 {% endblock %}
 {% block initOthers %}
-    $('#table_id tbody').on('click', 'tr', function () {
-    $(this).toggleClass('selected');
-    var a = t.rows('.selected').data();
-    console.log(a.length);
-    $("#selected_num").text(a.length);
-    var ids = '';
-    for (var i = 0; i < a.length; i++) {
-    console.log(a[i][1]);
-    ids = ids + parseFloat(a[i][1]) + ',';
-    }
-    ids = (ids.substring(ids.length - 1) == ',') ? ids.substring(0, ids.length - 1) : ids;
-    $("#id_ids").val(ids);
-    $("#count_select").text(a.length);
-    });
+    t.on('select', function (e, dt, type, indexes) {
+        var a = t.rows({selected: true}).data();
+        console.log(a.length);
+        $("#selected_num").text(a.length);
+        var ids = '';
+        for (var i = 0; i < a.length; i++) {
+        console.log(a[i][1]);
+        ids = ids + parseFloat(a[i][1]) + ',';
+        }
+        ids = (ids.substring(ids.length - 1) == ',') ? ids.substring(0, ids.length - 1) : ids;
+        $("#id_ids").val(ids);
+        $("#count_select").text(a.length);
+    })
+        .on('deselect', function (e, dt, type, indexes) {
+            var a = t.rows({selected: true}).data();
+            console.log(a.length);
+            $("#selected_num").text(a.length);
+            var ids = '';
+            for (var i = 0; i < a.length; i++) {
+            console.log(a[i][1]);
+            ids = ids + parseFloat(a[i][1]) + ',';
+            }
+            ids = (ids.substring(ids.length - 1) == ',') ? ids.substring(0, ids.length - 1) : ids;
+            $("#id_ids").val(ids);
+            $("#count_select").text(a.length);
+        });
+    ;
 {% endblock %}

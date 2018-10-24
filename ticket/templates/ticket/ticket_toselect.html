@@ -220,16 +220,14 @@
     });
 {% endblock %}
 {% block initOthers %}
-    $('#table_id tbody').on('click', 'tr', function () {
-        $(this).toggleClass('selected');
-        var a = t.rows('.selected').data();
+    t.on('select', function (e, dt, type, indexes) {
+        var a = t.rows({selected: true}).data();
         console.log(a.length);
         $("#selected_num").text(a.length);
         var total = 0;
         var totalgouru = 0;
         var ids = '';
         for (var i = 0; i < a.length; i++) {
-            console.log(a[i][1]);
             total = total + parseFloat(a[i][5]);
             totalgouru = totalgouru + parseFloat(a[i][6]);
             ids = ids + parseFloat(a[i][1]) + ',';
@@ -243,6 +241,28 @@
         $("#id_selected_real").val(totalgouru.toFixed(2));
         $("#id_selected_num").val(a.length);
         $("#id_ids").val(ids);
+    })
+        .on('deselect', function (e, dt, type, indexes) {
+            var a = t.rows({selected: true}).data();
+            console.log(a.length);
+            $("#selected_num").text(a.length);
+            var total = 0;
+            var totalgouru = 0;
+            var ids = '';
+            for (var i = 0; i < a.length; i++) {
+                total = total + parseFloat(a[i][5]);
+                totalgouru = totalgouru + parseFloat(a[i][6]);
+                ids = ids + parseFloat(a[i][1]) + ',';
 
-    });
+            }
+             ids=(ids.substring(ids.length-1)==',')?ids.substring(0,ids.length-1):ids;
+
+            $("#selected_piaomian").text(total.toFixed(2));
+            $("#id_selected_piaomian").val(total.toFixed(2));
+            $("#selected_gouru").text(totalgouru.toFixed(2));
+            $("#id_selected_real").val(totalgouru.toFixed(2));
+            $("#id_selected_num").val(a.length);
+            $("#id_ids").val(ids);
+        });
+    ;
 {% endblock %}

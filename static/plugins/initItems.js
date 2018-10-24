@@ -12,6 +12,7 @@ function initDatePicker(val) {
 }
 function initSortTable(val) {
     return val.DataTable({
+                'select': true,
                 'paging': false,
                 'lengthChange': false,
                 'searching': false,
@@ -48,6 +49,12 @@ function initSortTable(val) {
                         },
                         "sortAscending": ": 以升序排列此列",
                         "sortDescending": ": 以降序排列此列"
+                    },
+                    "select": {
+                        "rows": {
+                            _: "",
+                            0: "",
+                        }
                     },
                 }
             });
