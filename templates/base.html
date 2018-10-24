@@ -161,9 +161,9 @@
                                 class="active"
                             {% endif %}><a href="{% url 'tickets_needfix' %}"><i class="fa fa-circle-o"></i>待完成</a></li>
                     <li
-                            {% if '/ticket_import/' in request.path %}
+                            {% if '/ticket_imports/' in request.path %}
                                 class="active"
-                            {% endif %}><a href="{% url 'ticket_import' %}"><i class="fa fa-circle-o"></i>导入</a></li>
+                            {% endif %}><a href="{% url 'ticket_imports' %}"><i class="fa fa-circle-o"></i>导入</a></li>
                 </ul>
                 </li>
                 <li class="treeview {% if '/loan/' in request.path %}active{% endif %}">

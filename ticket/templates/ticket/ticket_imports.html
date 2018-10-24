@@ -1,0 +1,42 @@
+{% extends "ticket/res_list_with_form.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+
+{% block content-header %}
+    <h1>
+        导入记录
+    </h1>
+{% endblock %}
+
+{% block table_tr %}
+    <td>导入时间</td>
+    <td>详情</td>
+    <td>是否保存</td>
+{% endblock %}
+{% block table_td %}
+    <td><a class="green" href="{% url 'ticket_import_detail' item.id %}"
+           title="查看信息">
+        {{ item.pub_date }}
+    </a></td>
+    <td>{{ item.detail }}</td>
+    <td>{{ item.is_saved }}</td>
+{% endblock %}
+{% block form %}
+    <form method='POST' id="signupForm" action=""  enctype="multipart/form-data">{% csrf_token %}
+        <div class="box box-danger">
+            <div class="box-header with-border">
+                <h3 class="box-title">新建导入</h3>
+            </div>
+            <div class="box-body">
+                {{ form |crispy }}
+                <div class="input-group">
+                        <input type="file" name="file" accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+                    </div>
+            </div>
+            <div class="box-footer">
+                <button type="submit" class="btn btn-primary">提交</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}

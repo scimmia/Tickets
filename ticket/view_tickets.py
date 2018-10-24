@@ -4,6 +4,7 @@ import os
 import uuid
 from decimal import Decimal
 
+import xlrd
 from django.db.models import Sum, Count, Q
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -12,8 +13,9 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from ticket import utils, view_loan
-from ticket.forms import TicketForm, TicketEditForm, MoneyForm, TicketTransForm
-from ticket.models import Card, Ticket, Order, TicketsImport, StoreTicketsImport, FeeDetail, OperLog, Pool
+from ticket.forms import TicketForm, TicketEditForm, MoneyForm, TicketTransForm, CardForm, TicketImportForm
+from ticket.models import Card, Ticket, Order, TicketsImport, StoreTicketsImport, FeeDetail, OperLog, Pool, \
+    Ticket_Import, Ticket_Import_Detail
 
 
 # 增加
@@ -478,144 +480,143 @@ def ticket_order(request, pk):
     return utils.get_paged_page(request, fee_data, list_template, context)
 
 
-def ticket_import(request):
-    context = {}
-    if request.method == 'GET':
-        stamp = request.GET.get('stamp')
-        items = TicketsImport.objects.filter(stamp=stamp)
+def ticket_imports(request):
+    form = TicketImportForm(request.POST or None)
+    list_template = 'ticket/ticket_imports.html'
     if request.method == "POST":
-        if 'upfile' in request.POST.keys():
-            stamp = uuid.uuid1()
+        if form.is_valid():
+            instance = form.save(commit=False)
             path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
             if not os.path.exists(path):
                 os.makedirs(path)
             with open(path + 'tmp.csv', 'wb+')as destination:
                 for chunk in request.FILES['file'].chunks():
                     destination.write(chunk)
-            csv_reader = csv.reader(open(path + 'tmp.csv', 'r', newline=''))
-            print(datetime.datetime.now())
+            book = xlrd.open_workbook(path + 'tmp.csv')
+            print("The number of worksheets is {0}".format(book.nsheets))
+            print("Worksheet name(s): {0}".format(book.sheet_names()))
+            sh = book.sheet_by_index(0)
+            print("{0} {1} {2}".format(sh.name, sh.nrows, sh.ncols))
+            print("Cell D30 is {0}".format(sh.cell_value(rowx=29, colx=3)))
+            if instance.import_type != 2:
+                instance.pool = None
+            instance.detail = ''
+            instance.save()
             ticketsImports = []
-            for row in csv_reader:
-                a = len(row)
-                if len(row) == 14:
+            # 入库
+            if instance.import_type == 1:
+                for rx in range(sh.nrows):
+                    row = (sh.row_values(rx))
+                    if sh.cell_type(rowx=rx,colx=0) == 3:
+                        m = Ticket_Import_Detail()
+                        m.inport_info = instance
+                        m.qianpaipiaohao = row[1]
+                        m.piaohao = str(row[2])
+                        m.gongyingshang = row[9]
+                        m.chupiaohang = row[3]
+                        m.goumairiqi = xlrd.xldate.xldate_as_datetime(row[0], 1)
+                        m.chupiaoriqi = xlrd.xldate.xldate_as_datetime(row[4], 1)
+                        m.daoqiriqi = xlrd.xldate.xldate_as_datetime(row[5], 1)
+                        m.piaomianjiage = (row[6])
+                        m.gourujiage = (row[8])
+                        m.beizhu = row[10]
+                        ticketsImports.append(m)
+            # 入池
+            elif instance.import_type == 2:
+                for rx in range(sh.nrows):
+                    row = (sh.row_values(rx))
+                    if len(row) == 14:
+                        if row[5].startswith('2'):
+                            m = Ticket_Import_Detail()
+                            m.inport_info = instance
+                            m.piaohao = row[2]
+                            m.gongyingshang = row[0]
+                            m.chupiaohang = row[4]
+                            m.chupiaoriqi = row[5].replace(' ', '').replace('\t', '')
+                            m.daoqiriqi = row[6].replace(' ', '').replace('\t', '')
+                            m.piaomianjiage = (row[3])
+                            m.pool_in_riqi = row[11].replace(' ', '').replace('\t', '')
+                            if row[7] == '电票':
+                                m.t_type = 2
+                            if row[12].isdigit():
+                                m.zhiyalv = float(row[12])
+                            ticketsImports.append(m)
+            # 开票
+            elif instance.import_type == 3:
+                for rx in range(sh.nrows):
+                    row = (sh.row_values(rx))
                     if row[5].startswith('2'):
-                        m = TicketsImport()
-                        m.stamp = stamp
+                        m = Ticket_Import_Detail()
+                        m.inport_info = instance
                         m.piaohao = row[0]
-                        m.chupiaoren = row[1]
-                        m.shoukuanren = row[2]
-                        m.piaomianjiage = float(row[3].replace(',', ''))
-                        m.piaomianlixi = row[4]
+                        m.gongyingshang = row[1]
+                        m.maipiaoren = row[2]
+                        m.chupiaohang = row[11]
                         m.chupiaoriqi = row[5].replace(' ', '').replace('\t', '')
                         m.daoqiriqi = row[6].replace(' ', '').replace('\t', '')
-                        m.leixing = row[7]
-                        m.zhuangtai = row[8]
-                        m.chupiaohang = row[9]
-                        m.chupiaohangb = row[10]
-                        m.chengduiren = row[11]
-                        m.shoupiaoren = row[12]
-                        m.shoupiaohang = row[13]
+                        m.piaomianjiage = (row[3])
+                        m.t_type = 2
                         ticketsImports.append(m)
-            TicketsImport.objects.bulk_create(ticketsImports)
-            print(datetime.datetime.now())
+            if len(ticketsImports) > 0:
+                Ticket_Import_Detail.objects.bulk_create(ticketsImports)
 
-            return redirect('%s?stamp=%s' % (reverse('ticket_import'), stamp))
-        elif 'savefile' in request.POST.keys():
-            stamp = request.GET.get('stamp')
-            print(stamp)
-            TicketsImport.objects.filter(stamp=stamp).update(saved=True)
-            items = TicketsImport.objects.filter(stamp=stamp)
-            print(datetime.datetime.now())
-            log, detail = utils.create_log()
-            log.oper_type = 106
-            tickets = []
-            for item in items:
-                m = Ticket()
-                m.piaohao = item.piaohao
-                m.chupiaohang = item.chupiaohang
-                m.chupiaoriqi = item.chupiaoriqi
-                m.daoqiriqi = item.daoqiriqi
-                m.piaomianjiage = item.piaomianjiage
-                m.gourujiage = item.piaomianjiage
-                m.gongyingshang = item.chupiaoren
-                tickets.append(m)
-                pass
-            Ticket.objects.bulk_create(tickets)
-            print(datetime.datetime.now())
-            utils.save_log(log, detail)
+            return redirect('ticket_import_detail', instance.id)
+            pass
 
-            return redirect('ticket_list')
-    return render(request, 'ticket/ticket_import.html', locals())
+    raw_data = Ticket_Import.objects.all().order_by('-pub_date')
+    context = {
+        'form': form,
+    }
+    return utils.get_paged_page(request, raw_data, list_template, context)
 
 
-def flow_import(request):
-    context = {}
-    # 如果form通过POST方法发送数据
-    if request.method == 'GET':
-        stamp = request.GET.get('stamp')
-        items = StoreTicketsImport.objects.filter(stamp=stamp)
+def ticket_import_detail(request,pk):
+    info = Ticket_Import.objects.get(pk=pk)
+    data = Ticket_Import_Detail.objects.filter(inport_info=pk)
     if request.method == "POST":
-        if 'upfile' in request.POST.keys():
-            stamp = uuid.uuid1()
-            path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
-            if not os.path.exists(path):
-                os.makedirs(path)
-            with open(path + 'tmp.csv', 'wb+')as destination:
-                for chunk in request.FILES['file'].chunks():
-                    destination.write(chunk)
-            with open(path + 'tmp.csv', mode='r', encoding='utf-8', newline='') as f:
-                # 此处读取到的数据是将每行数据当做列表返回的
-                reader = csv.reader(f)
-                for row in reader:
-                    # 此时输出的是一行行的列表
-                    # print(row)
-                    a = len(row)
-                    if len(row) == 10:
-                        if row[0].startswith('2'):
-                            m = StoreTicketsImport()
-                            m.stamp = stamp
-                            m.qianpaipiaohao = row[1]
-                            m.piaohao = row[2]
-                            m.maipiaoriqi = row[0].replace(' ', '').replace('\t', '').replace('/', '-')
-                            m.chupiaoren = row[9]
-                            m.piaomianjiage = float(row[6].replace(',', ''))
-                            if row[7].isdigit():
-                                m.piaomianlixi = float(row[7])
-                            m.chupiaoriqi = row[4].replace(' ', '').replace('\t', '').replace('/', '-')
-                            m.daoqiriqi = row[5].replace(' ', '').replace('\t', '').replace('/', '-')
-                            m.leixing = '流水表'
-                            m.chupiaohang = row[3]
-                            m.save()
-                            print(row)
-
-            return redirect('%s?stamp=%s' % (reverse('flow_import'), stamp))
-        elif 'savefile' in request.POST.keys():
-            stamp = request.GET.get('stamp')
-            print(stamp)
-            StoreTicketsImport.objects.filter(stamp=stamp).update(saved=True)
-            items = StoreTicketsImport.objects.filter(stamp=stamp)
-            for item in items:
+        if info.is_saved:
+            message = u'已保存'
+        else:
+            message = u'保存成功'
+            data.update(saved=True)
+            tickets = []
+            for item in data:
                 m = Ticket()
+                m.t_type = item.t_type
                 m.qianpaipiaohao = item.qianpaipiaohao
                 m.piaohao = item.piaohao
                 m.chupiaohang = item.chupiaohang
                 m.chupiaoriqi = item.chupiaoriqi
                 m.daoqiriqi = item.daoqiriqi
                 m.piaomianjiage = item.piaomianjiage
-                m.gourujiage = item.piaomianjiage - item.piaomianlixi
-                m.pay_status = 2
-                m.gongyingshang = item.chupiaoren
-                m.save()
-                m.goumairiqi = item.maipiaoriqi
-                m.save()
+                m.gourujiage = item.gourujiage
+                m.paytime = item.paytime
+                m.gongyingshang = item.gongyingshang
+                m.pay_status = item.pay_status
+                m.maichuriqi = item.maichuriqi
+                m.maichujiage = item.maichujiage
+                m.maipiaoren = item.maipiaoren
+                m.sell_status = item.sell_status
+                m.selltime = item.selltime
+                m.selltime = item.selltime
+                # 入库
+                if info.import_type == 1:
+                    m.t_status = 1
+                    pass
+                # 入池
+                elif info.import_type == 2:
+                    m.t_status = 5
+                    m.pool_in = info.pool
+                    pass
+                # 开票
+                elif info.import_type == 3:
+                    pass
+                tickets.append(m)
                 pass
+            if len(tickets) > 0:
+                Ticket.objects.bulk_create(tickets)
+            info.is_saved = True
+            info.save()
 
-            return redirect('ticket_list')
-            pass
-        # return redirect('ticket_import',)
-
-    # 如果是通过GET方法请求数据，返回一个空的表单
-    # else:
-    # form = NameForm()
-    # context['forma'] = form
-    return render(request, 'ticket/ticket_import.html', locals())
+    list_template = 'ticket/ticket_import_detail.html'
+    return render(request, 'ticket/ticket_import_detail.html', locals())

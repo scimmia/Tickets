@@ -3,7 +3,7 @@ from django.forms import ModelForm
 from django import forms
 
 from ticket.models import Ticket, Card, Loan_Order, CardTrans, SuperLoan, Per_Detail, MoneyWithCard, \
-    PoolLicai, MoneyWithCardPool, PoolPercent, Pool
+    PoolLicai, MoneyWithCardPool, PoolPercent, Pool, Ticket_Import
 
 
 class TicketForm(ModelForm):
@@ -29,7 +29,14 @@ class TicketTransForm(forms.Form):
                                  widget=forms.RadioSelect,
                                  initial='1',
                                  )
-    pool = forms.ModelChoiceField(label=" ",queryset=Pool.objects.all(), required=False)
+    pool = forms.ModelChoiceField(label=" ", queryset=Pool.objects.all(), required=False)
+
+
+class TicketImportForm(ModelForm):
+
+    class Meta:
+        model = Ticket_Import
+        fields = ['import_type', 'pool', ]
 
 
 class MoneyWithCardForm(ModelForm):
@@ -57,7 +64,7 @@ class PoolForm(forms.Form):
 class PoolPercentForm(ModelForm):
     class Meta:
         model = PoolPercent
-        fields = ['pool','tags','inpoolPer']
+        fields = ['pool', 'tags', 'inpoolPer']
 
 
 class ProForm(ModelForm):

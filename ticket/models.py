@@ -156,7 +156,7 @@ class Per_Detail(models.Model):
         return (u'%d' % (self.order_type))
 
 
-class Ticket(models.Model):
+class BaseTicket(models.Model):
     PAY_STATUS = (
         (1, u'待付款'),
         (2, u'已付款'),
@@ -186,8 +186,8 @@ class Ticket(models.Model):
         choices=TICKET_TYPES,
         default=1,
     )
-    pool_in = models.ForeignKey(Pool, related_name='t_pool_in', verbose_name=u'资金池', blank=True, null=True)
     goumairiqi = models.DateTimeField(u'购买日期', auto_now_add=True)
+    pool_in_riqi = models.DateField(u'入池日期', blank=True, null=True)
     qianpaipiaohao = models.CharField(u'前排票号', max_length=100, blank=True, null=True)
     piaohao = models.CharField(u'票号', max_length=100, blank=True, null=True)
     chupiaohang = models.CharField(u'出票行', max_length=100)
@@ -195,17 +195,13 @@ class Ticket(models.Model):
     daoqiriqi = models.DateField(u'到期日期', )
     piaomianjiage = models.FloatField(u'票面价格(元)', default=0)
     gourujiage = models.FloatField(u'购入价格', default=0)
-    gouruzijinchi = models.BooleanField(u'资金池购入', default=False)
-    pool_buy = models.ForeignKey(Pool, related_name='t_pool_buy', verbose_name=u'资金池购入', blank=True, null=True)
-    payedzijinchi = models.BooleanField(u'保证金还款', default=False)
+    paytime = models.DateTimeField(u'付款时间', blank=True, null=True)
     gongyingshang = models.CharField(u'供应商', max_length=100)
     pay_status = models.IntegerField(
         u'状态',
         choices=PAY_STATUS,
         default=1,
     )
-    payorder = models.ForeignKey(Order, related_name='pay_order', verbose_name=u'付款订单', blank=True, null=True)
-    paytime = models.DateTimeField(u'付款时间', blank=True, null=True)
     maichuriqi = models.DateTimeField(u'卖出日期', blank=True, null=True)
     maichujiage = models.FloatField(u'卖出价格', default=0)
     maipiaoren = models.CharField(u'买票人', max_length=100, blank=True, null=True)
@@ -214,9 +210,20 @@ class Ticket(models.Model):
         choices=SELL_STATUS,
         default=3,
     )
-    sellorder = models.ForeignKey(Order, related_name='sell_order', verbose_name=u'收款订单', blank=True, null=True)
     selltime = models.DateTimeField(u'收款时间', blank=True, null=True)
     lirun = models.IntegerField(u'利润', default=0)
+
+    class Meta:
+        abstract = True
+
+
+class Ticket(BaseTicket):
+    pool_in = models.ForeignKey(Pool, related_name='t_pool_in', verbose_name=u'资金池', blank=True, null=True)
+    gouruzijinchi = models.BooleanField(u'资金池购入', default=False)
+    pool_buy = models.ForeignKey(Pool, related_name='t_pool_buy', verbose_name=u'资金池购入', blank=True, null=True)
+    payedzijinchi = models.BooleanField(u'保证金还款', default=False)
+    payorder = models.ForeignKey(Order, related_name='pay_order', verbose_name=u'付款订单', blank=True, null=True)
+    sellorder = models.ForeignKey(Order, related_name='sell_order', verbose_name=u'收款订单', blank=True, null=True)
 
     class Meta:
         verbose_name = '票据'
@@ -284,6 +291,7 @@ class StoreTicketsImport(models.Model):
 
 class SuperLoan(BaseLoan):
     pool = models.ForeignKey(Pool, related_name='super_loan_pool', verbose_name=u'资金池', blank=False, null=False)
+
     class Meta:
         verbose_name = '超短贷'
         verbose_name_plural = '超短贷'
@@ -312,8 +320,10 @@ class PoolPercent(models.Model):
     tags = models.CharField(u'标签', max_length=50)
     inpoolPer = models.FloatField(u'入池额度比例(%)', default=0)
     is_active = models.BooleanField(u'激活', default=True)
+
     class Meta:
         unique_together = ("pool", "tags")
+
 
 class PoolPercentDetail(models.Model):
     inpoolPercent = models.ForeignKey(PoolPercent, related_name='pool_loan', verbose_name=u'超短贷', blank=True,
@@ -464,3 +474,32 @@ class MoneyWithCardPool(models.Model):
     money = models.FloatField(u'金额', default=0)
     card = models.ForeignKey(Card, related_name='moneys_card', verbose_name=u'银行卡', blank=False, null=False)
     pool = models.ForeignKey(Pool, related_name='moneys_pool', verbose_name=u'资金池', blank=False, null=False)
+
+
+IMPORT_TYPE = (
+    (1, u'库存'),
+    (2, u'资金池'),
+    (3, u'开票'),
+)
+
+
+class Ticket_Import(models.Model):
+    import_type = models.IntegerField(
+        u'导入到',
+        choices=IMPORT_TYPE,
+        default=1,
+    )
+    pool = models.ForeignKey(Pool, related_name='import_pool', verbose_name=u'资金池', blank=True, null=True)
+    detail = models.CharField(u'详情', max_length=255, blank=False, null=False)
+    is_saved = models.BooleanField(u'保存', default=False)
+    search_date = models.DateField(u'添加日期', auto_now_add=True)
+    pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
+
+
+class Ticket_Import_Detail(BaseTicket):
+    inport_info = models.ForeignKey(Ticket_Import, related_name='t_import', verbose_name=u'导入', blank=False, null=False)
+    zhiyalv = models.FloatField(u'质押率', default=100)
+    saved = models.BooleanField(u'是否已保存', default=False)
+    search_date = models.DateField(u'添加日期', auto_now_add=True)
+    pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
+    beizhu = models.CharField(u'备注', max_length=255, blank=True, null=True)

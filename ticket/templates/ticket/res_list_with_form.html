@@ -30,24 +30,26 @@
             {% endblock %}
         </div>
         <div class="col-md-4">
-            <form method='POST' id="signupForm" action="" onsubmit="return check();">{% csrf_token %}
-                <div class="box box-danger">
-                    <div class="box-header with-border">
+            {% block form %}
+                <form method='POST' id="signupForm" action="" onsubmit="return check();">{% csrf_token %}
+                    <div class="box box-danger">
+                        <div class="box-header with-border">
 
-                        {% block form-header %}
-                        {% endblock %}
-                    </div>
-                    <div class="box-body">
+                            {% block form-header %}
+                            {% endblock %}
+                        </div>
+                        <div class="box-body">
 
-                        {% block form-body %}
-                        {% endblock %}
+                            {% block form-body %}
+                            {% endblock %}
 
+                        </div>
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary">提交</button>
+                        </div>
                     </div>
-                    <div class="box-footer">
-                        <button type="submit" class="btn btn-primary">提交</button>
-                    </div>
-                </div>
-            </form>
+                </form>
+            {% endblock %}
         </div>
 
     </div>
