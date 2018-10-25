@@ -1,20 +1,18 @@
-import csv
 import datetime
-import os
-import uuid
 
 from django.db.models import Sum, Count, Q
-from django.shortcuts import redirect
 
 from django.contrib.auth import views
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.urls import reverse
 
 from ticket import utils
-from ticket.models import Ticket, TicketsImport, StoreTicketsImport, SuperLoan, Loan_Order, DashBoard
+from ticket.models import Ticket, SuperLoan, Loan_Order, DashBoard
+from django.contrib.auth.models import User
+from ticket.forms import UserCreatForm, UserManageForm, UserChangePasswordForm
 
 
+@login_required
 def dashboard(request):
     ts = Ticket.objects.values('t_status', 't_type').annotate(t_count=Count('id'), sum_money=Sum('piaomianjiage'))
     kudianc = 0
@@ -74,7 +72,7 @@ def dashboard(request):
             daoqikucun_sum = round(t['sum_money'], 2)
     # ts = SuperLoan.objects.filter(Q(needpay_sum__gt=0)|Q(needpay_lixi__gt=0)).annotate(t_count = Count('id'),sum_money=Sum('needpay_sum'),sum_lixi=Sum('needpay_lixi'))
 
-    superLoans = SuperLoan.objects.filter(is_payed=False,lixi_end_date__lte=threeday)
+    superLoans = SuperLoan.objects.filter(is_payed=False, lixi_end_date__lte=threeday)
     loan_count = 0
     loan_sum = 0
     for superLoan in superLoans:
@@ -114,258 +112,72 @@ def logout(request):
     return template_response
 
 
+@login_required
+def user_list(request):
+    form = UserCreatForm(request.POST or None)
+    oper_form = UserManageForm(request.POST or None)
+    context = {}
+    if request.method == 'POST':
+        if form.is_valid():
+            oper_form = UserManageForm()
+            loginname = form.cleaned_data.get('loginname')
+            try:
+                user = User.objects.create_user(loginname, None, 'abcd1111')
+                user.last_name = form.cleaned_data.get('username')
+                user.save()
+                context['message'] = u'保存成功'
+            except:
+                context['errormsg'] = u'该用户已存在'
+        elif oper_form.is_valid():
+            form = UserCreatForm()
+            operation = oper_form.cleaned_data.get('operation')
+            ids = request.POST['ids']
+            if len(ids) > 0:
+                if operation == '1':
+                    users = User.objects.filter(id__in=ids.split(','))
+                    for u in users:
+                        u.set_password('abcd1111')
+                        u.save()
+                    context['message'] = u'重置成功，密码为abcd1111'
+                elif operation == '2':
+                    User.objects.filter(id__in=ids.split(',')).update(is_active=True)
+                    context['message'] = u'启用成功'
+                    pass
+                elif operation == '3':
+                    User.objects.filter(id__in=ids.split(',')).update(is_active=False)
+                    context['message'] = u'停用成功'
+                    pass
+            else:
+                context['errormsg'] = u'请选择至少一个账号'
+
+    context['form'] = form
+    context['oper_form'] = oper_form
+    raw_data = User.objects.filter(is_superuser=False)
+    list_template = 'ticket/user_list.html'
+    return utils.get_paged_page(request, raw_data, list_template, context)
+
+
 # 密码更改
 @login_required
-def password_change(request):
-    # post_change_redirect表示密码成功修改后将跳转的页面.
-    template_response = views.password_change(request, post_change_redirect='/index/')
-    return template_response
+def change_password(request):
+    form = UserChangePasswordForm(request.POST or None)
+    context = {
+        'form': form,
+    }
+    if request.method == 'POST':
+        if form.is_valid():
+            u = request.user
+            if u.check_password(form.cleaned_data.get('old_password')):
+                password1 = form.cleaned_data.get('new_password')
+                password2 = form.cleaned_data.get('new_password_2')
+                if password1 and password2 and len(password1)>0 and password1 == password2:
+                    u.set_password(password1)
+                    u.save()
+                    context['message'] = u'修改成功'
+                else:
+                    context['errormsg'] = u'新密码不一致或错误'
 
+            else:
+                context['errormsg'] = u'旧密码错误'
 
-def ticket_import(request):
-    context = {}
-    # 如果form通过POST方法发送数据
-    if request.method == 'GET':
-        stamp = request.GET.get('stamp')
-        items = TicketsImport.objects.filter(stamp=stamp)
-    if request.method == "POST":
-        if 'upfile' in request.POST.keys():
-            stamp = uuid.uuid1()
-            path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
-            if not os.path.exists(path):
-                os.makedirs(path)
-            with open(path + 'tmp.csv', 'wb+')as destination:
-                for chunk in request.FILES['file'].chunks():
-                    destination.write(chunk)
-            csv_reader = csv.reader(open(path + 'tmp.csv', 'r', newline=''))
-            print(datetime.datetime.now())
-            ticketsImports = []
-            for row in csv_reader:
-                a = len(row)
-                if len(row) == 14:
-                    if row[5].startswith('2'):
-                        m = TicketsImport()
-                        m.stamp = stamp
-                        m.piaohao = row[0]
-                        m.chupiaoren = row[1]
-                        m.shoukuanren = row[2]
-                        m.piaomianjiage = float(row[3].replace(',', ''))
-                        m.piaomianlixi = row[4]
-                        m.chupiaoriqi = row[5].replace(' ', '').replace('\t', '')
-                        m.daoqiriqi = row[6].replace(' ', '').replace('\t', '')
-                        m.leixing = row[7]
-                        m.zhuangtai = row[8]
-                        m.chupiaohang = row[9]
-                        m.chupiaohangb = row[10]
-                        m.chengduiren = row[11]
-                        m.shoupiaoren = row[12]
-                        m.shoupiaohang = row[13]
-                        ticketsImports.append(m)
-            TicketsImport.objects.bulk_create(ticketsImports)
-            print(datetime.datetime.now())
-
-            return redirect('%s?stamp=%s' % (reverse('ticket_import'), stamp))
-        elif 'savefile' in request.POST.keys():
-            stamp = request.GET.get('stamp')
-            print(stamp)
-            TicketsImport.objects.filter(stamp=stamp).update(saved=True)
-            items = TicketsImport.objects.filter(stamp=stamp)
-            print(datetime.datetime.now())
-            tickets = []
-            for item in items:
-                m = Ticket()
-                m.piaohao = item.piaohao
-                m.chupiaohang = item.chupiaohang
-                m.chupiaoriqi = item.chupiaoriqi
-                m.daoqiriqi = item.daoqiriqi
-                m.piaomianjiage = item.piaomianjiage
-                m.gourujiage = item.piaomianjiage
-                m.gongyingshang = item.chupiaoren
-                tickets.append(m)
-                pass
-            Ticket.objects.bulk_create(tickets)
-            print(datetime.datetime.now())
-
-            return redirect('ticket_list')
-            pass
-        # return redirect('ticket_import',)
-
-    # 如果是通过GET方法请求数据，返回一个空的表单
-    # else:
-    # form = NameForm()
-    # context['forma'] = form
-    return render(request, 'ticket/ticket_import.html', locals())
-
-
-def flow_import(request):
-    context = {}
-    # 如果form通过POST方法发送数据
-    if request.method == 'GET':
-        stamp = request.GET.get('stamp')
-        items = StoreTicketsImport.objects.filter(stamp=stamp)
-    if request.method == "POST":
-        if 'upfile' in request.POST.keys():
-            stamp = uuid.uuid1()
-            path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
-            if not os.path.exists(path):
-                os.makedirs(path)
-            with open(path + 'tmp.csv', 'wb+')as destination:
-                for chunk in request.FILES['file'].chunks():
-                    destination.write(chunk)
-            with open(path + 'tmp.csv', mode='r', encoding='utf-8', newline='') as f:
-                # 此处读取到的数据是将每行数据当做列表返回的
-                reader = csv.reader(f)
-                for row in reader:
-                    # 此时输出的是一行行的列表
-                    # print(row)
-                    a = len(row)
-                    if len(row) == 10:
-                        if row[0].startswith('2'):
-                            m = StoreTicketsImport()
-                            m.stamp = stamp
-                            m.qianpaipiaohao = row[1]
-                            m.piaohao = row[2]
-                            m.maipiaoriqi = row[0].replace(' ', '').replace('\t', '').replace('/', '-')
-                            m.chupiaoren = row[9]
-                            m.piaomianjiage = float(row[6].replace(',', ''))
-                            if row[7].isdigit():
-                                m.piaomianlixi = float(row[7])
-                            m.chupiaoriqi = row[4].replace(' ', '').replace('\t', '').replace('/', '-')
-                            m.daoqiriqi = row[5].replace(' ', '').replace('\t', '').replace('/', '-')
-                            m.leixing = '流水表'
-                            m.chupiaohang = row[3]
-                            m.save()
-                            print(row)
-
-            return redirect('%s?stamp=%s' % (reverse('flow_import'), stamp))
-        elif 'savefile' in request.POST.keys():
-            stamp = request.GET.get('stamp')
-            print(stamp)
-            StoreTicketsImport.objects.filter(stamp=stamp).update(saved=True)
-            items = StoreTicketsImport.objects.filter(stamp=stamp)
-            for item in items:
-                m = Ticket()
-                m.qianpaipiaohao = item.qianpaipiaohao
-                m.piaohao = item.piaohao
-                m.chupiaohang = item.chupiaohang
-                m.chupiaoriqi = item.chupiaoriqi
-                m.daoqiriqi = item.daoqiriqi
-                m.piaomianjiage = item.piaomianjiage
-                m.gourujiage = item.piaomianjiage - item.piaomianlixi
-                m.pay_status = 2
-                m.gongyingshang = item.chupiaoren
-                m.save()
-                m.goumairiqi = item.maipiaoriqi
-                m.save()
-                pass
-
-            return redirect('ticket_list')
-            pass
-        # return redirect('ticket_import',)
-
-    # 如果是通过GET方法请求数据，返回一个空的表单
-    # else:
-    # form = NameForm()
-    # context['forma'] = form
-    return render(request, 'ticket/ticket_import.html', locals())
-
-
-def pool_import(request):
-    context = {}
-    # 如果form通过POST方法发送数据
-    if request.method == 'GET':
-        stamp = request.GET.get('stamp')
-        items = StoreTicketsImport.objects.filter(stamp=stamp)
-    if request.method == "POST":
-        if 'upfile' in request.POST.keys():
-            stamp = uuid.uuid1()
-            path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
-            if not os.path.exists(path):
-                os.makedirs(path)
-            with open(path + 'tmp.csv', 'wb+')as destination:
-                for chunk in request.FILES['file'].chunks():
-                    destination.write(chunk)
-            with open(path + 'tmp.csv', mode='r', encoding='utf-8', newline='') as f:
-                # 此处读取到的数据是将每行数据当做列表返回的
-                reader = csv.reader(f)
-                for row in reader:
-                    # 此时输出的是一行行的列表
-                    # print(row)
-                    a = len(row)
-                    if len(row) == 10:
-                        if row[0].startswith('2'):
-                            m = StoreTicketsImport()
-                            m.stamp = stamp
-                            m.qianpaipiaohao = row[1]
-                            m.piaohao = row[2]
-                            m.maipiaoriqi = row[0].replace(' ', '').replace('\t', '').replace('/', '-')
-                            m.chupiaoren = row[9]
-                            m.piaomianjiage = float(row[6].replace(',', ''))
-                            m.piaomianlixi = m.piaomianjiage - float(row[8].replace(',', ''))
-                            m.chupiaoriqi = row[4].replace(' ', '').replace('\t', '').replace('/', '-')
-                            m.daoqiriqi = row[5].replace(' ', '').replace('\t', '').replace('/', '-')
-                            m.leixing = '流水表'
-                            m.chupiaohang = row[3]
-                            m.save()
-                            print(row)
-
-            return redirect('%s?stamp=%s' % (reverse('pool_import'), stamp))
-        elif 'savefile' in request.POST.keys():
-            stamp = request.GET.get('stamp')
-            print(stamp)
-            StoreTicketsImport.objects.filter(stamp=stamp).update(saved=True)
-            items = StoreTicketsImport.objects.filter(stamp=stamp)
-            for item in items:
-                m = Ticket()
-                m.qianpaipiaohao = item.qianpaipiaohao
-                m.piaohao = item.piaohao
-                m.chupiaohang = item.chupiaohang
-                m.chupiaoriqi = item.chupiaoriqi
-                m.daoqiriqi = item.daoqiriqi
-                m.piaomianjiage = item.piaomianjiage
-                m.gourujiage = item.piaomianjiage - item.piaomianlixi
-                m.pay_status = 2
-                m.t_status = 5
-                m.gongyingshang = item.chupiaoren
-                m.save()
-                m.goumairiqi = item.maipiaoriqi
-                m.save()
-                # ticket_inpool(m.pk)
-                pass
-
-            return redirect('ticket_list')
-            pass
-        # return redirect('ticket_import',)
-
-    # 如果是通过GET方法请求数据，返回一个空的表单
-    # else:
-    # form = NameForm()
-    # context['forma'] = form
-    return render(request, 'ticket/ticket_import.html', locals())
-
-
-def handle_upload_file(file):
-    path = '\\csvs\\'  # 上传文件的保存路径，可以自己指定任意的路径
-    if not os.path.exists(path):
-        os.makedirs(path)
-    with open(path + 'tmp.csv', 'wb+')as destination:
-        for chunk in file.chunks():
-            destination.write(chunk)
-    csv_reader = csv.reader(open(path + 'tmp.csv', 'r', newline=''))
-    res = []
-    for row in csv_reader:
-        a = len(row)
-        if len(row) == 14:
-            if row[5].startswith('2'):
-                m = Ticket()
-                m.qianpaipiaohao = row[0]
-                m.piaohao = row[0]
-                m.chupiaohang = row[9]
-                m.chupiaoriqi = row[5]
-                m.daoqiriqi = row[6]
-                m.piaomianjiage = row[3]
-                res.append(m)
-                print(row)
-
-            pass
-    return res
+    return render(request, 'ticket/user_change_password.html', context)

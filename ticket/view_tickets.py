@@ -1,7 +1,4 @@
-import csv
-import datetime
 import os
-import uuid
 from decimal import Decimal
 
 import xlrd
@@ -10,7 +7,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.urls import reverse
 
 from ticket import utils, view_loan
 from ticket.forms import TicketForm, TicketEditForm, MoneyForm, TicketTransForm, CardForm, TicketImportForm
@@ -19,6 +15,7 @@ from ticket.models import Card, Ticket, Order, TicketsImport, StoreTicketsImport
 
 
 # 增加
+@login_required
 def ticket_add(request):
     form = TicketForm(request.POST or None)
     context = {
@@ -75,6 +72,7 @@ def ticket_add(request):
 
 
 # 编辑查看
+@login_required
 def ticket_index(request, pk):
     ticket_ins = get_object_or_404(Ticket, pk=pk)
     context = {
@@ -141,6 +139,7 @@ def get_ticketlists(col):
     return t
 
 
+@login_required
 def ticket_list(request):
     pools = Pool.objects.all()
     form = TicketTransForm(request.POST or None)
@@ -248,6 +247,7 @@ def ticket_list(request):
     return utils.get_paged_page(request, raw_data, list_template, context)
 
 
+@login_required
 def tickets_needfix(request):
     context = {
         'gongyingshang': get_ticketlists('gongyingshang'),
@@ -295,14 +295,17 @@ def ticket_needselect(request, index):
     return utils.get_paged_page(request, raw_data, list_template, context)
 
 
+@login_required
 def ticket_needpay(request):
     return ticket_needselect(request, 1)
 
 
+@login_required
 def ticket_needcollect(request):
     return ticket_needselect(request, 2)
 
 
+@login_required
 def ticket_createorder(request):
     if request.method == 'POST':
         order = Order()
@@ -371,14 +374,17 @@ def ticket_orderlist(request, index):
     return utils.get_paged_page(request, raw_data, list_template, context)
 
 
+@login_required
 def ticket_payorders(request):
     return ticket_orderlist(request, 1)
 
 
+@login_required
 def ticket_sellorders(request):
     return ticket_orderlist(request, 2)
 
 
+@login_required
 def ticket_order(request, pk):
     order = get_object_or_404(Order, pk=pk)
     if order.order_type == 1:
@@ -480,6 +486,7 @@ def ticket_order(request, pk):
     return utils.get_paged_page(request, fee_data, list_template, context)
 
 
+@login_required
 def ticket_imports(request):
     form = TicketImportForm(request.POST or None)
     list_template = 'ticket/ticket_imports.html'
@@ -569,6 +576,7 @@ def ticket_imports(request):
     return utils.get_paged_page(request, raw_data, list_template, context)
 
 
+@login_required
 def ticket_import_detail(request,pk):
     info = Ticket_Import.objects.get(pk=pk)
     data = Ticket_Import_Detail.objects.filter(inport_info=pk)

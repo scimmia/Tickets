@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from ticket import utils
@@ -5,6 +6,7 @@ from ticket.forms import CardForm, CardTransForm
 from ticket.models import Card, CardTrans, FeeDetail
 
 
+@login_required
 def card_list(request):
     form = CardForm(request.POST or None)
     context = {
@@ -23,6 +25,7 @@ def card_list(request):
 
 
 # 修改数据,函数中的pk代表数据的id
+@login_required
 def card_edit(request, pk):
     card_ins = get_object_or_404(Card, pk=pk)
     context = {
@@ -51,6 +54,7 @@ def card_edit(request, pk):
 
 
 # 修改数据,函数中的pk代表数据的id
+@login_required
 def card_trans(request):
     form = CardTransForm(request.POST or None)
     context = {

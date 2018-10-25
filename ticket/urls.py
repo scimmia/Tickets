@@ -10,8 +10,9 @@ urlpatterns = [
     url(r'login/', views.login, name='login'),
     # 用户退出
     url(r'logout/', views.logout, name='logout'),
+    url(r'^user/users/', views.user_list, name='user_list'),
     # 密码修改
-    url(r'password_change/', views.password_change, name='password_change'),
+    url(r'^user/change_password', views.change_password, name='change_password'),
 
     url(r'^ticket/ticket_list/', view_tickets.ticket_list, name='ticket_list'),
     url(r'^ticket/tickets_needfix/', view_tickets.tickets_needfix, name='tickets_needfix'),
@@ -24,7 +25,6 @@ urlpatterns = [
     url(r'^ticket/ticket_add/', view_tickets.ticket_add, name='ticket_add'),
     url(r'^ticket/ticket_imports', view_tickets.ticket_imports, name='ticket_imports'),
     url(r'^ticket/ticket_import_detail/(?P<pk>\d+)/$', view_tickets.ticket_import_detail, name='ticket_import_detail'),
-    url(r'^ticket/pool_import', views.pool_import, name='pool_import'),
     url(r'^ticket/ticket_index/(?P<pk>\d+)/$', view_tickets.ticket_index, name='ticket_index'),
     url(r'^loan/order/(?P<pk>\d+)/$', view_loan.loanorder, name='loanorder'),
     url(r'^loan/need_collect_customers/', view_loan.need_collect_customers, name='need_collect_customers'),

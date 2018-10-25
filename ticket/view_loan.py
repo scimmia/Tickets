@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
 from ticket import utils
@@ -37,6 +38,7 @@ def create_need_collect(customer, instance, isMonthlilv):
     utils.save_log(log, detail)
 
 
+@login_required
 def need_collect_customers(request):
     loanform = LoanForm(request.POST or None)
     customerlist = Customer.objects.all().order_by('name')
@@ -57,6 +59,7 @@ def need_collect_customers(request):
     return utils.get_paged_page(request, raw_data, list_template, context)
 
 
+@login_required
 def need_collect_lists(request, pk):
     list_template = 'ticket/loan_orders.html'
     loanform = LoanForm(request.POST or None)
@@ -142,6 +145,7 @@ def create_need_pay(customer, instance, isMonthlilv):
     utils.save_log(log, detail)
 
 
+@login_required
 def need_pay_customers(request):
     loanform = LoanForm(request.POST or None)
     customerlist = Customer.objects.all().order_by('name')
@@ -163,6 +167,7 @@ def need_pay_customers(request):
     return utils.get_paged_page(request, raw_data, list_template, context)
 
 
+@login_required
 def need_pay_lists(request, pk):
     list_template = 'ticket/loan_orders.html'
     loanform = LoanForm(request.POST or None)
@@ -226,6 +231,7 @@ def need_pay_order(request, order):
     return utils.get_paged_page(request, fee_data, 'ticket/loan_order.html', context)
 
 
+@login_required
 def loanorder(request, pk):
     order = Loan_Order.objects.get(pk=pk)
     if order.order_type == 3:
@@ -251,6 +257,7 @@ def create_pre_collect(customer, instance):
     utils.save_log(log, detail)
 
 
+@login_required
 def pre_collect_customers(request):
     loanform = LoanPreForm(request.POST or None)
     list_template = 'ticket/loan_xx_customers.html'
@@ -289,6 +296,7 @@ def create_pre_pay(customer, instance):
     utils.save_log(log, detail)
 
 
+@login_required
 def pre_pay_customers(request):
     loanform = LoanPreForm(request.POST or None)
     list_template = 'ticket/loan_xx_customers.html'
@@ -309,11 +317,13 @@ def pre_pay_customers(request):
     return utils.get_paged_page(request, raw_data, list_template, context)
 
 
+@login_required
 def pre_collect_list(request, pk):
     fee_data = FeeDetail.objects.filter(fee_detail_type=41, fee_detail_pk=pk).order_by('-pub_date')
     return utils.get_paged_page(request, fee_data, 'ticket/loan_pre_order.html')
 
 
+@login_required
 def pre_pay_list(request, pk):
     fee_data = FeeDetail.objects.filter(fee_detail_type=42, fee_detail_pk=pk).order_by('-pub_date')
     return utils.get_paged_page(request, fee_data, 'ticket/loan_pre_order.html')

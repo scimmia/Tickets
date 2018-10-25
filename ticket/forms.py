@@ -33,7 +33,6 @@ class TicketTransForm(forms.Form):
 
 
 class TicketImportForm(ModelForm):
-
     class Meta:
         model = Ticket_Import
         fields = ['import_type', 'pool', ]
@@ -195,3 +194,26 @@ class BestMixForm(forms.Form):
                                 widget=forms.NumberInput(attrs={'class': 'form-control'}))
     valuete = forms.IntegerField(label="每十万贴息5", required=False,
                                  widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+
+class UserCreatForm(forms.Form):
+    username = forms.CharField(label="姓名", required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    loginname = forms.CharField(label="账号", required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+
+class UserManageForm(forms.Form):
+    operation = forms.ChoiceField(label="操作类型",
+                                  choices=(
+                                      (1, "重置密码"),
+                                      (2, "启用"),
+                                      (3, "停用"),
+                                  ),
+                                  widget=forms.RadioSelect,
+                                  initial='1',
+                                  )
+
+
+class UserChangePasswordForm(forms.Form):
+    old_password = forms.CharField(label="旧密码", required=True,widget=forms.PasswordInput(attrs={'autofocus': True}),)
+    new_password = forms.CharField(label="新密码", required=True,widget=forms.PasswordInput(),)
+    new_password_2 = forms.CharField(label="新密码确认", required=True,widget=forms.PasswordInput(),)

@@ -1,6 +1,7 @@
 import datetime
 from decimal import Decimal
 
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum
 from django.shortcuts import redirect, get_object_or_404, render
 
@@ -11,6 +12,7 @@ from ticket.models import Ticket, SuperLoan, Card, FeeDetail, PoolLicai, Pool, O
 from ticket.utils import create_pool_percent
 
 
+@login_required
 def pool_dash(request):
     pool_form = PoolForm(request.POST or None)
     pro_form = ProForm(request.POST or None)
@@ -123,6 +125,7 @@ def pool_dash(request):
     return utils.get_paged_page(request, pool_data, 'ticket/pool_dash.html', context)
 
 
+@login_required
 def pool_licai_lists(request):
     context = {}
     if request.method == 'POST':
@@ -157,11 +160,13 @@ def pool_licai_lists(request):
     return utils.get_paged_page(request, data, 'ticket/pool_licais.html', context)
 
 
+@login_required
 def super_loan_lists(request):
     loan_data = SuperLoan.objects.all().order_by('-pub_date')
     return utils.get_paged_page(request, loan_data, 'ticket/pool_loans.html')
 
 
+@login_required
 def super_loan(request, pk):
     order = SuperLoan.objects.get(pk=pk)
     card_data = Card.objects.all()
@@ -223,6 +228,7 @@ def super_loan(request, pk):
     return utils.get_paged_page(request, fee_data, 'ticket/pool_superloan.html', context)
 
 
+@login_required
 def pool_tickets(request):
     context = {
         'gongyingshang': utils.get_list_from_tickets('gongyingshang'),
@@ -250,6 +256,7 @@ def pool_tickets(request):
     return utils.get_paged_page(request, raw_data, 'ticket/pool_tickets.html', context)
 
 
+@login_required
 def pool_detail(request, pk):
     pool = get_object_or_404(Pool, pk=pk)
     context = {
@@ -261,6 +268,7 @@ def pool_detail(request, pk):
 
 
 
+@login_required
 def pool_percent_list(request):
     form = PoolPercentForm(request.POST or None)
     pools = Pool.objects.all()
@@ -281,6 +289,7 @@ def pool_percent_list(request):
     return render(request, 'ticket/inpoolPer_list.html', locals())
 
 
+@login_required
 def pool_percent_detail(request ,pk):
     pool_percent = PoolPercent.objects.get(pk = pk)
     if request.method == 'POST':

@@ -1,6 +1,7 @@
 import json
 import os
 
+from django.contrib.auth.decorators import login_required
 from django.http import FileResponse
 from django.shortcuts import render
 
@@ -140,6 +141,7 @@ def tiexian(request):
 
 
 # 日志
+@login_required
 def log_list(request):
     raw_data = OperLog.objects.all().order_by('-pub_date')
     kwargs, query = utils.get_query(request)
@@ -201,7 +203,7 @@ def log_list(request):
     return render(request, 'ticket/log_list.html', context)
 
 
-# todo
+@login_required
 def daily_report(request):
     if request.method == "POST":
         if 'day' in request.POST.keys():
