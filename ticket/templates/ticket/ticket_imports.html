@@ -20,7 +20,12 @@
         {{ item.pub_date }}
     </a></td>
     <td>{{ item.detail }}</td>
-    <td>{{ item.is_saved }}</td>
+    <td>{% if item.is_saved%}
+            <span class="label label-success">是
+        {% else %}
+            <span class="label label-danger">否
+        {% endif %}
+        </span></td>
 {% endblock %}
 {% block form %}
     <form method='POST' id="signupForm" action=""  enctype="multipart/form-data">{% csrf_token %}
