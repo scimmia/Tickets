@@ -61,6 +61,7 @@
     <th>操作类型</th>
     <th>相关票据卡</th>
     <th>详情</th>
+    <th>操作员</th>
 {% endblock %}
 {% block table_td %}
     <td>{{ item.pub_date }} </td>
@@ -105,6 +106,7 @@
             {% if forloop.counter|divisibleby:3 %}<br/>{% endif %}
         {% endfor %}
     </td>
+    <td>{{ item.username }} </td>
 {% endblock %}
 {% block initDatePicker %}
     initDatePicker($('.input-daterange'));

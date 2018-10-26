@@ -352,9 +352,10 @@ class LogDetailTemp:
         self.add_detail(9, pk)
 
 
-def create_log():
+def create_log(username='system'):
     detail = LogDetailTemp()
     log = OperLog()
+    log.contdetail = username
     log.save()
     return log, detail
 

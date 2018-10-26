@@ -152,6 +152,7 @@ def log_list(request):
     for t in data_list:
         try:
             t.detail = json.loads(t.detail)
+            t.username = t.contdetail
             t.contdetail = []
             if t.xianjin != 0:
                 t.contdetail.append({'cont': u'银行卡', 'money': t.xianjin})

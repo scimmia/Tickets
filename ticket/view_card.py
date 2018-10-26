@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404
 
 from ticket import utils
 from ticket.forms import CardForm, CardTransForm
@@ -14,7 +14,7 @@ def card_list(request):
     }
     if request.method == 'POST':
         instance = form.save()
-        log, detail = utils.create_log()
+        log, detail = utils.create_log(request.user.last_name)
         log.oper_type = 401
         detail.add_detail_card(instance.pk)
         utils.save_log(log, detail)
@@ -38,7 +38,7 @@ def card_edit(request, pk):
         card_ins.save()
 
         if request.POST['fee'].strip(' ') != '':
-            log, detail = utils.create_log()
+            log, detail = utils.create_log(request.user.last_name)
             log.oper_type = 402
             money = float(request.POST['fee'])
             if request.POST['p_status'] == '4':  # 银行卡取出
@@ -69,7 +69,7 @@ def card_trans(request):
                 context['message'] = u'转账金额不能小于0'
             else:
                 instance.save()
-                log,detail = utils.create_log()
+                log,detail = utils.create_log(request.user.last_name)
                 log.oper_type = 404
                 detail.add_detail_card(instance.fromCard.pk)
                 utils.create_card_fee(instance.fromCard, 0 - instance.money, log)

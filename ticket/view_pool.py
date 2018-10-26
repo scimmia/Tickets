@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Sum
-from django.shortcuts import redirect, get_object_or_404, render
+from django.shortcuts import get_object_or_404, render
 
 from ticket import utils
 from ticket.forms import SuperLoanForm, MoneyForm, ProForm, PoolLicaiForm, PoolForm, PoolPercentForm
@@ -21,7 +21,7 @@ def pool_dash(request):
 
     context = {}
     if request.method == 'POST':
-        log, detail = utils.create_log()
+        log, detail = utils.create_log(request.user.last_name)
         # 新建资金池
         if pool_form.is_valid():
             pro_form = ProForm()
@@ -93,7 +93,7 @@ def pool_dash(request):
             utils.create_card_fee(instance.yinhangka, 0 - instance.benjin, log)
             utils.save_log(log, detail)
             if instance.is_front:
-                lixilog, lixidetail = utils.create_log()
+                lixilog, lixidetail = utils.create_log(request.user.last_name)
                 lixilog.oper_type = 511
                 lixidetail.add_detail_licai(instance.pk)
                 lixidetail.add_detail_card(instance.yinhangka.pk)
@@ -108,7 +108,8 @@ def pool_dash(request):
     context['pool_licai_form'] = licai_form
 
     # dash = utils.get_dash()
-    dash = Pool.objects.aggregate(Sum('edu_keyong'), Sum('edu_yiyong'), Sum('edu_baozhengjin'), Sum('edu_chineipiao'), Sum('edu_licai'), Sum('edu_chaoduandai'))
+    dash = Pool.objects.aggregate(Sum('edu_keyong'), Sum('edu_yiyong'), Sum('edu_baozhengjin'), Sum('edu_chineipiao'),
+                                  Sum('edu_licai'), Sum('edu_chaoduandai'))
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     count_t = Ticket.objects.filter(Q(t_status=5) & Q(daoqiriqi__gte=today)).count()
     count_chikai = Ticket.objects.filter(gouruzijinchi=True).count()
@@ -137,7 +138,7 @@ def pool_licai_lists(request):
                 if t.is_end and (not t.is_payed):
                     t.is_payed = True
                     t.save()
-                    log, detail = utils.create_log()
+                    log, detail = utils.create_log(request.user.last_name)
                     log.oper_type = 512
                     detail.add_detail_pool(t.pool.pk)
                     detail.add_detail_licai(t.pk)
@@ -183,7 +184,7 @@ def super_loan(request, pk):
                 if money > order.benjin_needpay:
                     context['errormsg'] = u'金额不能大于待还本金'
                 else:
-                    log, detail = utils.create_log()
+                    log, detail = utils.create_log(request.user.last_name)
                     detail.add_detail_superloan(pk)
                     log.oper_type = 504
                     if 'zijinchipay' in request.POST.keys():
@@ -205,7 +206,7 @@ def super_loan(request, pk):
                 if money > order.lixi_needpay:
                     context['errormsg'] = u'金额不能大于待还利息'
                 else:
-                    log, detail = utils.create_log()
+                    log, detail = utils.create_log(request.user.last_name)
                     detail.add_detail_superloan(pk)
                     log.oper_type = 505
                     log.feiyong_yewu += Decimal(money)
@@ -237,7 +238,7 @@ def pool_tickets(request):
     if request.method == 'POST':
         if 'ids' in request.POST.keys():
             ids = request.POST['ids']
-            log, detail = utils.create_log()
+            log, detail = utils.create_log(request.user.last_name)
             log.oper_type = 506
             if len(ids) > 0:
                 tickets = Ticket.objects.filter(id__in=ids.split(','))
@@ -267,19 +268,18 @@ def pool_detail(request, pk):
     return utils.get_paged_page(request, fee_data, 'ticket/pool_detail.html', context)
 
 
-
 @login_required
 def pool_percent_list(request):
     form = PoolPercentForm(request.POST or None)
     pools = Pool.objects.all()
     if PoolPercent.objects.filter(tags='!默认!').count() < len(pools):
         for pool in pools:
-            create_pool_percent(pool,'!默认!', 100)
+            create_pool_percent(pool, '!默认!', 100)
     if request.method == 'POST':
         if form.is_valid():
             t = form.save(commit=False)
             inpoolPer = request.POST['inpoolPer']
-            if create_pool_percent(t.pool,t.tags, inpoolPer):
+            if create_pool_percent(t.pool, t.tags, inpoolPer):
                 message = u'保存成功'
             else:
                 message = u'保存失败'
@@ -290,8 +290,8 @@ def pool_percent_list(request):
 
 
 @login_required
-def pool_percent_detail(request ,pk):
-    pool_percent = PoolPercent.objects.get(pk = pk)
+def pool_percent_detail(request, pk):
+    pool_percent = PoolPercent.objects.get(pk=pk)
     if request.method == 'POST':
         inpoolPer = request.POST['inpoolPer']
         try:
@@ -307,4 +307,3 @@ def pool_percent_detail(request ,pk):
     data = PoolPercentDetail.objects.filter(inpoolPercent=pool_percent).order_by('-pub_date')
     item = data[0]
     return render(request, 'ticket/inpoolPer.html', locals())
-

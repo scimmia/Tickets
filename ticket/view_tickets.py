@@ -30,7 +30,7 @@ def ticket_add(request):
                 times = form.cleaned_data.get('fenshu')
             instance = form.save(commit=False)
             counter = 1
-            log, detail = utils.create_log()
+            log, detail = utils.create_log(request.user.last_name)
             log.oper_type = 101
             while counter <= times:
                 counter += 1
@@ -92,7 +92,7 @@ def ticket_index(request, pk):
             if form.is_valid():
                 instance = form.save(commit=False)
                 instance.save()
-                log, detail = utils.create_log()
+                log, detail = utils.create_log(request.user.last_name)
                 log.oper_type = 107
                 jiage = instance.gourujiage
                 detail.add_detail_ticket(instance.pk)
@@ -153,7 +153,7 @@ def ticket_list(request):
         if form.is_valid():
             ids = request.POST['ids']
             if len(ids) > 0:
-                log, detail = utils.create_log()
+                log, detail = utils.create_log(request.user.last_name)
                 p_status = form.cleaned_data.get('p_status')
                 if p_status == '1':
                     # '票据入库'
@@ -314,7 +314,7 @@ def ticket_needselect_car(request, index):
                 order.order_type = int(request.POST['ordertype'])
                 order.customer = view_loan.get_customer_by_name(request.POST['maipiaoren'])
                 order.save()
-                log, detail = utils.create_log()
+                log, detail = utils.create_log(request.user.last_name)
                 detail.add_detail_ticketorder(order.pk)
                 # 待付款订单
                 if order.order_type == 1:
@@ -448,7 +448,7 @@ def ticket_order(request, pk):
                     elif money > order.customer.yufu_benjin:
                         context['errormsg'] = u'付款金额不能大于可用预付金额'
                     else:
-                        log, detail = utils.create_log()
+                        log, detail = utils.create_log(request.user.last_name)
                         detail.add_detail_ticketorder(pk)
                         log.oper_type = 205
                         order.payfee_count += 1
@@ -468,7 +468,7 @@ def ticket_order(request, pk):
                     elif money > order.customer.yushou_benjin:
                         context['errormsg'] = u'收款金额不能大于可用预收金额'
                     else:
-                        log, detail = utils.create_log()
+                        log, detail = utils.create_log(request.user.last_name)
                         detail.add_detail_ticketorder(pk)
                         log.oper_type = 206
                         order.payfee_count += 1
@@ -488,7 +488,7 @@ def ticket_order(request, pk):
                     if money > order.needpay_sum:
                         context['errormsg'] = u'付款金额不能大于待支付金额'
                     else:
-                        log, detail = utils.create_log()
+                        log, detail = utils.create_log(request.user.last_name)
                         detail.add_detail_ticketorder(pk)
                         detail.add_detail_card(card.pk)
                         log.oper_type = 203
@@ -506,7 +506,7 @@ def ticket_order(request, pk):
                     if money > order.needpay_sum:
                         context['errormsg'] = u'收款金额不能大于待收取金额'
                     else:
-                        log, detail = utils.create_log()
+                        log, detail = utils.create_log(request.user.last_name)
                         detail.add_detail_ticketorder(pk)
                         detail.add_detail_card(card.pk)
                         log.oper_type = 204
