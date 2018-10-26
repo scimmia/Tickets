@@ -4,16 +4,37 @@
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
-    <link rel="stylesheet" href="{% static 'plugins/datatables/jquery.dataTables.min.css' %}">
+    <link href="https://cdn.bootcss.com/datatables/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
     <section class="content-header">
         <h1>
-            票据
-            <small>{% if index == 1 %}付款
-            {% elif index == 2 %}收款{% endif %}订单预览</small>
+            待{% if index == 1 %}付款
+        {% elif index == 2 %}收款{% endif %}购物车
         </h1>
+        <ol class="breadcrumb">
+            <li>
+                <a class="pull-right" href="{% if index == 1 %}{% url 'ticket_needpay' %}
+            {% elif index == 2 %}{% url 'ticket_needcollect' %}{% endif %}">
+                    <button class="btn btn-success center-block" id="all_checked">
+                        继续添加
+                        <i class="ace-icon fa fa-cart-plus icon-on-right bigger-110"></i>
+                    </button>
+                </a>
+                <form method='POST' action="" id="signupForm" class="form-inline  pull-right"
+                      onsubmit="return check();">{% csrf_token %}
+                    <input name="ids" value="" style="display: none"
+                           class="textinput textInput form-control "
+                           id="id_idsa" type="text">
+                    <span >已选择<mark id="count_select">0</mark>项</span>
+                    <button type="submit" class="btn btn-danger " name="remove_ticket">
+                        删除选中票
+                        <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
+                    </button>
+                </form>
+            </li>
+        </ol>
     </section>
 
     <section class="content">
@@ -68,7 +89,7 @@
             {% if index == 2 %}
                 {% include "ticket/tool_counter.html" %}
             {% endif %}
-            <form method='POST' action="{% url 'ticket_createorder' %}" id="signupForm"
+            <form method='POST' id="signupForm"
                   onsubmit="return check();">{% csrf_token %}
                 {% if index == 1 %}
                     <input name="maipiaoren" value="{{ maipiaoren }}" style="display: none"
@@ -84,7 +105,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <table id="table_id" class="table table-bordered table-hover">
+                        <table class="table table-bordered table-hover">
                             <thead>
                             <th>票面价格</th>
                             <th>卖出价格</th>
@@ -141,7 +162,7 @@
                             <input name="ids" value="{{ ids }}" style="display: none"
                                    class="textinput textInput form-control"
                                    id="id_ids" type="text">
-                            <button type="submit" class="btn btn-warning center-block" id="all_checked">
+                            <button type="submit" class="btn btn-warning center-block" name="create_order">
                                 生成{% if index == 1 %}付款
                             {% elif index == 2 %}收款{% endif %}订单
                                 <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
@@ -158,8 +179,10 @@
 
 {% block script %}
     <!-- page script -->
-    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
-    <script src="{% static 'plugins/datatables/dataTables.bootstrap.js' %}"></script>
+    <script src="https://cdn.bootcss.com/datatables/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.bootcss.com/datatables/1.10.19/js/dataTables.bootstrap.js"></script>
+    <script src="{% static 'plugins/datatables/dataTables.select.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.buttons.min.js' %}"></script>
     <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
     <script src="{% static 'plugins/initItems.js' %}"></script>
     <script src="{% static 'plugins/tiexian.js' %}"></script>
@@ -209,11 +232,71 @@
                         "sortAscending": ": 以升序排列此列",
                         "sortDescending": ": 以降序排列此列"
                     },
+                    "select": {
+                        "rows": {
+                            _: "",
+                            0: "",
+                        }
+                    },
+                    "buttons": {
+                        selectAll: "选择全部",
+                        selectNone: "取消全选",
+                    },
                     "decimal": "-",
                     "thousands": "."
                 },
+                dom: 'Bfrtip',
+                buttons: [
+                    'selectAll',
+                    'selectNone'
+                ],
+                select: true
             });
+            t.on('select', function (e, dt, type, indexes) {
+                var a = t.rows({selected: true}).data();
+                console.log(a.length);
+                $("#selected_num").text(a.length);
+                var total = 0;
+                var totalgouru = 0;
+                var ids = '';
+                for (var i = 0; i < a.length; i++) {
+                    total = total + parseFloat(a[i][5]);
+                    totalgouru = totalgouru + parseFloat(a[i][6]);
+                    ids = ids + parseFloat(a[i][1]) + ',';
+                }
+                ids = (ids.substring(ids.length - 1) == ',') ? ids.substring(0, ids.length - 1) : ids;
+
+                $("#count_select").text(a.length);
+                $("#selected_num").text(a.length);
+                $("#selected_piaomian").text(total.toFixed(2));
+                $("#selected_real").text(totalgouru.toFixed(2));
+                $("#id_ids").val(ids);
+                $("#id_idsa").val(ids);
+            })
+                .on('deselect', function (e, dt, type, indexes) {
+                    var a = t.rows({selected: true}).data();
+                    console.log(a.length);
+                    $("#selected_num").text(a.length);
+                    var total = 0;
+                    var totalgouru = 0;
+                    var ids = '';
+                    for (var i = 0; i < a.length; i++) {
+                        total = total + parseFloat(a[i][5]);
+                        totalgouru = totalgouru + parseFloat(a[i][6]);
+                        ids = ids + parseFloat(a[i][1]) + ',';
+                    }
+                    ids = (ids.substring(ids.length - 1) == ',') ? ids.substring(0, ids.length - 1) : ids;
+
+                    $("#count_select").text(a.length);
+                    $("#selected_num").text(a.length);
+                    $("#selected_piaomian").text(total.toFixed(2));
+                    $("#selected_real").text(totalgouru.toFixed(2));
+                    $("#id_ids").val(ids);
+                    $("#id_idsa").val(ids);
+                });
+            ;
         });
+
     </script>
 
 {% endblock %}

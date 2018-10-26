@@ -156,27 +156,24 @@
         <h3><b>合计购入价格</b> <a id="selected_gouru">0</a><b>元</b></h3>
     </div>
     <div class="col-xs-2 pull-right">
-        <form method='POST' id="signupForm"
+        <form method='POST' id="signupForm" class=" pull-right"
               onsubmit="return check();">{% csrf_token %}
-            <input name="selected_num" value="0" style="display: none"
-                   class="textinput textInput form-control"
-                   id="id_selected_num" type="text">
-            <input name="selected_piaomian" value="" style="display: none"
-                   class="textinput textInput form-control"
-                   id="id_selected_piaomian" type="text">
-            <input name="selected_real" value="" style="display: none"
-                   class="textinput textInput form-control"
-                   id="id_selected_real" type="text">
             <input name="ids" value="" style="display: none"
                    class="textinput textInput form-control"
                    id="id_ids" type="text">
             <button type="submit" class="btn btn-warning center-block" id="all_checked">
-                去{% if index == 1 %}付款
-            {% elif index == 2 %}收款{% endif %}
+                加入到购物车
+                <i class="ace-icon fa fa-cart-arrow-down icon-on-right bigger-110"></i>
+            </button>
+            <br>
+        </form>
+        <a class="blue pull-right" href="{% if index == 1 %}{% url 'ticket_needpay_car' %}
+            {% elif index == 2 %}{% url 'ticket_needcollect_car' %}{% endif %}">
+            <button class="btn btn-success center-block" id="all_checked">
+                查看购物车
                 <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
             </button>
-
-        </form>
+        </a>
     </div>
 {% endblock %}
 {% block table_tr %}
@@ -236,10 +233,7 @@
          ids=(ids.substring(ids.length-1)==',')?ids.substring(0,ids.length-1):ids;
 
         $("#selected_piaomian").text(total.toFixed(2));
-        $("#id_selected_piaomian").val(total.toFixed(2));
         $("#selected_gouru").text(totalgouru.toFixed(2));
-        $("#id_selected_real").val(totalgouru.toFixed(2));
-        $("#id_selected_num").val(a.length);
         $("#id_ids").val(ids);
     })
         .on('deselect', function (e, dt, type, indexes) {
@@ -258,10 +252,7 @@
              ids=(ids.substring(ids.length-1)==',')?ids.substring(0,ids.length-1):ids;
 
             $("#selected_piaomian").text(total.toFixed(2));
-            $("#id_selected_piaomian").val(total.toFixed(2));
             $("#selected_gouru").text(totalgouru.toFixed(2));
-            $("#id_selected_real").val(totalgouru.toFixed(2));
-            $("#id_selected_num").val(a.length);
             $("#id_ids").val(ids);
         });
     ;

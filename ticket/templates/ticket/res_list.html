@@ -43,7 +43,9 @@
                 </table>
             </div>
             <!--引入pagination.html-->
-            {% include 'ticket/pagination.html' %}
+            {% block include_pagination %}
+                {% include 'ticket/pagination.html' %}
+            {% endblock %}
         </div>
         {% endblock %}
         {% block content_footer %}

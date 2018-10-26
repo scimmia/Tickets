@@ -2,15 +2,7 @@
 {% load staticfiles %}
 {% load crispy_forms_tags %}
 
-{% block css %}
-    <link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
-
-{% endblock %}
-
-{#{% load material_form %}#}
-
 {% block content %}
-    <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
             票据
@@ -29,12 +21,13 @@
                     </div>
                     <div class="box-body">
                         {{ form.t_status |as_crispy_field }}
+                        {{ form.pool_in |as_crispy_field }}
+                        {{ form.t_type |as_crispy_field }}
                         {{ form.qianpaipiaohao |as_crispy_field }}
                         {{ form.piaohao |as_crispy_field }}
                         {{ form.chupiaohang |as_crispy_field }}
                         {{ form.chupiaoriqi |as_crispy_field }}
                         {{ form.daoqiriqi |as_crispy_field }}
-                        {{ form.piaomianjiage |as_crispy_field }}
                     </div>
                 </div>
 
@@ -48,8 +41,10 @@
                     <div class="box-body">
                         {{ form.pay_status |as_crispy_field }}
                         {{ form.gongyingshang |as_crispy_field }}
+                        {{ form.piaomianjiage |as_crispy_field }}
                         {{ form.gourujiage |as_crispy_field }}
                         {{ form.gouruzijinchi |as_crispy_field }}
+                        {{ form.pool_buy |as_crispy_field }}
                     </div>
 
                 </div>
@@ -78,25 +73,5 @@
             </div>
         </div>
     </section>
-
-{% endblock %}
-
-{% block script %}
-    <script src="{% static 'plugins/initItems.js' %}"></script>
-    <script src="{% static 'plugins/tiexian.js' %}"></script>
-    <script type="text/javascript">
-        initDatePicker($('.input-daterange'));
-        //按利率计算
-        function calctxlxone() {
-            var je = $("#id_piaomianjiage").val()/10000.0;
-            var results = countbylilv(je);
-            $("#jxtsd").text(results[0]);
-            $("#tztsd").text(results[1]);
-            $("#txlxd").text(numeral(results[2]).format('0,0.00'));
-            $("#jined").text(numeral(results[3]).format('0,0.00'));
-            $("#id_t_gourujiage").val(results[3]);
-        }
-
-    </script>
 
 {% endblock %}

@@ -222,6 +222,8 @@ class Ticket(BaseTicket):
     gouruzijinchi = models.BooleanField(u'资金池购入', default=False)
     pool_buy = models.ForeignKey(Pool, related_name='t_pool_buy', verbose_name=u'资金池购入', blank=True, null=True)
     payedzijinchi = models.BooleanField(u'保证金还款', default=False)
+    is_in_pay_car = models.BooleanField(u'付款购物车中', default=False)
+    is_in_sell_car = models.BooleanField(u'收款购物车中', default=False)
     payorder = models.ForeignKey(Order, related_name='pay_order', verbose_name=u'付款订单', blank=True, null=True)
     sellorder = models.ForeignKey(Order, related_name='sell_order', verbose_name=u'收款订单', blank=True, null=True)
 
@@ -231,62 +233,6 @@ class Ticket(BaseTicket):
 
     def __str__(self):
         return self.gongyingshang
-
-
-class TicketsImport(models.Model):
-    stamp = models.CharField(u'时间戳', max_length=100)
-    pub_date = models.DateTimeField(u'导入时间', auto_now_add=True)
-    piaohao = models.CharField(u'票号', max_length=100, blank=True, null=True)
-    chupiaoren = models.CharField(u'出票人', max_length=100)
-    shoukuanren = models.CharField(u'收款人	', max_length=100)
-    piaomianjiage = models.FloatField(u'票据金额（元）	', default=0)
-    piaomianlixi = models.FloatField(u'票面附带利息', default=0)
-    chupiaoriqi = models.DateField(u'出票日期', )
-    daoqiriqi = models.DateField(u'到期日期', )
-    leixing = models.CharField(u'类型', max_length=100)
-    zhuangtai = models.CharField(u'状态	', max_length=100)
-    chupiaohang = models.CharField(u'出票人开户行', max_length=100)
-    chupiaohangb = models.CharField(u'出票人开户行B', max_length=100)
-    chengduiren = models.CharField(u'承兑人/承兑银行	', max_length=100)
-    shoupiaoren = models.CharField(u'收票人账号', max_length=100)
-    shoupiaohang = models.CharField(u'收票人开户行', max_length=100)
-    saved = models.BooleanField(u'是否已保存', default=False)
-
-    class Meta:
-        verbose_name = '导入票据'
-        verbose_name_plural = '导入票据'
-
-    def __str__(self):
-        return self.piaohao
-
-
-class StoreTicketsImport(models.Model):
-    stamp = models.CharField(u'时间戳', max_length=100)
-    pub_date = models.DateTimeField(u'导入时间', auto_now_add=True)
-    qianpaipiaohao = models.CharField(u'前排票号', max_length=100, blank=True, null=True)
-    piaohao = models.CharField(u'票号', max_length=100, blank=True, null=True)
-    chupiaoren = models.CharField(u'出票人', max_length=100)
-    shoukuanren = models.CharField(u'收款人	', max_length=100)
-    piaomianjiage = models.FloatField(u'票据金额（元）	', default=0)
-    piaomianlixi = models.FloatField(u'票面附带利息', default=0)
-    maipiaoriqi = models.DateField(u'购买日期', )
-    chupiaoriqi = models.DateField(u'出票日期', )
-    daoqiriqi = models.DateField(u'到期日期', )
-    leixing = models.CharField(u'类型', max_length=100)
-    zhuangtai = models.CharField(u'状态	', max_length=100)
-    chupiaohang = models.CharField(u'出票人开户行', max_length=100)
-    chupiaohangb = models.CharField(u'出票人开户行B', max_length=100)
-    chengduiren = models.CharField(u'承兑人/承兑银行	', max_length=100)
-    shoupiaoren = models.CharField(u'收票人账号', max_length=100)
-    shoupiaohang = models.CharField(u'收票人开户行', max_length=100)
-    saved = models.BooleanField(u'是否已保存', default=False)
-
-    class Meta:
-        verbose_name = '导入票据'
-        verbose_name_plural = '导入票据'
-
-    def __str__(self):
-        return self.piaohao
 
 
 class SuperLoan(BaseLoan):
