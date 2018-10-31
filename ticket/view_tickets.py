@@ -557,11 +557,24 @@ def ticket_imports(request):
                         m.piaohao = str(row[2])
                         m.gongyingshang = row[9]
                         m.chupiaohang = row[3]
-                        m.goumairiqi = xlrd.xldate.xldate_as_datetime(row[0], 1)
-                        m.chupiaoriqi = xlrd.xldate.xldate_as_datetime(row[4], 1)
-                        m.daoqiriqi = xlrd.xldate.xldate_as_datetime(row[5], 1)
+                        if sh.cell(rx, 0).ctype == 3:
+                            m.goumairiqi = xlrd.xldate_as_datetime((row[0]), book.datemode)
+                        else:
+                            print(rx)
+                            continue
+                        if sh.cell(rx, 4).ctype == 3:
+                            m.chupiaoriqi = xlrd.xldate_as_datetime((row[4]), book.datemode)
+                        else:
+                            print(rx)
+                            continue
+                        if sh.cell(rx, 5).ctype == 3:
+                            m.daoqiriqi = xlrd.xldate_as_datetime((row[5]), book.datemode)
+                        else:
+                            print(rx)
+                            continue
                         m.piaomianjiage = (row[6])
-                        m.gourujiage = (row[8])
+                        if sh.cell(rx, 8).ctype == 3:
+                            m.gourujiage = row[8]
                         m.beizhu = row[10]
                         ticketsImports.append(m)
             # 入池
@@ -579,9 +592,10 @@ def ticket_imports(request):
                             m.daoqiriqi = row[6].replace(' ', '').replace('\t', '')
                             m.piaomianjiage = (row[3])
                             m.pool_in_riqi = row[11].replace(' ', '').replace('\t', '')
+                            m.goumairiqi = row[13].replace(' ', '').replace('\t', '')
                             if row[7] == '电票':
                                 m.t_type = 2
-                            if row[12].isdigit():
+                            if sh.cell(rx, 12).ctype == 2:
                                 m.zhiyalv = float(row[12])
                             m.gourujiage = m.piaomianjiage
                             ticketsImports.append(m)
@@ -602,6 +616,54 @@ def ticket_imports(request):
                         m.gourujiage = m.piaomianjiage
                         m.t_type = 2
                         ticketsImports.append(m)
+            # 浙商福利
+            # elif instance.import_type == 4:
+            #     tickets_temp = []
+            #     for rx in range(sh.nrows):
+            #         row = (sh.row_values(rx))
+            #         try:
+            #             if row[9] and len(row[9]) > 0:
+            #                 m = Ticket()
+            #                 n = sh.cell(rx, 0).ctype
+            #                 n = sh.cell_type(rx, 0)
+            #                 if sh.cell(rx, 0).ctype == 3:
+            #                     m.goumairiqi = xlrd.xldate_as_datetime((row[0]), book.datemode)
+            #                 else:
+            #                     print(rx)
+            #                     continue
+            #                 m.qianpaipiaohao = row[1]
+            #                 m.piaohao = row[2]
+            #                 m.gongyingshang = row[9]
+            #                 m.chupiaohang = row[3]
+            #                 if sh.cell(rx, 4).ctype == 3:
+            #                     m.chupiaoriqi = xlrd.xldate_as_datetime((row[4]), book.datemode)
+            #                 else:
+            #                     print(rx)
+            #                     continue
+            #                 if sh.cell(rx, 5).ctype == 3:
+            #                     m.daoqiriqi = xlrd.xldate_as_datetime((row[5]), book.datemode)
+            #                 else:
+            #                     print(rx)
+            #                     continue
+            #                 # m.chupiaoriqi = row[4].replace(' ', '').replace('\t', '')
+            #                 # m.daoqiriqi = row[5].replace(' ', '').replace('\t', '')
+            #                 m.piaomianjiage = float(row[6])
+            #                 m.gourujiage = float(row[8])
+            #                 if sh.cell(rx, 10).ctype == 3:
+            #                     m.maichuriqi = xlrd.xldate_as_datetime((row[10]), book.datemode)
+            #                 # m.maichuriqi = row[10].replace(' ', '').replace('\t', '')
+            #                 m.maichujiage = float(row[12])
+            #                 m.maipiaoren = row[13]
+            #                 m.lirun = float(row[14])
+            #                 m.t_type = 3
+            #                 m.pay_status = 2
+            #                 m.sell_status = 4
+            #                 tickets_temp.append(m)
+            #         except:
+            #             print(rx)
+            #             pass
+            #     if len(tickets_temp) > 0:
+            #         Ticket.objects.bulk_create(tickets_temp)
             if len(ticketsImports) > 0:
                 Ticket_Import_Detail.objects.bulk_create(ticketsImports)
 
