@@ -3,7 +3,8 @@
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'plugins/select2/select2.min.css' %}">
-    <link href="https://cdn.bootcss.com/datatables/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
+{#    <link href="https://cdn.bootcss.com/datatables/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">#}
+    <link rel="stylesheet" href="{% static 'plugins/DataTables-1.10.18/css/jquery.dataTables.min.css' %}">
     <link rel="stylesheet" href="{% static 'plugins/iCheck/all.css' %}">
 {% endblock %}
 
@@ -55,8 +56,10 @@
 {% endblock %}
 
 {% block script %}
-    <script src="https://cdn.bootcss.com/datatables/1.10.19/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.bootcss.com/datatables/1.10.19/js/dataTables.bootstrap.js"></script>
+{#    <script src="https://cdn.bootcss.com/datatables/1.10.19/js/jquery.dataTables.min.js"></script>#}
+{#    <script src="https://cdn.bootcss.com/datatables/1.10.19/js/dataTables.bootstrap.js"></script>#}
+    <script src="{% static 'plugins/DataTables-1.10.18/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'plugins/DataTables-1.10.18/js/dataTables.bootstrap.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.select.min.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.buttons.min.js' %}"></script>
     <script src="{% static 'plugins/select2/select2.min.js' %}"></script>

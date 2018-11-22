@@ -29,7 +29,8 @@
          folder instead of downloading all of them to reduce the load. -->
     <link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
     {#    <link href="https://cdn.bootcss.com/admin-lte/2.3.6/css/skins/_all-skins.min.css" rel="stylesheet">#}
-    <link href="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'plugins/datepicker/datepicker3.css' %}">
+{#    <link href="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" rel="stylesheet">#}
     {% block css %}{% endblock %}
 
 </head>
@@ -379,9 +380,12 @@
 {#<script src="https://cdn.bootcss.com/admin-lte/2.3.6/js/demo.js"></script>#}
 <script src="{% static 'plugins/knob/jquery.knob.js' %}"></script>
 {#<script src="https://cdn.bootcss.com/jQuery-Knob/1.2.11/jquery.knob.min.js"></script>#}
-<script src="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
-<script src="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/locales/bootstrap-datepicker.zh-CN.min.js"></script>
-<script src="https://cdn.bootcss.com/numeral.js/2.0.6/numeral.min.js"></script>
+<script src="{% static 'plugins/datepicker/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'plugins/datepicker/locales/bootstrap-datepicker.zh-CN.js' %}"></script>
+{#<script src="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>#}
+{#<script src="https://cdn.bootcss.com/bootstrap-datepicker/1.8.0/locales/bootstrap-datepicker.zh-CN.min.js"></script>#}
+{#<script src="https://cdn.bootcss.com/numeral.js/2.0.6/numeral.min.js"></script>#}
+<script src="{% static 'plugins/numeral.js' %}"></script>
 {% block script %}{% endblock %}
 
 </body>

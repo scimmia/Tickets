@@ -130,25 +130,40 @@ function getDays() {
     return [ts,ts-readTs];
 }
 
+//计算利率
 function getlilv() {
+    var inputJinE = $("#tje");
+    var je = inputJinE.val();
+    if (isNaN(je) || je <=0) {
+        console.log("金额："+je);
+        je = 100000;
+        inputJinE.val(10);
+    }else{
+        je = je * 10000
+    }
     var lixi = $("#everytenprice").val();
-    var je = 100000;
     if (isNaN(lixi))
         lixi = 0;
+    var realLixi = je * lixi / 100000;
     var days = getDays();
     console.log(days);
     var ts = days[0];
-    $("#tje").val(10);
     $("#jxtsd").text(ts);
     $("#tztsd").text(days[1]);
-    $("#txlxd").text(lixi);
-    $("#jined").text(je - lixi);
-    var lilv = (lixi / je / ts * 30 * 1000).toFixed(2);
-    if (isNaN(lilv))
-        lilv = 0;
+    // $("#txlxd").text(realLixi);
+    // $("#jined").text(je - realLixi);
+    // $("#real_jine").text(je - realLixi);
+    $("#txlxd").text(numeral(realLixi).format('0,0.00'));
+    $("#real_jine").text((je - realLixi).toFixed(3));
+    $("#jined").text(numeral(je - realLixi).format('0,0.00'));
+    var lilv = 0;
+    if (ts > 0){
+        lilv = (lixi / je / ts * 30 * 1000).toFixed(2);
+    }
     $("#txlvi").val(lilv);
     $("#yxlvi").val(lilv * 1.2);
     console.log(lilv);
+    // calctxlxone();
 }
 
 //按贴现计算
@@ -189,13 +204,14 @@ function countbylilv(je) {
         jine = 0;
     return [ts,days[1],txlx,jine,everytenprice];
 }
+//按利率计算
 function calctxlxone() {
     var je = $("input[name='je']").val();
     var results = countbylilv(je);
     $("#jxtsd").text(results[0]);
     $("#tztsd").text(results[1]);
     $("#txlxd").text(numeral(results[2]).format('0,0.00'));
-    $("#real_jine").text(results[3]);
+    $("#real_jine").text(results[3].toFixed(2));
     $("#jined").text(numeral(results[3]).format('0,0.00'));
     $("#everytenprice").val(results[4]);
 }
