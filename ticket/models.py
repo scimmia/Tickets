@@ -47,7 +47,8 @@ class Card(models.Model):
 
 
 class Pool(models.Model):
-    name = models.CharField(u'资金池', max_length=50)
+    name = models.CharField(u'名称', max_length=50)
+    yinhangka = models.ForeignKey(Card, related_name='pool_card', verbose_name=u'银行卡', blank=False, null=False)
     edu_keyong = models.DecimalField(u'可用额度', default=0, max_digits=10, decimal_places=2)
     edu_yiyong = models.DecimalField(u'已用额度', default=0, max_digits=10, decimal_places=2)
     edu_baozhengjin = models.DecimalField(u'保证金', default=0, max_digits=10, decimal_places=2)
@@ -255,6 +256,7 @@ class PoolLicai(models.Model):
     is_payed = models.BooleanField(u'是否还清', default=False)
     yinhangka = models.ForeignKey(Card, related_name='licai_card', verbose_name=u'银行卡', blank=False, null=False)
     pool = models.ForeignKey(Pool, related_name='licai_pool', verbose_name=u'资金池', blank=False, null=False)
+    beizhu = models.CharField(u'备注', max_length=255, default="", blank=True, null=True)
 
     class Meta:
         verbose_name = '理财'
@@ -426,6 +428,7 @@ IMPORT_TYPE = (
     (1, u'库存'),
     (2, u'资金池'),
     (3, u'开票'),
+    # (4, u'浙商福利'),
 )
 
 

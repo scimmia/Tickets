@@ -27,10 +27,9 @@ def pool_dash(request):
             pro_form = ProForm()
             licai_form = PoolLicaiForm()
             super_loan_form = SuperLoanForm()
-            pool = Pool()
-            pool.name = pool_form.cleaned_data.get('name')
-            pool.save()
+            pool = pool_form.save()
             detail.add_detail_pool(pool.pk)
+            detail.add_detail_card(pool.yinhangka.pk)
             log.oper_type = 500
             utils.save_log(log, detail)
             context['message'] = u'新建资金池成功'
@@ -41,8 +40,8 @@ def pool_dash(request):
             super_loan_form = SuperLoanForm()
             pro = pro_form.save(commit=False)
             money = pro.money
-            card = pro.card
             pool = pro.pool
+            card = pool.yinhangka
             detail.add_detail_pool(pool.pk)
             detail.add_detail_card(card.pk)
             if pro_form.cleaned_data.get('p_status') == '2':
@@ -51,7 +50,7 @@ def pool_dash(request):
             else:
                 log.oper_type = 501
             utils.create_pro_fee(pool, money, log)
-            utils.create_card_fee(pro.card, 0 - money, log)
+            utils.create_card_fee(card, 0 - money, log)
             utils.save_log(log, detail)
             context['message'] = u'保存保证金成功'
         #     新建超短贷
@@ -67,7 +66,9 @@ def pool_dash(request):
             instance.save()
             log.oper_type = 503
             detail.add_detail_pool(instance.pool.pk)
+            detail.add_detail_card(instance.pool.yinhangka.pk)
             detail.add_detail_superloan(instance.pk)
+            utils.create_card_fee(instance.pool.yinhangka,instance.benjin,log)
             utils.create_super_loan_fee(instance, instance.benjin, log)
             utils.save_log(log, detail)
             context['message'] = u'保存超短贷成功'
@@ -77,6 +78,7 @@ def pool_dash(request):
             pro_form = ProForm()
             super_loan_form = SuperLoanForm()
             instance = licai_form.save(commit=False)
+            instance.yinhangka = instance.pool.yinhangka
             if licai_form.cleaned_data.get('isMonthlilv') == '2':
                 instance.lilv = licai_form.cleaned_data.get('lilv') * 1.2
             days = (instance.lixi_end_date - instance.lixi_begin_date).days
@@ -101,7 +103,6 @@ def pool_dash(request):
                 utils.save_log(lixilog, lixidetail)
             context['message'] = u'保存理财成功'
 
-    pro_form.fields['card'].required = True
     context['pool_form'] = pool_form
     context['form'] = pro_form
     context['loanform'] = super_loan_form

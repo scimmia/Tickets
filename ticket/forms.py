@@ -56,9 +56,10 @@ class CardTransForm(ModelForm):
         exclude = ['pub_date']
 
 
-class PoolForm(forms.Form):
-    name = forms.CharField(label="名称", required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
-
+class PoolForm(ModelForm):
+    class Meta:
+        model = Pool
+        fields = ['name', 'yinhangka']
 
 class PoolPercentForm(ModelForm):
     class Meta:
@@ -78,7 +79,7 @@ class ProForm(ModelForm):
 
     class Meta:
         model = MoneyWithCardPool
-        fields = ['pool', 'p_status', 'money', 'card', ]
+        fields = ['pool', 'p_status', 'money', ]
 
 
 class SuperLoanForm(ModelForm):
@@ -108,7 +109,7 @@ class PoolLicaiForm(ModelForm):
 
     class Meta:
         model = PoolLicai
-        fields = ['pool', 'benjin', 'isMonthlilv', 'lilv', 'lixi_begin_date', 'lixi_end_date', 'is_front', 'yinhangka']
+        fields = ['pool', 'benjin', 'isMonthlilv', 'lilv', 'lixi_begin_date', 'lixi_end_date', 'is_front', 'beizhu']
 
 
 class MoneyForm(forms.Form):

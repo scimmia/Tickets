@@ -151,6 +151,7 @@
     <th>到期日期</th>
     <th>利息前置</th>
     <th>银行卡</th>
+    <th>备注</th>
     <th>收款状态</th>
 {% endblock %}
 {% block table_td %}
@@ -176,6 +177,7 @@
         {% endif %}
         </span></td>
     <td>{{ item.yinhangka }}</td>
+    <td>{{ item.beizhu }}</td>
     <td>
         {% if item.is_end %}
             {% if item.is_payed %}
