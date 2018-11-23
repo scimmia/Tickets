@@ -208,35 +208,80 @@
         {% endif %}
         </span></td>
 {% endblock %}
-{% block initDatePicker %}
-    initDatePicker($('.input-daterange'));
-{% endblock %}
-{% block initSelect %}
-    $('.js-single').select2({
-        height: '40px',
-    });
-{% endblock %}
-{% block initOthers %}
-    t.on('select', function (e, dt, type, indexes) {
-        var a = t.rows({selected: true}).data();
-        console.log(a.length);
-        $("#selected_num").text(a.length);
-        var total = 0;
-        var totalgouru = 0;
-        var ids = '';
-        for (var i = 0; i < a.length; i++) {
-            total = total + parseFloat(a[i][5]);
-            totalgouru = totalgouru + parseFloat(a[i][6]);
-            ids = ids + parseFloat(a[i][1]) + ',';
+{% block script %}
+    <script src="{% static 'plugins/DataTables-1.10.18/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'plugins/DataTables-1.10.18/js/dataTables.bootstrap.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.select.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'plugins/select2/select2.min.js' %}"></script>
+    <script src="{% static 'plugins/initItems.js' %}"></script>
+    <script type="text/javascript">
+        initDatePicker($('.input-daterange'));
 
-        }
-         ids=(ids.substring(ids.length-1)==',')?ids.substring(0,ids.length-1):ids;
+        $(document).ready(function () {
+            $('.js-single').select2({
+                tags: true
+            });
+            var t = $('#table_id').DataTable({
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'ordering': true,
+                'info': true,
+                'autoWidth': false,
+                'scrollY': 450,
+                "language": {
+                    "processing": "处理中...",
+                    "lengthMenu": "显示 _MENU_ 项结果",
+                    "zeroRecords": "没有匹配结果",
+                    "info": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                    "infoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                    "infoFiltered": "(由 _MAX_ 项结果过滤)",
+                    "infoPostFix": "",
+                    "search": "搜索:",
+                    "searchPlaceholder": "搜索...",
+                    "url": "",
+                    "emptyTable": "表中数据为空",
+                    "loadingRecords": "载入中...",
+                    "infoThousands": ",",
+                    "paginate": {
+                        "first": "首页",
+                        "previous": "上页",
+                        "next": "下页",
+                        "last": "末页"
+                    },
+                    "aria": {
+                        "paginate": {
+                            'first': '首页',
+                            'previous': '上页',
+                            'next': '下页',
+                            'last': '末页'
+                        },
+                        "sortAscending": ": 以升序排列此列",
+                        "sortDescending": ": 以降序排列此列"
+                    },
+                    "select": {
+                        "rows": {
+                            _: "",
+                            0: "",
+                        }
+                    },
+                    "buttons": {
+                        selectAll: "选择全部",
+                        selectNone: "取消全选",
+                    },
+                    "decimal": "-",
+                    "thousands": "."
+                },
+                dom: 'Bfrtip',
+                buttons: [
+                    'selectAll',
+                    'selectNone'
+                ],
+                select: true
+            });
 
-        $("#selected_piaomian").text(total.toFixed(2));
-        $("#selected_gouru").text(totalgouru.toFixed(2));
-        $("#id_ids").val(ids);
-    })
-        .on('deselect', function (e, dt, type, indexes) {
+            function buildItems(e, dt, type, indexes) {
             var a = t.rows({selected: true}).data();
             console.log(a.length);
             $("#selected_num").text(a.length);
@@ -254,6 +299,12 @@
             $("#selected_piaomian").text(total.toFixed(2));
             $("#selected_gouru").text(totalgouru.toFixed(2));
             $("#id_ids").val(ids);
+        }
+
+            t.on('select', buildItems)
+                .on('deselect', buildItems);
+
         });
-    ;
+
+    </script>
 {% endblock %}

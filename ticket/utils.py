@@ -7,7 +7,7 @@ from django.db.models import Count
 from django.shortcuts import render
 
 from ticket.models import OperLog, DashBoard, FeeDetail, Ticket, PoolPercent, PoolPercentDetail
-
+from django.db.models import Aggregate, CharField
 
 def create_fee_detail(money, fee_detail_type, fee_detail_pk, log_temp):
     if money != 0:
@@ -391,3 +391,28 @@ def save_log_to_dash(log):
     except:
         pass
     pass
+
+
+class GroupConcat(Aggregate):
+    function = 'GROUP_CONCAT'
+    template = '%(function)s(%(distinct)s%(expressions)s%(ordering)s%(separator)s)'
+
+    def __init__(self, expression, distinct=False, ordering=None, separator=',', **extra):
+        super(GroupConcat, self).__init__(
+            expression,
+            distinct='DISTINCT ' if distinct else '',
+            ordering=' ORDER BY %s' % ordering if ordering is not None else '',
+            separator=' SEPARATOR "%s"' % separator,
+            output_field=CharField(),
+            **extra)
+
+class Concat(Aggregate):
+    function = 'GROUP_CONCAT'
+    template = '%(function)s(%(distinct)s%(expressions)s)'
+
+    def __init__(self, expression, distinct=False, **extra):
+        super(Concat, self).__init__(
+            expression,
+            distinct='DISTINCT ' if distinct else '',
+            output_field=CharField(),
+            **extra)

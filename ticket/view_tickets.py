@@ -364,7 +364,7 @@ def ticket_needselect_car(request, index):
                         t.sellorder = order
                         t.selltime = order.pub_date
                         t.maipiaoren = request.POST['maipiaoren']
-                        t.maichujiage = round(float(request.POST['maichujiage' + str(t.piaomianjiage)]), 2)
+                        t.maichujiage = round(float(request.POST[',' + str(t.pk) + ',']), 2)
                         t.lirun = t.maichujiage - t.gourujiage
                         t.save()
                         order.money += t.maichujiage
@@ -383,10 +383,10 @@ def ticket_needselect_car(request, index):
             '-goumairiqi')
     else:
         raw_data = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None, is_in_sell_car=True).order_by(
-            '-goumairiqi')
-        prices = set([])
-        for t in raw_data:
-            prices.add(str(t.piaomianjiage))
+            '-piaomianjiage')
+        prices = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None, is_in_sell_car=True) \
+            .values('piaomianjiage', 'chupiaohang', 'daoqiriqi') \
+            .annotate(max=Count('pk'), ids=utils.Concat('pk')).order_by('piaomianjiage')
         context['prices'] = prices
     context['data'] = raw_data
     return render(request, 'ticket/ticket_order_preview.html', context)
