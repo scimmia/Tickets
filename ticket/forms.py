@@ -39,9 +39,11 @@ class TicketImportForm(ModelForm):
 
 
 class MoneyWithCardForm(ModelForm):
+    beizhu = forms.CharField(label="备注", required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
     class Meta:
         model = MoneyWithCard
-        fields = ['card', 'money', ]
+        fields = ['card', 'money']
 
 
 class CardForm(ModelForm):
@@ -114,6 +116,11 @@ class PoolLicaiForm(ModelForm):
 
 class MoneyForm(forms.Form):
     money = forms.FloatField(label="金额", required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+
+class MoneyBeizhuForm(forms.Form):
+    money = forms.FloatField(label="金额", required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    beizhu = forms.CharField(label="备注", required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
 
 class LoanForm(ModelForm):

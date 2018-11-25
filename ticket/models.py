@@ -398,6 +398,7 @@ FeeDetail_Type = (
 class FeeDetail(models.Model):
     oper_log = models.ForeignKey(OperLog, related_name='carddetail_log', verbose_name=u'操作详情', blank=False, null=False)
     money = models.FloatField(u'金额', default=0)
+    beizhu = models.CharField(u'备注', max_length=255, default="", blank=True, null=True)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
     fee_type = models.IntegerField(

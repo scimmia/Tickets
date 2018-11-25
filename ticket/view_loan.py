@@ -93,30 +93,31 @@ def need_collect_order(request, order):
             instance = feeform.save(commit=False)
             money = instance.money
             card = instance.card
+            beizhu = feeform.cleaned_data.get('beizhu')
             log, detail = utils.create_log(request.user.last_name)
             detail.add_detail_loanorder(pk)
             detail.add_detail_card(card.pk)
             if 'benjin' in request.POST.keys():
-                if feeform.cleaned_data.get('money') > order.benjin_needpay:
-                    context['message'] = u'金额不能大于应收本金'
+                if feeform.cleaned_data.get('money') > order.benjin_needpay + 0.01:
+                    context['errormsg'] = u'金额不能大于应收本金'
                 else:
                     utils.pay_order_loan_benjin(order, money)
                     log.oper_type = 303
                     log.need_collect -= Decimal(money)
-                    utils.create_card_fee(card, money, log)
-                    utils.create_loan_fee(order, money, log)
+                    utils.create_card_fee(card, money, log, beizhu)
+                    utils.create_loan_fee(order, money, log, beizhu)
                     utils.save_log(log, detail)
                     context['message'] = u'保存成功'
                 pass
             elif 'lixi' in request.POST.keys():
-                if feeform.cleaned_data.get('money') > order.lixi_needpay:
-                    context['message'] = u'金额不能大于待收利息'
+                if feeform.cleaned_data.get('money') > order.lixi_needpay + 0.01:
+                    context['errormsg'] = u'金额不能大于待收利息'
                 else:
                     utils.pay_order_loan_lixi(order, money)
                     log.oper_type = 304
                     log.lirun_yewu += Decimal(money)
-                    utils.create_card_fee(card, money, log)
-                    utils.create_loan_fee(order, money, log)
+                    utils.create_card_fee(card, money, log, beizhu)
+                    utils.create_loan_fee(order, money, log, beizhu)
                     utils.save_log(log, detail)
                     context['message'] = u'保存成功'
                 pass
@@ -201,30 +202,31 @@ def need_pay_order(request, order):
             instance = feeform.save(commit=False)
             money = instance.money
             card = instance.card
+            beizhu = feeform.cleaned_data.get('beizhu')
             log, detail = utils.create_log(request.user.last_name)
             detail.add_detail_loanorder(pk)
             detail.add_detail_card(card.pk)
             if 'benjin' in request.POST.keys():
-                if feeform.cleaned_data.get('money') > order.benjin_needpay:
-                    context['message'] = u'金额不能大于应付本金'
+                if feeform.cleaned_data.get('money') > order.benjin_needpay + 0.01:
+                    context['errormsg'] = u'金额不能大于应付本金'
                 else:
                     utils.pay_order_loan_benjin(order, money)
                     log.oper_type = 305
                     log.need_pay -= Decimal(money)
-                    utils.create_card_fee(card, 0 - money, log)
-                    utils.create_loan_fee(order, money, log)
+                    utils.create_card_fee(card, 0 - money, log, beizhu)
+                    utils.create_loan_fee(order, money, log, beizhu)
                     utils.save_log(log, detail)
                     context['message'] = u'保存成功'
                 pass
             elif 'lixi' in request.POST.keys():
-                if feeform.cleaned_data.get('money') > order.lixi_needpay:
-                    context['message'] = u'金额不能大于待付利息'
+                if feeform.cleaned_data.get('money') > order.lixi_needpay + 0.01:
+                    context['errormsg'] = u'金额不能大于待付利息'
                 else:
                     utils.pay_order_loan_lixi(order, money)
                     log.oper_type = 306
                     log.feiyong_yewu += Decimal(money)
-                    utils.create_card_fee(card, 0 - money, log)
-                    utils.create_loan_fee(order, money, log)
+                    utils.create_card_fee(card, 0 - money, log, beizhu)
+                    utils.create_loan_fee(order, money, log, beizhu)
                     utils.save_log(log, detail)
                     context['message'] = u'保存成功'
                 pass

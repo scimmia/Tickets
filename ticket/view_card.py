@@ -45,7 +45,7 @@ def card_edit(request, pk):
                 money = 0 - money
                 log.oper_type = 403
             detail.add_detail_card(pk)
-            utils.create_card_fee(card_ins, money, log)
+            utils.create_card_fee(card_ins, money, log, request.POST['feebeizhu'])
             utils.save_log(log, detail)
         context['message'] = u'保存成功'
 

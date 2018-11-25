@@ -6,7 +6,7 @@ from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, render
 
 from ticket import utils
-from ticket.forms import SuperLoanForm, MoneyForm, ProForm, PoolLicaiForm, PoolForm, PoolPercentForm
+from ticket.forms import SuperLoanForm, ProForm, PoolLicaiForm, PoolForm, PoolPercentForm, MoneyBeizhuForm
 from ticket.models import Ticket, SuperLoan, Card, FeeDetail, PoolLicai, Pool, OperLog, PoolPercent, \
     PoolPercentDetail
 from ticket.utils import create_pool_percent
@@ -172,7 +172,7 @@ def super_loan_lists(request):
 def super_loan(request, pk):
     order = SuperLoan.objects.get(pk=pk)
     card_data = Card.objects.all()
-    poolfeeform = MoneyForm(request.POST or None)
+    poolfeeform = MoneyBeizhuForm(request.POST or None)
     context = {
         'poolfeeform': poolfeeform,
         'card_data': card_data,
@@ -181,8 +181,9 @@ def super_loan(request, pk):
     if request.method == 'POST':
         if poolfeeform.is_valid():
             money = poolfeeform.cleaned_data.get('money')
+            beizhu = poolfeeform.cleaned_data.get('beizhu')
             if 'benjin' in request.POST.keys():
-                if money > order.benjin_needpay:
+                if money > order.benjin_needpay + 0.01:
                     context['errormsg'] = u'金额不能大于待还本金'
                 else:
                     log, detail = utils.create_log(request.user.last_name)
@@ -197,14 +198,14 @@ def super_loan(request, pk):
                         # 银行卡还款
                         card = Card.objects.get(pk=int(request.POST['yinhangka']))
                         detail.add_detail_card(card.pk)
-                        utils.create_card_fee(card, 0 - money, log)
+                        utils.create_card_fee(card, 0 - money, log, beizhu)
                     utils.pay_super_loan_benjin(order, money)
-                    utils.create_super_loan_fee(order, 0 - money, log)
+                    utils.create_super_loan_fee(order, 0 - money, log, beizhu)
                     utils.save_log(log, detail)
                     context['message'] = u'还款成功'
                 pass
             elif 'lixi' in request.POST.keys():
-                if money > order.lixi_needpay:
+                if money > order.lixi_needpay + 0.01:
                     context['errormsg'] = u'金额不能大于待还利息'
                 else:
                     log, detail = utils.create_log(request.user.last_name)
@@ -221,8 +222,8 @@ def super_loan(request, pk):
                         # 银行卡还款
                         card = Card.objects.get(pk=int(request.POST['yinhangka']))
                         detail.add_detail_card(card.pk)
-                        utils.create_card_fee(card, 0 - money, log)
-                    # utils.create_super_loan_fee(order, 0 - money, log)
+                        utils.create_card_fee(card, 0 - money, log, beizhu)
+                    utils.create_fee_detail(0 - money, 7, order.pk, log, beizhu)
                     utils.save_log(log, detail)
                     context['message'] = u'还息成功'
                 pass

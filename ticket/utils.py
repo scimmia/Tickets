@@ -9,12 +9,14 @@ from django.shortcuts import render
 from ticket.models import OperLog, DashBoard, FeeDetail, Ticket, PoolPercent, PoolPercentDetail
 from django.db.models import Aggregate, CharField
 
-def create_fee_detail(money, fee_detail_type, fee_detail_pk, log_temp):
+
+def create_fee_detail(money, fee_detail_type, fee_detail_pk, log_temp, beizhu=""):
     if money != 0:
         fee_detail = FeeDetail()
         fee_detail.money = money
         fee_detail.fee_detail_type = fee_detail_type
         fee_detail.fee_detail_pk = fee_detail_pk
+        fee_detail.beizhu = beizhu
         if isinstance(log_temp, OperLog):
             fee_detail.oper_log = log_temp
             fee_detail.fee_type = log_temp.oper_type
@@ -27,17 +29,17 @@ def create_ticket_order_fee(order, money, log_temp):
     pass
 
 
-def create_card_fee(card, money, log_temp):
+def create_card_fee(card, money, log_temp, beizhu=""):
     card.money += money
     card.save()
     if isinstance(log_temp, OperLog):
         log_temp.xianjin += Decimal(money)
-    create_fee_detail(money, 5, card.pk, log_temp)
+    create_fee_detail(money, 5, card.pk, log_temp, beizhu)
     pass
 
 
-def create_loan_fee(loan, money, log_temp):
-    create_fee_detail(money, 3, loan.pk, log_temp)
+def create_loan_fee(loan, money, log_temp, beizhu=""):
+    create_fee_detail(money, 3, loan.pk, log_temp, beizhu)
     pass
 
 
@@ -70,7 +72,7 @@ def create_pro_fee(pool, money, log_temp):
     create_fee_detail(money, 9, pool.pk, log_temp)
 
 
-def create_super_loan_fee(super_loan, money, log_temp):
+def create_super_loan_fee(super_loan, money, log_temp, beizhu=""):
     super_loan.pool.edu_chaoduandai += Decimal(money)
     super_loan.pool.edu_keyong -= Decimal(money)
     super_loan.pool.edu_yiyong += Decimal(money)
@@ -80,7 +82,7 @@ def create_super_loan_fee(super_loan, money, log_temp):
     log_temp.edu_yiyong += Decimal(money)
     log_temp.save()
     create_fee_detail(money, 9, super_loan.pool.pk, log_temp)
-    create_fee_detail(money, 7, super_loan.pk, log_temp)
+    create_fee_detail(money, 7, super_loan.pk, log_temp, beizhu)
 
 
 def create_licai_fee(licai, money, log_temp):
@@ -120,7 +122,7 @@ def count_loan_lixi(order):
 def payLoanBenjin(order, money):
     order.benjin_payed = order.benjin_payed + money
     order.benjin_needpay = order.benjin_needpay - money
-    order.is_payed = order.benjin_needpay == 0 and order.lixi_needpay == 0
+    order.is_payed = order.benjin_needpay <= 0 and order.lixi_needpay <= 0
     order.save()
 
 
@@ -128,7 +130,7 @@ def payLoanBenjin(order, money):
 def payLoanLixi(order, money):
     order.lixi_payed = order.lixi_payed + money
     order.lixi_needpay = order.lixi_needpay - money
-    order.is_payed = order.benjin_needpay == 0 and order.lixi_needpay == 0
+    order.is_payed = order.benjin_needpay <= 0 and order.lixi_needpay <= 0
     order.save()
 
 
@@ -405,6 +407,7 @@ class GroupConcat(Aggregate):
             separator=' SEPARATOR "%s"' % separator,
             output_field=CharField(),
             **extra)
+
 
 class Concat(Aggregate):
     function = 'GROUP_CONCAT'

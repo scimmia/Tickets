@@ -6,6 +6,7 @@
     <th>费用内容</th>
     <th>金额</th>
     <th>添加日期</th>
+    <th>备注</th>
     <th>详情</th>
     </thead>
     <!--表格内容-->
@@ -22,6 +23,7 @@
                 {% endif %}
                 {{ i.money|floatformat:2|intcomma }}</span></td>
             <td>{{ i.pub_date }}</td>
+            <td>{{ i.beizhu }}</td>
             <td>
                 <a class="green" href="{% url 'log_list' %}?pk={{ i.oper_log_id }}" title="编辑信息">
                     详情

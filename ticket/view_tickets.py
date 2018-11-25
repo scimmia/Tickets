@@ -296,7 +296,7 @@ def ticket_needcollect(request):
 def ticket_needselect_car(request, index):
     context = {
         'index': index,
-        'gongyingshang': get_ticketlists('gongyingshang'),
+        'maipiaoren': get_ticketlists('maipiaoren'),
     }
     if request.method == 'POST':
         ids = request.POST['ids']
