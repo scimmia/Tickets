@@ -11,7 +11,7 @@ from django.shortcuts import render
 from ticket import utils, view_loan
 from ticket.forms import TicketForm, TicketEditForm, MoneyForm, TicketTransForm, CardForm, TicketImportForm
 from ticket.models import Card, Ticket, Order, FeeDetail, OperLog, Pool, \
-    Ticket_Import, Ticket_Import_Detail
+    Ticket_Import, Ticket_Import_Detail, Customer
 
 
 # 增加
@@ -296,7 +296,6 @@ def ticket_needcollect(request):
 def ticket_needselect_car(request, index):
     context = {
         'index': index,
-        'maipiaoren': get_ticketlists('maipiaoren'),
     }
     if request.method == 'POST':
         ids = request.POST['ids']
@@ -388,6 +387,7 @@ def ticket_needselect_car(request, index):
             .values('piaomianjiage', 'chupiaohang', 'daoqiriqi') \
             .annotate(max=Count('pk'), ids=utils.Concat('pk')).order_by('piaomianjiage')
         context['prices'] = prices
+        context['maipiaoren'] = Customer.objects.values('name')
     context['data'] = raw_data
     return render(request, 'ticket/ticket_order_preview.html', context)
 

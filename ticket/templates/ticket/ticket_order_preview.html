@@ -102,7 +102,7 @@
                             <label for="disabledTextInput">买票人</label>
                             <select class="js-single form-control" name="maipiaoren" required>
                                 {% for v in maipiaoren %}
-                                    <option value="{{ v }}">{{ v }}</option>
+                                    <option value="{{ v.name }}">{{ v.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
