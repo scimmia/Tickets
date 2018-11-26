@@ -59,8 +59,8 @@ def pool_dash(request):
             pro_form = ProForm()
             licai_form = PoolLicaiForm()
             instance = super_loan_form.save(commit=False)
-            if super_loan_form.cleaned_data.get('isMonthlilv') == '2':
-                instance.lilv = super_loan_form.cleaned_data.get('lilv') * 1.2
+            if super_loan_form.cleaned_data.get('super_isMonthlilv') == '2':
+                instance.lilv = super_loan_form.cleaned_data.get('lilv') * 12 / 10
             instance.benjin_needpay = super_loan_form.cleaned_data.get('benjin')
             instance.lixi_sum_date = instance.lixi_begin_date
             instance.save()
@@ -80,9 +80,9 @@ def pool_dash(request):
             instance = licai_form.save(commit=False)
             instance.yinhangka = instance.pool.yinhangka
             if licai_form.cleaned_data.get('isMonthlilv') == '2':
-                instance.lilv = licai_form.cleaned_data.get('lilv') * 1.2
+                instance.lilv = licai_form.cleaned_data.get('lilv') * 12 / 10
             days = (instance.lixi_end_date - instance.lixi_begin_date).days
-            instance.lixi = round(instance.benjin * instance.lilv / 100 * days / 360, 2)
+            instance.lixi = instance.benjin * instance.lilv / 100 * days / 360
             today = datetime.date.today()
             if (instance.lixi_end_date - today).days <= 0:
                 instance.is_end = True
@@ -180,10 +180,10 @@ def super_loan(request, pk):
     }
     if request.method == 'POST':
         if poolfeeform.is_valid():
-            money = poolfeeform.cleaned_data.get('money')
+            money = (poolfeeform.cleaned_data.get('money'))
             beizhu = poolfeeform.cleaned_data.get('beizhu')
             if 'benjin' in request.POST.keys():
-                if money > order.benjin_needpay + 0.01:
+                if money > order.benjin_needpay:
                     context['errormsg'] = u'金额不能大于待还本金'
                 else:
                     log, detail = utils.create_log(request.user.last_name)
@@ -205,7 +205,7 @@ def super_loan(request, pk):
                     context['message'] = u'还款成功'
                 pass
             elif 'lixi' in request.POST.keys():
-                if money > order.lixi_needpay + 0.01:
+                if money > order.lixi_needpay:
                     context['errormsg'] = u'金额不能大于待还利息'
                 else:
                     log, detail = utils.create_log(request.user.last_name)

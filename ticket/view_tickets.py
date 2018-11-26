@@ -42,12 +42,14 @@ def ticket_add(request):
                 instance.save()
                 detail.add_detail_ticket(instance.pk)
             if instance.t_status == 1:
+                # 入库
                 log.kucun += Decimal(instance.gourujiage * times)
             elif instance.t_status == 5:
+                # 入池
                 jiage = instance.piaomianjiage * times
                 detail.add_detail_pool(instance.pool_in.pk)
                 bili = utils.get_pool_percent(instance.pool_in, instance.chupiaohang)
-                edu = round(jiage * bili / 100, 2)
+                edu = jiage * bili / 100
                 feiyong = jiage - edu
                 log.edu_chineipiao += Decimal(jiage)
                 log.edu_keyong += Decimal(edu)
@@ -57,6 +59,7 @@ def ticket_add(request):
                 instance.pool_in.save()
                 utils.create_fee_detail(jiage, 9, instance.pool_in.pk, log)
             if instance.gouruzijinchi and instance.t_status != 2:
+                # 池开票
                 log.oper_type = 102
                 jiage = instance.piaomianjiage * times
                 detail.add_detail_pool(instance.pool_buy.pk)
@@ -119,7 +122,7 @@ def ticket_index(request, pk):
                     detail.add_detail_pool(instance.pool_buy.pk)
                     log.edu_keyong -= Decimal(jiage)
                     log.edu_yiyong += Decimal(jiage)
-                    instance.pool_buy.edu_keyong -= Decimal(edu)
+                    instance.pool_buy.edu_keyong -= Decimal(jiage)
                     instance.pool_buy.edu_yiyong += Decimal(jiage)
                     instance.pool_buy.save()
                     utils.create_fee_detail(jiage, 9, instance.pool_buy.pk, log)
@@ -293,7 +296,9 @@ def ticket_needcollect(request):
     return ticket_needselect(request, 2)
 
 
-def ticket_needselect_car(request, index):
+@login_required
+def ticket_needpay_car(request):
+    index = 1
     context = {
         'index': index,
     }
@@ -301,13 +306,8 @@ def ticket_needselect_car(request, index):
         ids = request.POST['ids']
         if len(ids) > 0:
             if 'remove_ticket' in request.POST.keys():
-                if index == 1:
-                    Ticket.objects.filter(id__in=ids.split(','), ).update(is_in_pay_car=False)
-                    context['message'] = u'删除成功'
-                elif index == 2:
-                    Ticket.objects.filter(id__in=ids.split(',')).update(is_in_sell_car=False)
-                    context['message'] = u'删除成功'
-                pass
+                Ticket.objects.filter(id__in=ids.split(','), ).update(is_in_pay_car=False)
+                context['message'] = u'删除成功'
             elif 'create_order' in request.POST.keys():
                 order = Order()
                 order.order_type = int(request.POST['ordertype'])
@@ -316,59 +316,94 @@ def ticket_needselect_car(request, index):
                 log, detail = utils.create_log(request.user.last_name)
                 detail.add_detail_ticketorder(order.pk)
                 # 待付款订单
-                if order.order_type == 1:
-                    log.oper_type = 201
-                    tickets = Ticket.objects.filter(~Q(t_status=2), pay_status=1, payorder=None, gourujiage__gt=0,
-                                                    is_in_pay_car=True, id__in=ids.split(',')).order_by('-goumairiqi')
-                    for t in tickets:
-                        detail.add_detail_ticket(t.pk)
-                        order.ticket_count += 1
-                        order.ticket_sum += t.piaomianjiage
-                        order.money += t.gourujiage
-                        log.need_pay += Decimal(t.gourujiage)
-                        t.pay_status = 2
-                        t.payorder = order
-                        t.paytime = order.pub_date
-                        t.is_in_pay_car = False
-                        t.save()
+                log.oper_type = 201
+                tickets = Ticket.objects.filter(~Q(t_status=2), pay_status=1, payorder=None, gourujiage__gt=0,
+                                                is_in_pay_car=True, id__in=ids.split(',')).order_by('-goumairiqi')
+                customer_names = set()
+                for t in tickets:
+                    detail.add_detail_ticket(t.pk)
+                    order.ticket_count += 1
+                    order.ticket_sum += t.piaomianjiage
+                    order.money += t.gourujiage
+                    log.need_pay += Decimal(t.gourujiage)
+                    t.pay_status = 2
+                    t.payorder = order
+                    t.paytime = order.pub_date
+                    t.is_in_pay_car = False
+                    t.save()
+                    customer_names.add(t.gongyingshang)
+                order.total_sum = order.money
+                order.needpay_sum = order.total_sum - order.payfee_sum
+                if len(customer_names) == 1:
+                    order.customer = view_loan.get_customer_by_name(customer_names.pop())
+                order.save()
+                utils.save_log(log, detail)
+                return redirect('ticket_order', pk=order.id)
+        else:
+            context['errormsg'] = u'请选择至少一张票据'
+    raw_data = Ticket.objects.filter(~Q(t_status=2), pay_status=1, payorder=None, gourujiage__gt=0,
+                                     is_in_pay_car=True).order_by('-goumairiqi')
+    context['data'] = raw_data
+    return render(request, 'ticket/ticket_order_preview.html', context)
+
+
+@login_required
+def ticket_needcollect_car(request):
+    index = 2
+    context = {
+        'index': index,
+    }
+    if request.method == 'POST':
+        ids = request.POST['ids']
+        if len(ids) > 0:
+            if 'remove_ticket' in request.POST.keys():
+                Ticket.objects.filter(id__in=ids.split(',')).update(is_in_sell_car=False)
+                context['message'] = u'删除成功'
+                pass
+            elif 'create_order' in request.POST.keys():
+                order = Order()
+                order.order_type = int(request.POST['ordertype'])
+                order.customer = view_loan.get_customer_by_name(request.POST['maipiaoren'])
+                order.save()
+                log, detail = utils.create_log(request.user.last_name)
+                detail.add_detail_ticketorder(order.pk)
                 # 待收款订单
-                elif order.order_type == 2:
-                    log.oper_type = 202
-                    tickets = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None, is_in_sell_car=True,
-                                                    id__in=ids.split(',')).order_by('-goumairiqi')
-                    for t in tickets:
-                        detail.add_detail_ticket(t.pk)
-                        order.ticket_count += 1
-                        order.ticket_sum += t.piaomianjiage
-                        if t.t_status == 1:
-                            # 在库
-                            log.kucun -= Decimal(t.gourujiage)
-                        elif t.t_status == 5 or t.t_status == 7:
-                            # 在池
-                            pool = t.pool_in
-                            detail.add_detail_pool(pool.pk)
-                            t.pool_in = None
-                            jiage = t.piaomianjiage
-                            bili = utils.get_pool_percent(pool, t.chupiaohang)
-                            edu = round(jiage * bili / 100, 2)
-                            log.edu_chineipiao -= Decimal(jiage)
-                            log.edu_keyong -= Decimal(edu)
-                            log.feiyong_yewu += Decimal(jiage - edu)
-                            pool.edu_keyong -= Decimal(edu)
-                            pool.edu_chineipiao -= Decimal(jiage)
-                            pool.save()
-                        t.t_status = 3
-                        t.is_in_sell_car = False
-                        t.sell_status = 4
-                        t.sellorder = order
-                        t.selltime = order.pub_date
-                        t.maipiaoren = request.POST['maipiaoren']
-                        t.maichujiage = round(float(request.POST[',' + str(t.pk) + ',']), 2)
-                        t.lirun = t.maichujiage - t.gourujiage
-                        t.save()
-                        order.money += t.maichujiage
-                        log.need_collect += Decimal(t.maichujiage)
-                        log.lirun_yewu += Decimal(t.lirun)
+                log.oper_type = 202
+                tickets = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None, is_in_sell_car=True,
+                                                id__in=ids.split(',')).order_by('-goumairiqi')
+                for t in tickets:
+                    detail.add_detail_ticket(t.pk)
+                    order.ticket_count += 1
+                    order.ticket_sum += t.piaomianjiage
+                    if t.t_status == 1:
+                        # 在库
+                        log.kucun -= Decimal(t.gourujiage)
+                    elif t.t_status == 5 or t.t_status == 7:
+                        # 在池
+                        pool = t.pool_in
+                        detail.add_detail_pool(pool.pk)
+                        t.pool_in = None
+                        jiage = t.piaomianjiage
+                        bili = utils.get_pool_percent(pool, t.chupiaohang)
+                        edu = round(jiage * bili / 100, 2)
+                        log.edu_chineipiao -= Decimal(jiage)
+                        log.edu_keyong -= Decimal(edu)
+                        log.feiyong_yewu += Decimal(jiage - edu)
+                        pool.edu_keyong -= Decimal(edu)
+                        pool.edu_chineipiao -= Decimal(jiage)
+                        pool.save()
+                    t.t_status = 3
+                    t.is_in_sell_car = False
+                    t.sell_status = 4
+                    t.sellorder = order
+                    t.selltime = order.pub_date
+                    t.maipiaoren = request.POST['maipiaoren']
+                    t.maichujiage = Decimal(request.POST[',' + str(t.pk) + ','])
+                    t.lirun = t.maichujiage - t.gourujiage
+                    t.save()
+                    order.money += t.maichujiage
+                    log.need_collect += Decimal(t.maichujiage)
+                    log.lirun_yewu += Decimal(t.lirun)
                 order.total_sum = order.money
                 order.needpay_sum = order.total_sum - order.payfee_sum
                 order.save()
@@ -376,30 +411,15 @@ def ticket_needselect_car(request, index):
                 return redirect('ticket_order', pk=order.id)
         else:
             context['errormsg'] = u'请选择至少一张票据'
-    if index == 1:
-        raw_data = Ticket.objects.filter(~Q(t_status=2), pay_status=1, payorder=None, gourujiage__gt=0,
-                                         is_in_pay_car=True).order_by(
-            '-goumairiqi')
-    else:
-        raw_data = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None, is_in_sell_car=True).order_by(
-            '-piaomianjiage')
-        prices = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None, is_in_sell_car=True) \
-            .values('piaomianjiage', 'chupiaohang', 'daoqiriqi') \
-            .annotate(max=Count('pk'), ids=utils.Concat('pk')).order_by('piaomianjiage')
-        context['prices'] = prices
-        context['maipiaoren'] = Customer.objects.values('name')
+    raw_data = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None, is_in_sell_car=True).order_by(
+        '-piaomianjiage')
+    prices = Ticket.objects.filter(~Q(t_status=2), sell_status=3, sellorder=None, is_in_sell_car=True) \
+        .values('piaomianjiage', 'chupiaohang', 'daoqiriqi') \
+        .annotate(max=Count('pk'), ids=utils.Concat('pk')).order_by('piaomianjiage')
+    context['prices'] = prices
+    context['maipiaoren'] = Customer.objects.values('name')
     context['data'] = raw_data
     return render(request, 'ticket/ticket_order_preview.html', context)
-
-
-@login_required
-def ticket_needpay_car(request):
-    return ticket_needselect_car(request, 1)
-
-
-@login_required
-def ticket_needcollect_car(request):
-    return ticket_needselect_car(request, 2)
 
 
 def ticket_orderlist(request, index):
@@ -596,7 +616,7 @@ def ticket_imports(request):
                             if row[7] == '电票':
                                 m.t_type = 2
                             if sh.cell(rx, 12).ctype == 2:
-                                m.zhiyalv = float(row[12])
+                                m.zhiyalv = Decimal(row[12])
                             m.gourujiage = m.piaomianjiage
                             ticketsImports.append(m)
             # 开票

@@ -116,6 +116,7 @@
     <th>状态</th>
     <th>添加日期</th>
     <th>本金</th>
+    <th>利率</th>
     <th>已还本金</th>
     <th>待还本金</th>
     <th>计息日期</th>
@@ -137,6 +138,7 @@
         {{ item.pub_date }}
     </a></td>
     <td>{{ item.benjin|floatformat:2|intcomma }}</td>
+    <td>{{ item.lilv|floatformat:2|intcomma }}</td>
     <td>{{ item.benjin_payed|floatformat:2|intcomma }}</td>
     <td {% if item.benjin_needpay > 0 %}style="color: red"{% endif %}>{{ item.benjin_needpay|floatformat:2|intcomma }}</td>
     <td>{{ item.lixi_begin_date }}</td>

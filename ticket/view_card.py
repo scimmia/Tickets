@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 
 from ticket import utils
-from ticket.forms import CardForm, CardTransForm
+from ticket.forms import CardForm, CardTransForm, CardfeeForm
 from ticket.models import Card, CardTrans, FeeDetail
 
 
@@ -28,27 +28,31 @@ def card_list(request):
 @login_required
 def card_edit(request, pk):
     card_ins = get_object_or_404(Card, pk=pk)
+    form = CardForm(request.POST or None, instance=card_ins)
+    feeform = CardfeeForm(request.POST or None)
     context = {
         'item': card_ins,
     }
     if request.method == 'POST':
-        card_ins.name = request.POST['name']
-        card_ins.beizhu = request.POST['beizhu']
-        card_ins.card_type = request.POST['card_type']
-        card_ins.save()
+        if form.is_valid():
+            feeform = CardfeeForm()
+            form.save()
+            context['message'] = u'编辑成功'
+        elif feeform.is_valid():
 
-        if request.POST['fee'].strip(' ') != '':
             log, detail = utils.create_log(request.user.last_name)
             log.oper_type = 402
-            money = float(request.POST['fee'])
-            if request.POST['p_status'] == '4':  # 银行卡取出
+            money = feeform.cleaned_data.get('fee_money')
+            if feeform.cleaned_data.get('fee_status') == '2':  # 银行卡取出
                 money = 0 - money
                 log.oper_type = 403
             detail.add_detail_card(pk)
-            utils.create_card_fee(card_ins, money, log, request.POST['feebeizhu'])
+            utils.create_card_fee(card_ins, money, log, feeform.cleaned_data.get('fee_beizhu'))
             utils.save_log(log, detail)
-        context['message'] = u'保存成功'
-
+            form = CardForm(instance=card_ins)
+            context['message'] = u'保存成功'
+    context['form'] = form
+    context['feeform'] = feeform
     fee_data = FeeDetail.objects.filter(fee_detail_type=5,fee_detail_pk=pk).order_by('-pub_date')
     return utils.get_paged_page(request, fee_data, 'ticket/card_edit.html', context)
 

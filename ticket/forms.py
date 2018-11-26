@@ -52,6 +52,19 @@ class CardForm(ModelForm):
         exclude = ['money']
 
 
+class CardfeeForm(forms.Form):
+    fee_status = forms.ChoiceField(label="类型",
+                                 choices=(
+                                     (1, "存入"),
+                                     (2, "取出"),
+                                 ),
+                                 widget=forms.RadioSelect,
+                                 initial='1',
+                                 )
+    fee_money = forms.DecimalField(label="金额", required=True, decimal_places=2)
+    fee_beizhu = forms.CharField(label="备注", required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+
 class CardTransForm(ModelForm):
     class Meta:
         model = CardTrans
@@ -62,6 +75,7 @@ class PoolForm(ModelForm):
     class Meta:
         model = Pool
         fields = ['name', 'yinhangka']
+
 
 class PoolPercentForm(ModelForm):
     class Meta:
@@ -85,18 +99,17 @@ class ProForm(ModelForm):
 
 
 class SuperLoanForm(ModelForm):
-    isMonthlilv = forms.ChoiceField(label="",
+    super_isMonthlilv = forms.ChoiceField(label="",
                                     choices=(
-                                        (3, "月利率（‰）"),
-                                        (4, "年利率（%）"),
+                                        (1, "年利率（%）"),
+                                        (2, "月利率（‰）"),
                                     ),
                                     widget=forms.RadioSelect,
-                                    initial='3',
+                                    initial='1',
                                     )
-
     class Meta:
         model = SuperLoan
-        fields = ['pool', 'benjin', 'isMonthlilv', 'lilv', 'lixi_begin_date', 'lixi_end_date']
+        fields = ['pool', 'benjin', 'super_isMonthlilv', 'lilv', 'lixi_begin_date', 'lixi_end_date']
 
 
 class PoolLicaiForm(ModelForm):
@@ -115,11 +128,11 @@ class PoolLicaiForm(ModelForm):
 
 
 class MoneyForm(forms.Form):
-    money = forms.FloatField(label="金额", required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    money = forms.DecimalField(label="金额", required=True, decimal_places=2)
 
 
 class MoneyBeizhuForm(forms.Form):
-    money = forms.FloatField(label="金额", required=True, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    money = forms.DecimalField(label="金额", required=True, decimal_places=2)
     beizhu = forms.CharField(label="备注", required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
 
@@ -222,6 +235,6 @@ class UserManageForm(forms.Form):
 
 
 class UserChangePasswordForm(forms.Form):
-    old_password = forms.CharField(label="旧密码", required=True,widget=forms.PasswordInput(attrs={'autofocus': True}),)
-    new_password = forms.CharField(label="新密码", required=True,widget=forms.PasswordInput(),)
-    new_password_2 = forms.CharField(label="新密码确认", required=True,widget=forms.PasswordInput(),)
+    old_password = forms.CharField(label="旧密码", required=True, widget=forms.PasswordInput(attrs={'autofocus': True}), )
+    new_password = forms.CharField(label="新密码", required=True, widget=forms.PasswordInput(), )
+    new_password_2 = forms.CharField(label="新密码确认", required=True, widget=forms.PasswordInput(), )

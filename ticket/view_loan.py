@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 
 from ticket import utils
 from ticket.forms import LoanForm, LoanPreForm, MoneyWithCardForm
@@ -23,11 +22,12 @@ def create_need_collect(customer, instance, isMonthlilv, username):
     instance.jiedairen = customer
     instance.order_type = 3
     if isMonthlilv:
-        instance.lilv = instance.lilv * 1.2
+        instance.lilv = instance.lilv * 12 / 10
     instance.benjin_needpay = money
     instance.lixi_sum_date = instance.lixi_begin_date
     instance.save()
     customer.need_collect_benjin += money
+    customer.is_collect_acctive = True
     customer.save()
     log, detail = utils.create_log(username)
     log.oper_type = 301
@@ -55,7 +55,7 @@ def need_collect_customers(request):
             create_need_collect(customer, instance, loanform.cleaned_data.get('isMonthlilv') == '2',
                                 request.user.last_name)
             context['message'] = u'保存成功'
-    raw_data = Customer.objects.filter(Q(need_collect_benjin__gt=0) | Q(need_collect_lixi__gt=0)).order_by('-pub_date')
+    raw_data = Customer.objects.filter(is_collect_acctive=True).order_by('-pub_date')
     list_template = 'ticket/loan_xx_customers.html'
 
     return utils.get_paged_page(request, raw_data, list_template, context)
@@ -98,7 +98,7 @@ def need_collect_order(request, order):
             detail.add_detail_loanorder(pk)
             detail.add_detail_card(card.pk)
             if 'benjin' in request.POST.keys():
-                if feeform.cleaned_data.get('money') > order.benjin_needpay + 0.01:
+                if feeform.cleaned_data.get('money') > order.benjin_needpay:
                     context['errormsg'] = u'金额不能大于应收本金'
                 else:
                     utils.pay_order_loan_benjin(order, money)
@@ -110,7 +110,7 @@ def need_collect_order(request, order):
                     context['message'] = u'保存成功'
                 pass
             elif 'lixi' in request.POST.keys():
-                if feeform.cleaned_data.get('money') > order.lixi_needpay + 0.01:
+                if feeform.cleaned_data.get('money') > order.lixi_needpay:
                     context['errormsg'] = u'金额不能大于待收利息'
                 else:
                     utils.pay_order_loan_lixi(order, money)
@@ -132,11 +132,12 @@ def create_need_pay(customer, instance, isMonthlilv, username):
     instance.jiedairen = customer
     instance.order_type = 4
     if isMonthlilv:
-        instance.lilv = instance.lilv * 1.2
+        instance.lilv = instance.lilv * 12 / 10
     instance.benjin_needpay = money
     instance.lixi_sum_date = instance.lixi_begin_date
     instance.save()
     customer.need_pay_benjin += money
+    customer.is_pay_acctive = True
     customer.save()
     log, detail = utils.create_log(username)
     log.oper_type = 302
@@ -164,7 +165,7 @@ def need_pay_customers(request):
             customer = get_customer_by_name(request.POST['jiedairen'])
             create_need_pay(customer, instance, loanform.cleaned_data.get('isMonthlilv') == '2', request.user.last_name)
             context['message'] = u'保存成功'
-    raw_data = Customer.objects.filter(Q(need_pay_benjin__gt=0) | Q(need_pay_lixi__gt=0)).order_by('-pub_date')
+    raw_data = Customer.objects.filter(is_pay_acctive=True).order_by('-pub_date')
     list_template = 'ticket/loan_xx_customers.html'
 
     return utils.get_paged_page(request, raw_data, list_template, context)
@@ -207,7 +208,7 @@ def need_pay_order(request, order):
             detail.add_detail_loanorder(pk)
             detail.add_detail_card(card.pk)
             if 'benjin' in request.POST.keys():
-                if feeform.cleaned_data.get('money') > order.benjin_needpay + 0.01:
+                if feeform.cleaned_data.get('money') > order.benjin_needpay:
                     context['errormsg'] = u'金额不能大于应付本金'
                 else:
                     utils.pay_order_loan_benjin(order, money)
@@ -219,7 +220,7 @@ def need_pay_order(request, order):
                     context['message'] = u'保存成功'
                 pass
             elif 'lixi' in request.POST.keys():
-                if feeform.cleaned_data.get('money') > order.lixi_needpay + 0.01:
+                if feeform.cleaned_data.get('money') > order.lixi_needpay:
                     context['errormsg'] = u'金额不能大于待付利息'
                 else:
                     utils.pay_order_loan_lixi(order, money)
@@ -248,7 +249,7 @@ def loanorder(request, pk):
 def pre_collect_customers(request):
     loanform = LoanPreForm(request.POST or None)
     list_template = 'ticket/loan_xx_customers.html'
-    customerlist = Customer.objects.all().order_by('name')
+    customerlist = Customer.objects.values('name')
 
     context = {
         'index': 5,
@@ -259,6 +260,8 @@ def pre_collect_customers(request):
         if loanform.is_valid():
             instance = loanform.save(commit=False)
             customer = get_customer_by_name(request.POST['jiedairen'])
+            customer.is_yushou_acctive = True
+            customer.save()
             money = instance.money
             card = instance.yinhangka
             instance.jiedairen = customer
@@ -273,7 +276,7 @@ def pre_collect_customers(request):
             utils.create_loan_yu_shou_fee(customer, money, log)
             utils.save_log(log, detail)
             context['message'] = u'保存成功'
-    raw_data = Customer.objects.filter(Q(yushou_benjin__gt=0) | Q(yushou_lixi__gt=0)).order_by('-pub_date')
+    raw_data = Customer.objects.filter(is_yushou_acctive = True).order_by('-pub_date')
 
     return utils.get_paged_page(request, raw_data, list_template, context)
 
@@ -294,6 +297,8 @@ def pre_pay_customers(request):
         if loanform.is_valid():
             instance = loanform.save(commit=False)
             customer = get_customer_by_name(request.POST['jiedairen'])
+            customer.is_yufu_acctive = True
+            customer.save()
             money = instance.money
             card = instance.yinhangka
             instance.jiedairen = customer
@@ -308,7 +313,7 @@ def pre_pay_customers(request):
             utils.create_loan_yu_fu_fee(customer, money, log)
             utils.save_log(log, detail)
             context['message'] = u'保存成功'
-    raw_data = Customer.objects.filter(Q(yufu_benjin__gt=0) | Q(yufu_lixi__gt=0)).order_by('-pub_date')
+    raw_data = Customer.objects.filter(is_yufu_acctive = True).order_by('-pub_date')
     return utils.get_paged_page(request, raw_data, list_template, context)
 
 

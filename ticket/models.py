@@ -1,19 +1,20 @@
-import datetime
-from decimal import Decimal
-
 from django.db import models
 
 
+def get_decimal_field(label="", default=0, max_digits=10, decimal_places=2):
+    return models.DecimalField(label, default=default, max_digits=max_digits, decimal_places=decimal_places)
+
+
 class BaseLoan(models.Model):
-    benjin = models.FloatField(u'本金', default=0)
-    lilv = models.FloatField(u'利率', default=0)
+    benjin = get_decimal_field(u'本金', default=0)
+    lilv = get_decimal_field(u' ', 0, 10, 4)
     lixi_begin_date = models.DateField(u'计息日期', auto_now_add=False)
     lixi_end_date = models.DateField(u'到期日期', auto_now_add=False)
-    benjin_payed = models.FloatField(u'已还本金', default=0)
-    benjin_needpay = models.FloatField(u'待还本金', default=0)
-    lixi = models.FloatField(u'利息', default=0)
-    lixi_payed = models.FloatField(u'已还利息', default=0)
-    lixi_needpay = models.FloatField(u'待还利息', default=0)
+    benjin_payed = get_decimal_field(u'已还本金', default=0)
+    benjin_needpay = get_decimal_field(u'待还本金', default=0)
+    lixi = get_decimal_field(u'利息', default=0)
+    lixi_payed = get_decimal_field(u'已还利息', default=0)
+    lixi_needpay = get_decimal_field(u'待还利息', default=0)
     lixi_sum_date = models.DateField(u'结息日期', auto_now_add=False)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
     is_payed = models.BooleanField(u'是否还清', default=False)
@@ -33,8 +34,8 @@ class Card(models.Model):
         choices=CARD_TYPE,
         default=1,
     )
-    name = models.CharField(u'银行卡', max_length=50)
-    money = models.FloatField(u'金额', default=0)
+    name = models.CharField(u'名称', max_length=50)
+    money = get_decimal_field(u'金额', default=0)
     beizhu = models.CharField(u'备注', max_length=100)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
@@ -64,14 +65,18 @@ class Pool(models.Model):
 
 class Customer(models.Model):
     name = models.CharField(u'姓名', max_length=100)
-    need_collect_benjin = models.FloatField(u'应收本金', default=0)
-    need_collect_lixi = models.FloatField(u'应收利息', default=0)
-    need_pay_benjin = models.FloatField(u'应付本金', default=0)
-    need_pay_lixi = models.FloatField(u'应付利息', default=0)
-    yufu_benjin = models.FloatField(u'预付本金', default=0)
-    yufu_lixi = models.FloatField(u'预付利息', default=0)
-    yushou_benjin = models.FloatField(u'预收本金', default=0)
-    yushou_lixi = models.FloatField(u'预收利息', default=0)
+    need_collect_benjin = get_decimal_field(u'应收本金', default=0)
+    need_collect_lixi = get_decimal_field(u'应收利息', default=0)
+    need_pay_benjin = get_decimal_field(u'应付本金', default=0)
+    need_pay_lixi = get_decimal_field(u'应付利息', default=0)
+    yufu_benjin = get_decimal_field(u'预付本金', default=0)
+    yufu_lixi = get_decimal_field(u'预付利息', default=0)
+    yushou_benjin = get_decimal_field(u'预收本金', default=0)
+    yushou_lixi = get_decimal_field(u'预收利息', default=0)
+    is_collect_acctive = models.BooleanField(default= False)
+    is_pay_acctive = models.BooleanField(default= False)
+    is_yufu_acctive = models.BooleanField(default= False)
+    is_yushou_acctive = models.BooleanField(default= False)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
     class Meta:
@@ -92,15 +97,15 @@ class Order(models.Model):
         choices=ORDER_TYPE,
         default=1,
     )
-    money = models.FloatField(u'合计应收付金额', default=0)
-    ticket_sum = models.FloatField(u'合计票面价格', default=0)
+    money = get_decimal_field(u'合计应收付金额', default=0)
+    ticket_sum = get_decimal_field(u'合计票面价格', default=0)
     ticket_count = models.IntegerField(u'票据数目', default=0)
-    fee_sum = models.FloatField(u'合计费用金额', default=0)
+    fee_sum = get_decimal_field(u'合计费用金额', default=0)
     fee_count = models.IntegerField(u'费用数目', default=0)
-    payfee_sum = models.FloatField(u'已支付金额', default=0)
+    payfee_sum = get_decimal_field(u'已支付金额', default=0)
     payfee_count = models.IntegerField(u'已支付次数', default=0)
-    total_sum = models.FloatField(u'总金额', default=0)
-    needpay_sum = models.FloatField(u'剩余金额', default=0)
+    total_sum = get_decimal_field(u'总金额', default=0)
+    needpay_sum = get_decimal_field(u'剩余金额', default=0)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
     customer = models.ForeignKey(Customer, related_name='ticket_order_customer', verbose_name=u'客户', blank=False,
                                  null=False)
@@ -149,7 +154,7 @@ class Per_Detail(models.Model):
     )
     jiedairen = models.ForeignKey(Customer, related_name='pre_order_customer', verbose_name=u'客户', blank=False,
                                   null=False)
-    money = models.FloatField(u'金额', default=0)
+    money = get_decimal_field(u'金额', default=0)
     yinhangka = models.ForeignKey(Card, related_name='pre_order_card', verbose_name=u'银行卡', blank=False, null=False)
     order = models.ForeignKey(Order, related_name='pre_order_pay', verbose_name=u'票据订单', blank=True, null=True)
 
@@ -194,8 +199,8 @@ class BaseTicket(models.Model):
     chupiaohang = models.CharField(u'出票行', max_length=100)
     chupiaoriqi = models.DateField(u'出票日期', )
     daoqiriqi = models.DateField(u'到期日期', )
-    piaomianjiage = models.FloatField(u'票面价格(元)', default=0)
-    gourujiage = models.FloatField(u'购入价格', default=0)
+    piaomianjiage = get_decimal_field(u'票面价格(元)', default=0)
+    gourujiage = get_decimal_field(u'购入价格', default=0)
     paytime = models.DateTimeField(u'付款时间', blank=True, null=True)
     gongyingshang = models.CharField(u'供应商', max_length=100)
     pay_status = models.IntegerField(
@@ -204,7 +209,7 @@ class BaseTicket(models.Model):
         default=1,
     )
     maichuriqi = models.DateTimeField(u'卖出日期', blank=True, null=True)
-    maichujiage = models.FloatField(u'卖出价格', default=0)
+    maichujiage = get_decimal_field(u'卖出价格', default=0)
     maipiaoren = models.CharField(u'买票人', max_length=100, blank=True, null=True)
     sell_status = models.IntegerField(
         u'状态',
@@ -245,9 +250,9 @@ class SuperLoan(BaseLoan):
 
 
 class PoolLicai(models.Model):
-    benjin = models.FloatField(u'本金', default=0)
-    lilv = models.FloatField(u'利率', default=0)
-    lixi = models.FloatField(u'利息', default=0)
+    benjin = get_decimal_field(u'本金', default=0)
+    lilv = get_decimal_field(u'利率', 0, 10, 4)
+    lixi = get_decimal_field(u'利息', default=0)
     lixi_begin_date = models.DateField(u'计息日期', auto_now_add=False)
     lixi_end_date = models.DateField(u'到期日期', auto_now_add=False)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
@@ -266,7 +271,7 @@ class PoolLicai(models.Model):
 class PoolPercent(models.Model):
     pool = models.ForeignKey(Pool, related_name='percent_pool', verbose_name=u'资金池', blank=False, null=False)
     tags = models.CharField(u'标签', max_length=50)
-    inpoolPer = models.FloatField(u'入池额度比例(%)', default=0)
+    inpoolPer = get_decimal_field(u'入池额度比例(%)', 0, 10, 4)
     is_active = models.BooleanField(u'激活', default=True)
 
     class Meta:
@@ -276,13 +281,13 @@ class PoolPercent(models.Model):
 class PoolPercentDetail(models.Model):
     inpoolPercent = models.ForeignKey(PoolPercent, related_name='pool_loan', verbose_name=u'超短贷', blank=True,
                                       null=True)
-    inpoolPer = models.FloatField(u'入池额度比例', default=0)
+    inpoolPer = get_decimal_field(u'入池额度比例', 0, 10, 4)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
 
 class CardTrans(models.Model):
     fromCard = models.ForeignKey(Card, related_name='tran_from_card', verbose_name=u'转出账户', blank=False, null=False)
-    money = models.FloatField(u'金额', default=0)
+    money = get_decimal_field(u'金额', default=0)
     toCard = models.ForeignKey(Card, related_name='tran_to_card', verbose_name=u'转入账户', blank=False, null=False)
     pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)
 
@@ -397,7 +402,7 @@ FeeDetail_Type = (
 
 class FeeDetail(models.Model):
     oper_log = models.ForeignKey(OperLog, related_name='carddetail_log', verbose_name=u'操作详情', blank=False, null=False)
-    money = models.FloatField(u'金额', default=0)
+    money = get_decimal_field(u'金额', default=0)
     beizhu = models.CharField(u'备注', max_length=255, default="", blank=True, null=True)
     pub_date = models.DateTimeField(u'添加日期', auto_now_add=True)
 
@@ -415,12 +420,12 @@ class FeeDetail(models.Model):
 
 
 class MoneyWithCard(models.Model):
-    money = models.FloatField(u'金额', default=0)
+    money = get_decimal_field(u'金额', default=0)
     card = models.ForeignKey(Card, related_name='money_card', verbose_name=u'银行卡', blank=False, null=False)
 
 
 class MoneyWithCardPool(models.Model):
-    money = models.FloatField(u'金额', default=0)
+    money = get_decimal_field(u'金额', default=0)
     card = models.ForeignKey(Card, related_name='moneys_card', verbose_name=u'银行卡', blank=False, null=False)
     pool = models.ForeignKey(Pool, related_name='moneys_pool', verbose_name=u'资金池', blank=False, null=False)
 
@@ -448,7 +453,7 @@ class Ticket_Import(models.Model):
 
 class Ticket_Import_Detail(BaseTicket):
     inport_info = models.ForeignKey(Ticket_Import, related_name='t_import', verbose_name=u'导入', blank=False, null=False)
-    zhiyalv = models.FloatField(u'质押率', default=100)
+    zhiyalv = get_decimal_field(u'质押率', 100, 10, 4)
     saved = models.BooleanField(u'是否已保存', default=False)
     search_date = models.DateField(u'添加日期', auto_now_add=True)
     pub_date = models.DateTimeField(u'添加时间', auto_now_add=True)

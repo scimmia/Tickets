@@ -93,7 +93,7 @@
             <form method='POST' id="signupForm"
                   onsubmit="return check();">{% csrf_token %}
                 {% if index == 1 %}
-                    <input name="maipiaoren" value="{{ maipiaoren }}" style="display: none"
+                    <input name="maipiaoren" value="多个" style="display: none"
                            class="textinput textInput form-control"
                            id="id_maipiaoren" type="text">
                 {% elif index == 2 %}
@@ -124,7 +124,7 @@
                                     <td>{{ price.daoqiriqi }}</td>
                                     <td>{{ price.max }}</td>
                                     <td><input type="number" name=",{{ price.ids }}," value="" min="0"
-                                               id=",{{ price.ids }}"
+                                               id=",{{ price.ids }}" step="0.01"
                                                class="numberinput prices" required=""></td>
                                 </tr>
                             {% endfor %}
@@ -185,17 +185,19 @@
                                    class="textinput textInput form-control"
                                    id="id_ids" type="text">
                             <div id="all_prices" style="display: none">
-                                {% for item in data %}
-                                    <input name=",{{ item.pk }}," value="" style="display: none"
-                                           class="textinput textInput form-control"
-                                           id=",{{ item.pk }}," type="number">
-                                {% endfor %}
+                                {% if index == 2 %}
+                                    {% for item in data %}
+                                        <input name=",{{ item.pk }}," value="" style="display: none"
+                                               class="textinput textInput form-control"
+                                               id=",{{ item.pk }}," type="number">
+                                    {% endfor %}
+                                {% endif %}
                             </div>
 
                             <br>
 
                             <button type="submit" class="btn btn-warning center-block" name="create_order">
-                                生成{% if index == 1 %}付款
+                                生成待{% if index == 1 %}付款
                             {% elif index == 2 %}收款{% endif %}订单
                                 <i class="ace-icon fa fa-shopping-cart icon-on-right bigger-110"></i>
                             </button>
@@ -334,7 +336,30 @@
                     'selectAll',
                     'selectNone'
                 ],
-                select: true
+                select: true,
+                {% if index == 1 %}
+                    "columnDefs": [{
+                        "visible": false,
+                        "targets": 4
+                    }],
+                    "drawCallback": function (settings) {
+                        var api = this.api();
+                        var rows = api.rows({
+                            page: 'current'
+                        }).nodes();
+                        var last = null;
+
+                        api.column(4, {
+                            page: 'current'
+                        }).data().each(function (group, i) {
+                            if (last !== group) {
+                                $(rows).eq(i).before('<tr class="group"><td colspan="9">' + group + '</td></tr>');
+
+                                last = group;
+                            }
+                        });
+                    }
+                {% endif %}
             });
 
             function buildItems(e, dt, type, indexes) {
