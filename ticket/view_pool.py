@@ -28,6 +28,7 @@ def pool_dash(request):
             licai_form = PoolLicaiForm()
             super_loan_form = SuperLoanForm()
             pool = pool_form.save()
+            create_pool_percent(pool, '!默认!', 100)
             detail.add_detail_pool(pool.pk)
             detail.add_detail_card(pool.yinhangka.pk)
             log.oper_type = 500
@@ -273,10 +274,6 @@ def pool_detail(request, pk):
 @login_required
 def pool_percent_list(request):
     form = PoolPercentForm(request.POST or None)
-    pools = Pool.objects.all()
-    if PoolPercent.objects.filter(tags='!默认!').count() < len(pools):
-        for pool in pools:
-            create_pool_percent(pool, '!默认!', 100)
     if request.method == 'POST':
         if form.is_valid():
             t = form.save(commit=False)

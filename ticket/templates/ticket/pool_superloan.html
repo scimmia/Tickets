@@ -52,11 +52,11 @@
                             <tbody>
                             <tr>
                                 <th>待还本金:</th>
-                                <td style="text-align:right;{% if not order.is_payed  %}color: red{% endif %}">{{ order.benjin_needpay|floatformat:2|intcomma }}</td>
+                                <td  id="benjin_needpay" style="text-align:right;{% if not order.is_payed  %}color: red{% endif %}">{{ order.benjin_needpay|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
                                 <th>待还利息:</th>
-                                <td style="text-align:right;{% if not order.is_payed  %}color: red{% endif %}">{{ order.lixi_needpay|floatformat:2|intcomma }}</td>
+                                <td id="lixi_needpay" style="text-align:right;{% if not order.is_payed  %}color: red{% endif %}">{{ order.lixi_needpay|floatformat:2|intcomma }}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -134,6 +134,12 @@
                     $("#div_id_yinhangka").show()
                     $("#id_yinhangka").prop("required", "true");
                 }
+            });
+            $("#benjin_needpay").click(function () {
+                $("#id_money").val({{ order.benjin_needpay }});
+            });
+            $("#lixi_needpay").click(function () {
+                $("#id_money").val({{ order.lixi_needpay }});
             });
         });
     </script>

@@ -10,10 +10,8 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
          <h1>
-            票据
-            <small>{% if order.order_type == 1 %}付款
-            {% elif order.order_type == 2 %}收款{% endif %}订单
-            </small>
+             {% if index == 1 %}预收款
+            {% elif index == 2 %}预付款{% endif %}列表
         </h1>
     </section>
 

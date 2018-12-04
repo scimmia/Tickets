@@ -319,11 +319,17 @@ def pre_pay_customers(request):
 
 @login_required
 def pre_collect_list(request, pk):
+    context = {
+        'index': 1,
+    }
     fee_data = FeeDetail.objects.filter(fee_detail_type=41, fee_detail_pk=pk).order_by('-pub_date')
-    return utils.get_paged_page(request, fee_data, 'ticket/loan_pre_order.html')
+    return utils.get_paged_page(request, fee_data, 'ticket/loan_pre_order.html', context)
 
 
 @login_required
 def pre_pay_list(request, pk):
+    context = {
+        'index': 2,
+    }
     fee_data = FeeDetail.objects.filter(fee_detail_type=42, fee_detail_pk=pk).order_by('-pub_date')
-    return utils.get_paged_page(request, fee_data, 'ticket/loan_pre_order.html')
+    return utils.get_paged_page(request, fee_data, 'ticket/loan_pre_order.html', context)
