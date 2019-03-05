@@ -237,6 +237,14 @@ class Ticket(BaseTicket):
         verbose_name = '票据'
         verbose_name_plural = '票据'
 
+    @property
+    def payorderleft(self):
+        return self.payorder.needpay_sum
+
+    @property
+    def sellorderleft(self):
+        return self.sellorder.needpay_sum
+
     def __str__(self):
         return self.gongyingshang
 

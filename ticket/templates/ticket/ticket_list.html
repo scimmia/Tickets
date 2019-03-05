@@ -300,18 +300,30 @@
         </span></td>
     <td>
         {% if item.pay_status == 1 %}
-            <span class="label label-danger">待付款
+            <span class="label label-danger">待付款</span>
         {% elif item.pay_status == 2 %}
-            <span class="label label-success">已付款
+            <a class="green" href="{% url 'ticket_order' item.payorder_id %}" title="查看信息">
+            {% if item.payorderleft > 0 %}
+                <span class="label label-warning">部分付款</span>
+            {% else %}
+                <span class="label label-success">已付款</span>
+            {% endif %}
+             </a>
         {% endif %}
-        </span></td>
+    </td>
     <td>
         {% if item.sell_status == 3 %}
-            <span class="label label-danger">待收款
+            <span class="label label-danger">待收款</span>
         {% elif item.sell_status == 4 %}
-            <span class="label label-success">已收款
+            <a class="green" href="{% url 'ticket_order' item.sellorder_id %}" title="查看信息">
+            {% if item.sellorderleft > 0 %}
+                <span class="label label-warning">部分收款</span>
+            {% else %}
+                <span class="label label-success">已收款</span>
+            {% endif %}
+             </a>
         {% endif %}
-        </span></td>
+    </td>
 {% endblock %}
 {% block initDatePicker %}
     initDatePicker($('.input-daterange'));
