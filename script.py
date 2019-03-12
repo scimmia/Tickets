@@ -13,6 +13,11 @@ django.setup()#启动django
 
 from ticket import models, utils
 
+import logging
+
+logging.basicConfig(filename='dailyJob.log', level = logging.INFO,format = '%(asctime)s - %(filename)s - %(funcName)s - %(lineno)d - %(message)s')
+logger = logging.getLogger(__name__)
+
 
 def writeHeader(workbook,worksheet):
     merge_format = workbook.add_format({
@@ -222,15 +227,30 @@ def countLoanOrderLixi():
 
 def dailyJob():
     try:
+        logger.info('buildDailyReport---start')
         buildDailyReport()
-        countLoanOrderLixi()
-        countSuperLoanLixi()
+        logger.info('buildDailyReport---end')
     except:
+        logger.exception('buildDailyReport---except')
+        pass
+    try:
+        logger.info('countLoanOrderLixi---start')
+        countLoanOrderLixi()
+        logger.info('countLoanOrderLixi---end')
+    except:
+        logger.exception('countLoanOrderLixi---except')
+        pass
+    try:
+        logger.info('countSuperLoanLixi---start')
+        countSuperLoanLixi()
+        logger.info('countSuperLoanLixi---end')
+    except:
+        logger.exception('countSuperLoanLixi---except')
         pass
     pass
 
-schedule.every().day.at("00:30").do(dailyJob)
-while True:
-    schedule.run_pending()
-    time.sleep(1)
-# dailyJob()
+# schedule.every().day.at("00:30").do(dailyJob)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
+dailyJob()
