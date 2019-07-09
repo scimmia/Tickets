@@ -137,6 +137,8 @@ def avg_day(request):
 def tiexian(request):
     return render(request, 'ticket/tool_tiexian.html')
 
+def tiexian_mob(request):
+    return render(request, 'ticket/mob_counter.html')
 
 
 

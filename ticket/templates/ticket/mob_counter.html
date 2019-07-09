@@ -1,0 +1,177 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,viewport-fit=cover">
+    <title>Title</title>
+    <link href="https://cdn.bootcss.com/weui/2.0.0/style/weui.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/weui/2.0.0/style/weui.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/numeral.js/2.0.6/numeral.min.js"></script>
+</head>
+<body>
+<div class="container" id="container">
+    <div class="page home js_show">
+        <div class="page input js_show">
+            <div class="page__hd">
+                <h1 class="page__title">贴现计算器</h1>
+            </div>
+            <div class="page__bd">
+
+                <div class="weui-cells ">
+
+                    <div class="weui-cell weui-cell_vcode">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">票据类型</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <div class="btn-group" data-toggle="buttons">
+                                <label class="btn btn-default ">
+                                    <input type="radio" name="options" id="piaozhi" autocomplete="off">纸票
+                                </label>
+                                <label class="btn btn-default active">
+                                    <input type="radio" name="options" id="piaodian" autocomplete="off" checked>电票
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">票面金额</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input id="tje" name="je" class="weui-input" placeholder="" type="number">
+                        </div>
+                        <div class="weui-cell__ft">
+                            <label class="weui-label">万元</label>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">月利率</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" id="txlvi" name="txlv" onblur="getVal(this.value,'m')"
+                                   placeholder="" type="number">
+                        </div>
+                        <div class="weui-cell__ft">
+                            <label class="weui-label">‰</label>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">年利率</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" id="yxlvi" name="yxlv" onblur="getVal(this.value,'y')"
+                                   placeholder="" type="number">
+                        </div>
+                        <div class="weui-cell__ft">
+                            <label class="weui-label">%</label>
+                        </div>
+                    </div>
+
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label for="" class="weui-label">贴现日期</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" id="datepicker" name="outpjdate" value="" type="date">
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label for="" class="weui-label">到期日期</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" id="pjendpicker" name="pjenddate" value="" type="date">
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">调整天数</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" id="tzts" name="tzts" placeholder="" type="number">
+                        </div>
+                        <div class="weui-cell__ft">
+                            <label class="weui-label">天</label>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">每十万元手续费</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input id="sxf" name="sxf" class="weui-input" placeholder="" type="number" value="0">
+                        </div>
+                        <div class="weui-cell__ft">
+                            <label class="weui-label">元</label>
+                        </div>
+                    </div>
+                </div>
+
+                <a class="weui-btn weui-btn_plain-primary" onclick="calctxlxone()">计算</a>
+
+                <div class="weui-cells">
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">计息天数</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <label class="weui-label" id="jxtsd" style="color: #1d75b3"></label>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">合计调整天数</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <label class="weui-label" id="tztsd" style="color: #1d75b3"></label>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">贴现利息</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <label class="weui-label" id="txlxd" style="color: #1d75b3"></label>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd">
+                            <label class="weui-label">贴现金额</label>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <label class="weui-label" id="jined" style="color: #1d75b3"></label>
+                        </div>
+                    </div>
+                    <div class="weui-form-preview__ft">
+                    </div>
+                </div>
+
+                <a class="weui-btn weui-btn_plain-default" onclick="resetAll()">重置</a>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function resetAll() {
+
+        $("#tje").val("");
+        $("#txlvi").val("");
+        $("#yxlvi").val("");
+        $("#datepicker").val("");
+        $("#pjendpicker").val("");
+        $("#tzts").val("");
+        $("#sxf").val("0");
+
+        $("#jxtsd").text("");
+        $("#tztsd").text("");
+        $("#txlxd").text("");
+        $("#jined").text("");
+    }
+
+</script>
+<script src="{% static 'plugins/tiexian.js' %}"></script>
+
+</body>
+</html>

@@ -277,6 +277,11 @@
                                     class="active"
                                 {% endif %}><a href="{% url 'tiexian' %}"><i class="fa fa-circle-o"></i>贴现</a>
                         </li>
+                        <li
+                                {% if '/tiexian_mob' in request.path %}
+                                    class="active"
+                                {% endif %}><a href="{% url 'tiexian_mob' %}"><i class="fa fa-circle-o"></i>贴现手机</a>
+                        </li>
                     </ul>
                 </li>
 

@@ -57,5 +57,6 @@ urlpatterns = [
     url(r'^tool/bestmix/', view_tools.best_mix, name='bestmix'),
     url(r'^tool/avgday/', view_tools.avg_day, name='avgday'),
     url(r'^tool/tiexian/', view_tools.tiexian, name='tiexian'),
+    url(r'^tool/tiexian_mob/', view_tools.tiexian_mob, name='tiexian_mob'),
 
 ]
