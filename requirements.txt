@@ -1,6 +1,6 @@
 amqp==2.3.2
 billiard==3.5.0.4
-Django==1.11.12
+Django==1.11.29
 django-crispy-forms==1.7.2
 django-datatables-view==1.16.0
 django-debug-toolbar==1.9.1
